@@ -52,6 +52,7 @@ class RunConfig:
     talker_models: list[str] | None = None
     rep_models: list[str] | None = None
     label: str = "vocalis"
+    llm_factory: Any = None  # () -> (LLMService, model ids); tests inject a scripted LLM
 
 
 @dataclass
@@ -152,7 +153,10 @@ class CallSimulation:
         sc = self.sc
         rights = assess(sc.case)
         briefing = Briefing(sc.case, rights, sc.mandate, self.vault)
-        llm, talker_models = build_talker(self.cfg.talker_models)
+        if self.cfg.llm_factory is not None:
+            llm, talker_models = self.cfg.llm_factory()
+        else:
+            llm, talker_models = build_talker(self.cfg.talker_models)
         hooks = SessionHooks(
             on_dtmf=self._on_dtmf,
             on_handoff=lambda reason: self._do_handoff("tool", reason),

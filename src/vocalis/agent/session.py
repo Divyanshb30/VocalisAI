@@ -25,11 +25,11 @@ from pipecat.flows import (
 )
 from pipecat.frames.frames import EndFrame, LLMMessagesAppendFrame
 from pipecat.pipeline.pipeline import Pipeline
-from pipecat.pipeline.runner import PipelineRunner
 from pipecat.pipeline.worker import PipelineParams, PipelineWorker
 from pipecat.processors.aggregators.llm_context import LLMContext
 from pipecat.processors.aggregators.llm_response_universal import LLMContextAggregatorPair
 from pipecat.services.llm_service import LLMService
+from pipecat.workers.runner import WorkerRunner
 
 from vocalis.agent.briefing import Briefing, nato
 from vocalis.agent.processors import GuardEvent, LineSink, OutputGuardProcessor
@@ -283,8 +283,9 @@ class AgentSession:
 
     # ------------------------------------------------------------------ control
     async def start(self) -> None:
-        runner = PipelineRunner(handle_sigint=False)
-        self._runner_task = asyncio.create_task(runner.run(self.worker))
+        runner = WorkerRunner(handle_sigint=False)
+        await runner.add_workers(self.worker)
+        self._runner_task = asyncio.create_task(runner.run())
         await asyncio.sleep(0.2)
         await self.flow.initialize(self.ivr_node())
         self.record.nodes.append("ivr")

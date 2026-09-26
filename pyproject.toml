@@ -37,6 +37,7 @@ dev = [
     "mypy>=1.13",
     "pre-commit>=4.0",
     "types-pyyaml",
+    "pytest-timeout>=2.4.0",
 ]
 
 [build-system]

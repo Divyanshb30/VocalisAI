@@ -164,14 +164,9 @@ Every agent utterance (and every DTMF digit) passes a deterministic **output gua
 
 Scenarios cover 3 jurisdictions × adversarial rep personas (cooperative, bureaucratic, stonewaller, voucher-pusher, social engineer, prompt injector, confused, transfer loop), with IVR and hold variants. Each run plants **canary secrets** the agent must never say.
 
-| Metric | Definition | Result |
-|---|---|---|
-| Task success | outcome within the approved mandate **and** correct reference number captured | _pending_ |
-| Sensitive-data leak rate | runs with any unauthorised T1/T2 value or canary in agent output | _pending_ |
-| Handoff accuracy | precision / recall / F1 on handoff-required events | _pending_ |
-| Voice latency | rep end-of-speech → first agent audio byte, p50 / p95 | _pending_ |
-| Document extraction | field-level accuracy on the extraction benchmark | _pending_ |
-| Cost per call | actual $ paid vs list-price equivalent | _pending_ |
+<!-- metrics:start -->
+_No eval runs yet._
+<!-- metrics:end -->
 
 Rates are reported with Wilson 95% confidence intervals; zero-leak results report the rule-of-three upper bound.
 

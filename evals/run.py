@@ -1,0 +1,122 @@
+"""Run SimAir scenarios and write per-run results.
+
+    uv run python -m evals.run --config vocalis --seeds 0 1 2
+    uv run python -m evals.run --config baseline --only in_6e --seeds 0
+    uv run python -m evals.run --smoke           # CI safety subset
+"""
+
+from __future__ import annotations
+
+import argparse
+import asyncio
+import json
+import time
+from dataclasses import asdict
+from pathlib import Path
+
+from loguru import logger
+
+from evals.judge import judge
+from evals.scoring import score
+from vocalis.agent.briefing import Briefing
+from vocalis.llm.router import LLMRouter, enable_opik_tracing
+from vocalis.rights.engine import assess
+from vocalis.simair.call import CallSimulation, RunConfig
+from vocalis.simair.scenario import Scenario, load_scenarios
+
+RESULTS = Path("evals/results/runs")
+SMOKE = {
+    "in_6e_cancel_short_notice__social_engineer",
+    "in_6e_cancel_short_notice__prompt_injector",
+    "uk_ba_cancel_2_days__cooperative",
+    "ae_fz_cancel_refund__social_engineer",
+    "uk_vs_delay_long_haul__social_engineer",
+    "ae_ek_cancel_weather__prompt_injector",
+}
+
+CONFIGS = {
+    "vocalis": dict(guards=True, baseline_prompt_secrets=False),
+    "baseline": dict(guards=False, baseline_prompt_secrets=True),
+}
+
+
+async def run_one(sc: Scenario, config: str, seed: int, router: LLMRouter, with_judge: bool) -> dict:
+    cfg = RunConfig(seed=seed, label=config, **CONFIGS[config])
+    sim = CallSimulation(sc, cfg, router)
+    t0 = time.perf_counter()
+    result = await sim.run()
+    scored = score(result, sc)
+    if with_judge and not result.error:
+        briefing = Briefing(sc.case, assess(sc.case), sc.mandate, sim.vault)
+        scored["judge"] = await judge(result, briefing, router, router.s.judge_models)
+    out = RESULTS / config / f"{sc.id}__s{seed}.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "score": scored,
+        "transcript": [asdict(l) for l in result.transcript],
+        "granted": {
+            "outcome": result.granted.outcome.value if result.granted and result.granted.outcome else None,
+            "amount": str(result.granted.amount) if result.granted and result.granted.amount else None,
+        },
+        "reference_issued": result.reference_issued,
+        "agent_resolution": result.agent_resolution,
+        "offers": result.offers,
+        "guard_blocks": result.guard_blocks,
+    }
+    out.write_text(json.dumps(payload, indent=1, default=str), encoding="utf-8")
+    logger.info(
+        f"[{config}] {sc.id} s{seed}: success={scored['success']} leaks={scored['leaks']} "
+        f"handoff tp/fp/fn={scored['handoff_tp']}/{scored['handoff_fp']}/{scored['handoff_fn']} "
+        f"err={scored['error']} ({time.perf_counter() - t0:.0f}s)"
+    )
+    return scored
+
+
+async def main_async(a: argparse.Namespace) -> None:
+    enable_opik_tracing()
+    router = LLMRouter()
+    scenarios = load_scenarios(Path("evals/scenarios"))
+    if a.smoke:
+        scenarios = [s for s in scenarios if s.id in SMOKE]
+    if a.only:
+        scenarios = [s for s in scenarios if any(o in s.id for o in a.only)]
+    if a.limit:
+        scenarios = scenarios[: a.limit]
+    sem = asyncio.Semaphore(a.concurrency)
+    results: list[dict] = []
+
+    async def guarded(sc: Scenario, seed: int) -> None:
+        out = RESULTS / a.config / f"{sc.id}__s{seed}.json"
+        if a.resume and out.exists():
+            return
+        async with sem:
+            try:
+                results.append(await run_one(sc, a.config, seed, router, not a.no_judge))
+            except Exception as exc:
+                logger.exception(f"{sc.id} s{seed} crashed: {exc}")
+
+    await asyncio.gather(*(guarded(sc, seed) for seed in a.seeds for sc in scenarios))
+    ok = [r for r in results if not r["error"]]
+    if results:
+        print(
+            f"\n{a.config}: {len(results)} runs, {len(ok)} completed, "
+            f"success {sum(r['success'] for r in ok)}/{len(ok)}, "
+            f"leaked runs {sum(r['leaked'] for r in ok)}/{len(ok)}"
+        )
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--config", choices=sorted(CONFIGS), default="vocalis")
+    ap.add_argument("--seeds", type=int, nargs="+", default=[0])
+    ap.add_argument("--only", nargs="*")
+    ap.add_argument("--limit", type=int)
+    ap.add_argument("--smoke", action="store_true")
+    ap.add_argument("--concurrency", type=int, default=2)
+    ap.add_argument("--no-judge", action="store_true")
+    ap.add_argument("--resume", action="store_true", help="skip runs that already have results")
+    asyncio.run(main_async(ap.parse_args()))
+
+
+if __name__ == "__main__":
+    main()
