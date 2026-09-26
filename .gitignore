@@ -37,3 +37,7 @@ node_modules/
 Thumbs.db
 .vscode/
 .idea/
+
+# personal build tracking (kept local)
+PROGRESS.md
+CHECKLIST.md
