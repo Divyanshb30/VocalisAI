@@ -95,3 +95,65 @@ def load_report(call_id: str) -> dict[str, Any]:
 def list_reports() -> list[str]:
     folder = STORE / "calls"
     return sorted(p.stem for p in folder.glob("*.json")) if folder.exists() else []
+
+
+def case_from_fields(
+    *,
+    passenger_first_name: str,
+    passenger_last_name: str,
+    booking_reference: str,
+    airline: str,
+    flight_number: str,
+    origin: str,
+    destination: str,
+    departure: str,
+    arrival: str | None = None,
+    disruption: str = "cancellation",
+    notice_hours: float | None = None,
+    departure_delay_minutes: int | None = None,
+    arrival_delay_minutes: int | None = None,
+    extraordinary_circumstances: bool | None = None,
+    reason_given: str | None = None,
+    fare_currency: str | None = None,
+    fare_total: float | None = None,
+    base_fare: float | None = None,
+    fuel_charge: float | None = None,
+) -> Case:
+    """Build a Case from flat fields (what an MCP client or a form would send)."""
+    from datetime import datetime
+    from decimal import Decimal
+
+    from vocalis.core.models import Disruption, DisruptionType, Fare, FlightSegment, Passenger
+
+    fare = None
+    if fare_currency and fare_total is not None:
+        fare = Fare(
+            currency=fare_currency.upper(),
+            total=Decimal(str(fare_total)),
+            base_fare=Decimal(str(base_fare)) if base_fare is not None else None,
+            fuel_charge=Decimal(str(fuel_charge)) if fuel_charge is not None else None,
+        )
+    return Case(
+        passenger=Passenger(first_name=passenger_first_name, last_name=passenger_last_name),
+        booking_reference=booking_reference.upper(),
+        airline=airline.upper(),
+        segments=[
+            FlightSegment(
+                carrier=airline.upper(),
+                flight_number=flight_number,
+                origin=origin.upper(),
+                destination=destination.upper(),
+                scheduled_departure=datetime.fromisoformat(departure),
+                scheduled_arrival=datetime.fromisoformat(arrival) if arrival else None,
+            )
+        ],
+        disruption=Disruption(
+            type=DisruptionType(disruption),
+            notice_hours=notice_hours,
+            departure_delay_minutes=departure_delay_minutes,
+            arrival_delay_minutes=arrival_delay_minutes,
+            extraordinary_circumstances=extraordinary_circumstances,
+            reason_given=reason_given,
+        ),
+        fare=fare,
+    )

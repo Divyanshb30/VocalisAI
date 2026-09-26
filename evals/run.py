@@ -17,7 +17,7 @@ from pathlib import Path
 from loguru import logger
 
 from evals.judge import judge
-from evals.scoring import score
+from vocalis.simair.scoring import score
 from vocalis.agent.briefing import Briefing
 from vocalis.llm.router import LLMRouter, enable_opik_tracing
 from vocalis.rights.engine import assess

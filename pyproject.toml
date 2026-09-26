@@ -24,6 +24,9 @@ dependencies = [
     "opik>=1.7",
 ]
 
+[project.scripts]
+vocalis = "vocalis.cli:main"
+
 [project.optional-dependencies]
 voice = [
     "pipecat-ai[deepgram,groq,google,silero,local-smart-turn,webrtc,runner,tracing]",

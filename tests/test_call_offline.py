@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from evals.scoring import score
+from vocalis.simair.scoring import score
 from vocalis.simair.offline import ScriptedAgentLLM, ScriptedRepRouter
 from vocalis.simair.call import CallSimulation, RunConfig
 from vocalis.simair.scenario import load_scenarios
