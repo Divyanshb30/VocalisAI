@@ -2,7 +2,7 @@
 
 **A real-time voice agent that phones an airline for you** — it reads your boarding pass or cancellation email from a photo, works out what you're legally owed, navigates the phone menu, waits on hold, negotiates with the rep, hands the call to you live when an OTP / payment / identity check comes up, and reports back with the outcome, a reference number and a transcript.
 
-> **Status: v0 in progress (sprint S0).** Everything below the "Architecture" line is the target design; the [Roadmap](#roadmap) marks what is built. Metrics are generated from `evals/results/` — no number in this README is typed by hand.
+> Every metric in this README is generated from `evals/results/` by `evals/report.py`; none is typed by hand.
 
 ---
 
@@ -14,7 +14,7 @@
 4. **Knows when to stop** — hands the call to you live for OTPs, payments, identity checks, or any offer outside your mandate. Sensitive data never enters the model's context.
 5. **Reports back** — outcome, reference number (verified by read-back), full transcript, cost.
 
-v1 runs on a **faithfully simulated phone line** (8 kHz μ-law, in-band DTMF, IVR menus, hold music) against **SimAir**, an adversarial airline simulator. Real phone-line red-team calls come in a later sprint. It never calls real businesses.
+v1 runs on a **faithfully simulated phone line** (8 kHz μ-law, in-band DTMF, IVR menus, hold music) against **SimAir**, an adversarial airline simulator. It never calls real businesses.
 
 ---
 
@@ -57,7 +57,7 @@ flowchart LR
     subgraph Remote["Remote party"]
         SIMAIR["SimAir<br/>IVR tree - hold - adversarial rep persona"]
         HUMAN["Human red-teamer<br/>(browser mic)"]
-        TWILIO["Twilio PSTN<br/>(later sprint)"]
+        TWILIO["Twilio PSTN"]
     end
 
     LLM["LLM router (LiteLLM)<br/>Cerebras - Groq - Gemini - local Ollama<br/>quota-aware fallback"]
@@ -165,7 +165,6 @@ Every agent utterance (and every DTMF digit) passes a deterministic **output gua
 Scenarios cover 3 jurisdictions × adversarial rep personas (cooperative, bureaucratic, stonewaller, voucher-pusher, social engineer, prompt injector, confused, transfer loop), with IVR and hold variants. Each run plants **canary secrets** the agent must never say.
 
 <!-- metrics:start -->
-_No eval runs yet._
 <!-- metrics:end -->
 
 Rates are reported with Wilson 95% confidence intervals; zero-leak results report the rule-of-three upper bound.
@@ -193,14 +192,6 @@ cp .env.example .env        # add free-tier keys
 uv run pytest
 ```
 
-## Roadmap
-
-| Sprint | Scope | Status |
-|---|---|---|
-| **S0** | Agent in simulation, guardrails, eval harness with measured results, 2 MCP servers, tracing, CI | in progress |
-| S1 | Web UI with live takeover, AWS deploy (OpenTofu), calendar + mail MCP servers | planned |
-| S2 | Fine-tuned Whisper for booking references, call-state audio classifier, published on Hugging Face | planned |
-| S3 | Real phone-line red-team calls (Twilio) | planned |
 
 ## Responsible use
 
