@@ -147,15 +147,26 @@ async def extract_with_gemini(
     if not s.google_api_key:
         raise RuntimeError("GOOGLE_API_KEY is not set")
     client = genai.Client(api_key=s.google_api_key)
-    resp = await client.aio.models.generate_content(
-        model=model or s.vocalis_vision_model,
-        contents=[types.Part.from_bytes(data=image_bytes, mime_type=mime_type), EXTRACTION_PROMPT],
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            response_schema=ExtractedDocument,
-            temperature=0,
-        ),
-    )
+    import asyncio
+
+    for attempt in range(5):  # free tier returns 503/429 under load; back off and retry
+        try:
+            resp = await client.aio.models.generate_content(
+                model=model or s.vocalis_vision_model,
+                contents=[types.Part.from_bytes(data=image_bytes, mime_type=mime_type), EXTRACTION_PROMPT],
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=ExtractedDocument,
+                    temperature=0,
+                ),
+            )
+            break
+        except Exception as exc:
+            if attempt == 4 or not any(
+                code in str(exc) for code in ("503", "429", "UNAVAILABLE", "RESOURCE_EXHAUSTED")
+            ):
+                raise
+            await asyncio.sleep(15 * (attempt + 1))
     parsed = resp.parsed
     if isinstance(parsed, ExtractedDocument):
         return parsed
