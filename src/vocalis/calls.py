@@ -18,7 +18,9 @@ from vocalis.simair.scoring import score
 def _offline_config(seed: int) -> tuple[RunConfig, Any]:
     from vocalis.simair.offline import ScriptedAgentLLM, ScriptedRepRouter
 
-    cfg = RunConfig(seed=seed, label="offline", llm_factory=lambda: (ScriptedAgentLLM(), ["offline/scripted-agent"]))
+    cfg = RunConfig(
+        seed=seed, label="offline", llm_factory=lambda: (ScriptedAgentLLM(), ["offline/scripted-agent"])
+    )
     return cfg, ScriptedRepRouter()
 
 
@@ -72,12 +74,16 @@ def summary_text(report: dict[str, Any]) -> str:
     if report.get("error"):
         return f"Call {report['call_id']} failed: {report['error']}"
     outcome = (report["outcome"] or "no resolution").replace("_", " ")
-    parts = [f"Call {report['call_id']} for {report['passenger']} ({report['flight']}, booking {report['booking_reference']}): {outcome}"]
+    parts = [
+        f"Call {report['call_id']} for {report['passenger']} ({report['flight']}, booking {report['booking_reference']}): {outcome}"
+    ]
     if report["amount"]:
         parts.append(f"amount {report['amount']}")
     if report["reference_number"]:
         verified = "verified" if report["reference_verified"] else "NOT verified"
         parts.append(f"reference {report['reference_number']} ({verified})")
     parts.append(f"{len(report['handoffs'])} handoff(s) to the passenger")
-    parts.append("no sensitive data spoken" if not report["leaks"] else f"LEAKED: {', '.join(report['leaks'])}")
+    parts.append(
+        "no sensitive data spoken" if not report["leaks"] else f"LEAKED: {', '.join(report['leaks'])}"
+    )
     return "; ".join(parts) + "."

@@ -1,0 +1,133 @@
+{
+ "summary": {
+  "model": "gemini-flash-latest",
+  "documents": 20,
+  "errors": 15,
+  "field_accuracy_vision": 1.0,
+  "field_accuracy_with_barcode": 1.0,
+  "barcode_conflicts_caught": 0,
+  "mean_latency_s": 6.77
+ },
+ "per_doc": [
+  {
+   "doc": "doc_000.jpg",
+   "type": "boarding_pass",
+   "latency_s": 4.94,
+   "conflicts": 0,
+   "vision_correct": 10,
+   "vision_total": 10,
+   "vision_wrong": [],
+   "reconciled_correct": 10,
+   "reconciled_total": 10,
+   "reconciled_wrong": []
+  },
+  {
+   "doc": "doc_001.jpg",
+   "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+  },
+  {
+   "doc": "doc_002.jpg",
+   "type": "boarding_pass",
+   "latency_s": 6.59,
+   "conflicts": 0,
+   "vision_correct": 10,
+   "vision_total": 10,
+   "vision_wrong": [],
+   "reconciled_correct": 10,
+   "reconciled_total": 10,
+   "reconciled_wrong": []
+  },
+  {
+   "doc": "doc_003.jpg",
+   "type": "cancellation_notice",
+   "latency_s": 14.55,
+   "conflicts": 0,
+   "vision_correct": 13,
+   "vision_total": 13,
+   "vision_wrong": [],
+   "reconciled_correct": 13,
+   "reconciled_total": 13,
+   "reconciled_wrong": []
+  },
+  {
+   "doc": "doc_004.jpg",
+   "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+  },
+  {
+   "doc": "doc_005.jpg",
+   "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+  },
+  {
+   "doc": "doc_006.jpg",
+   "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+  },
+  {
+   "doc": "doc_007.jpg",
+   "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+  },
+  {
+   "doc": "doc_008.jpg",
+   "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+  },
+  {
+   "doc": "doc_009.jpg",
+   "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+  },
+  {
+   "doc": "doc_010.jpg",
+   "type": "boarding_pass",
+   "latency_s": 4.24,
+   "conflicts": 0,
+   "vision_correct": 10,
+   "vision_total": 10,
+   "vision_wrong": [],
+   "reconciled_correct": 10,
+   "reconciled_total": 10,
+   "reconciled_wrong": []
+  },
+  {
+   "doc": "doc_011.jpg",
+   "type": "cancellation_notice",
+   "latency_s": 3.51,
+   "conflicts": 0,
+   "vision_correct": 13,
+   "vision_total": 13,
+   "vision_wrong": [],
+   "reconciled_correct": 13,
+   "reconciled_total": 13,
+   "reconciled_wrong": []
+  },
+  {
+   "doc": "doc_012.jpg",
+   "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+  },
+  {
+   "doc": "doc_013.jpg",
+   "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+  },
+  {
+   "doc": "doc_014.jpg",
+   "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+  },
+  {
+   "doc": "doc_015.jpg",
+   "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+  },
+  {
+   "doc": "doc_016.jpg",
+   "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+  },
+  {
+   "doc": "doc_017.jpg",
+   "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+  },
+  {
+   "doc": "doc_018.jpg",
+   "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+  },
+  {
+   "doc": "doc_019.jpg",
+   "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google."
+  }
+ ]
+}

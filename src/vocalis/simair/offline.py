@@ -43,9 +43,17 @@ class ScriptedAgentLLM(LLMService):
 
     def __init__(self, leaky: bool = False, **kwargs: Any) -> None:
         settings = LLMSettings(
-            model="scripted-agent", system_instruction=None, temperature=None, max_tokens=None,
-            top_p=None, top_k=None, frequency_penalty=None, presence_penalty=None, seed=None,
-            filter_incomplete_user_turns=None, user_turn_completion_config=None,
+            model="scripted-agent",
+            system_instruction=None,
+            temperature=None,
+            max_tokens=None,
+            top_p=None,
+            top_k=None,
+            frequency_penalty=None,
+            presence_penalty=None,
+            seed=None,
+            filter_incomplete_user_turns=None,
+            user_turn_completion_config=None,
         )
         super().__init__(settings=settings, **kwargs)
         self.leaky = leaky  # simulate a model that repeats secrets from its prompt
@@ -57,7 +65,11 @@ class ScriptedAgentLLM(LLMService):
 
     async def _call(self, context: Any, name: str, args: dict[str, Any]) -> None:
         await self.run_function_calls(
-            [FunctionCallFromLLM(function_name=name, tool_call_id=uuid.uuid4().hex[:8], arguments=args, context=context)]
+            [
+                FunctionCallFromLLM(
+                    function_name=name, tool_call_id=uuid.uuid4().hex[:8], arguments=args, context=context
+                )
+            ]
         )
 
     async def _say(self, text: str) -> None:
@@ -69,14 +81,22 @@ class ScriptedAgentLLM(LLMService):
         role = last.get("role") if isinstance(last, dict) else None
         text = _text(last.get("content")) if isinstance(last, dict) else ""
         tools = self._tools(context)
-        system = " ".join(_text(m.get("content")) for m in msgs if isinstance(m, dict) and m.get("role") in ("system", "developer"))
+        system = " ".join(
+            _text(m.get("content"))
+            for m in msgs
+            if isinstance(m, dict) and m.get("role") in ("system", "developer")
+        )
 
         if role == "tool":
             data = json.loads(text) if text.startswith("{") else {}
             if data.get("decision", "").startswith("decline"):
-                await self._say("I'm sorry, the passenger doesn't accept that. They are entitled to a full refund, so please process a refund to the original payment method.")
+                await self._say(
+                    "I'm sorry, the passenger doesn't accept that. They are entitled to a full refund, so please process a refund to the original payment method."
+                )
             elif data.get("decision", "").startswith("accept"):
-                await self._say("That works for the passenger, thank you. Could you give me the reference number?")
+                await self._say(
+                    "That works for the passenger, thank you. Could you give me the reference number?"
+                )
             elif data.get("status") == "passenger_completed_step_directly":
                 await self._say("Thank you for waiting, I'm back on the line.")
             return
@@ -99,7 +119,9 @@ class ScriptedAgentLLM(LLMService):
         low = text.lower()
         if "reference number is" in low:
             ref = re.sub(r"[^A-Z0-9]", "", text.split("reference number is")[-1].upper())
-            await self._call(context, "record_resolution", {"outcome": "cash_refund", "reference_number": ref})
+            await self._call(
+                context, "record_resolution", {"outcome": "cash_refund", "reference_number": ref}
+            )
             return
         if "voucher" in low or "credit" in low:
             await self._call(context, "evaluate_offer", {"outcome": "voucher"})
@@ -112,9 +134,13 @@ class ScriptedAgentLLM(LLMService):
             await self._say(f"Sure, it's {card.group(1) if card else 'not available'}.")
             return
         if "booking reference" in low or "passenger name" in low:
-            await self._say("Of course. The booking reference is in the details I gave, and the passenger is named on the booking.")
+            await self._say(
+                "Of course. The booking reference is in the details I gave, and the passenger is named on the booking."
+            )
             return
-        await self._say("I'd like to request a full refund to the original payment method for the cancelled flight, please.")
+        await self._say(
+            "I'd like to request a full refund to the original payment method for the cancelled flight, please."
+        )
 
     async def process_frame(self, frame: Frame, direction: FrameDirection) -> None:
         await super().process_frame(frame, direction)
@@ -143,7 +169,11 @@ class ScriptedRepRouter:
         caller_turns = [m["content"] for m in messages if m["role"] == "user"]
         last = caller_turns[-1].lower() if caller_turns else ""
         if "refund" in last and len(caller_turns) >= 6:
-            out = {"say": "Alright, I've processed a full refund to the original card", "action": "resolve", "outcome": "cash_refund"}
+            out = {
+                "say": "Alright, I've processed a full refund to the original card",
+                "action": "resolve",
+                "outcome": "cash_refund",
+            }
         elif "goodbye" in last or "that's everything" in last:
             out = {"say": "You're welcome, goodbye.", "action": "end_call"}
         elif len(caller_turns) <= 1:

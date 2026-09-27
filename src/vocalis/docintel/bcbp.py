@@ -38,7 +38,10 @@ class BCBPLeg:
     def flight_date(self, reference: date | None = None) -> date:
         """Resolve the day-of-year to the date nearest ``reference`` (BCBP omits the year)."""
         ref = reference or date.today()
-        candidates = [date(y, 1, 1) + timedelta(days=self.julian_day - 1) for y in (ref.year - 1, ref.year, ref.year + 1)]
+        candidates = [
+            date(y, 1, 1) + timedelta(days=self.julian_day - 1)
+            for y in (ref.year - 1, ref.year, ref.year + 1)
+        ]
         return min(candidates, key=lambda d: abs((d - ref).days))
 
 

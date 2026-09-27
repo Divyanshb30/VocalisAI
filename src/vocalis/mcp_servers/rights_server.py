@@ -1,7 +1,7 @@
 """vocalis-rights: passenger-rights entitlements as an MCP server.
 
-    uv run vocalis mcp rights            # stdio (desktop MCP clients)
-    uv run vocalis mcp rights --http 8765
+uv run vocalis mcp rights            # stdio (desktop MCP clients)
+uv run vocalis mcp rights --http 8765
 """
 
 from __future__ import annotations
@@ -58,12 +58,24 @@ def check_entitlements(
     notice_hours: hours between being told and scheduled departure (cancellations).
     """
     case = case_from_fields(
-        passenger_first_name="Passenger", passenger_last_name="", booking_reference="XXXXXX",
-        airline=airline, flight_number=flight_number, origin=origin, destination=destination,
-        departure=departure, arrival=arrival, disruption=disruption, notice_hours=notice_hours,
-        departure_delay_minutes=departure_delay_minutes, arrival_delay_minutes=arrival_delay_minutes,
-        extraordinary_circumstances=extraordinary_circumstances, fare_currency=fare_currency,
-        fare_total=fare_total, base_fare=base_fare, fuel_charge=fuel_charge,
+        passenger_first_name="Passenger",
+        passenger_last_name="",
+        booking_reference="XXXXXX",
+        airline=airline,
+        flight_number=flight_number,
+        origin=origin,
+        destination=destination,
+        departure=departure,
+        arrival=arrival,
+        disruption=disruption,
+        notice_hours=notice_hours,
+        departure_delay_minutes=departure_delay_minutes,
+        arrival_delay_minutes=arrival_delay_minutes,
+        extraordinary_circumstances=extraordinary_circumstances,
+        fare_currency=fare_currency,
+        fare_total=fare_total,
+        base_fare=base_fare,
+        fuel_charge=fuel_charge,
     )
     a = assess(case)
     best = a.best_compensation()
@@ -74,7 +86,9 @@ def check_entitlements(
             {
                 "kind": e.kind.value,
                 "description": e.description,
-                "amount": (str(int(e.amount)) if e.amount == int(e.amount) else str(e.amount)) if e.amount is not None else None,
+                "amount": (str(int(e.amount)) if e.amount == int(e.amount) else str(e.amount))
+                if e.amount is not None
+                else None,
                 "currency": e.currency,
                 "condition": e.condition,
                 "citation": f"{e.citation.regime.value} {e.citation.clause}",

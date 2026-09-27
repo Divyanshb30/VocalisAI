@@ -192,7 +192,10 @@ class AgentSession:
             try:
                 outcome = OutcomeType(str(args.get("outcome")))
             except ValueError:
-                return {"decision": "clarify", "guidance": "Ask the representative to state the offer clearly."}
+                return {
+                    "decision": "clarify",
+                    "guidance": "Ask the representative to state the offer clearly.",
+                }
             amount = args.get("amount")
             amt = Decimal(str(amount)) if amount not in (None, "") else None
             m = self.b.mandate
@@ -205,7 +208,9 @@ class AgentSession:
                 guidance = "Accept it, and ask for the reference number."
             else:
                 approved = await self.hooks.approve_offer(outcome, amt)
-                entry["decision"] = "accept_after_passenger_approval" if approved else "decline_after_passenger_review"
+                entry["decision"] = (
+                    "accept_after_passenger_approval" if approved else "decline_after_passenger_review"
+                )
                 guidance = (
                     "The passenger approved this. Accept it and ask for the reference number."
                     if approved
@@ -244,7 +249,10 @@ class AgentSession:
                 "outcome": {"type": "string", "enum": OUTCOME_VALUES},
                 "amount": {"type": "number"},
                 "currency": {"type": "string"},
-                "reference_number": {"type": "string", "description": "Exactly as the representative said it, letters and digits only"},
+                "reference_number": {
+                    "type": "string",
+                    "description": "Exactly as the representative said it, letters and digits only",
+                },
             },
             required=["outcome", "reference_number"],
             handler=self._tracked(handler),

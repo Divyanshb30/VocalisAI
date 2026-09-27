@@ -28,12 +28,8 @@ class Settings(BaseSettings):
     vocalis_talker_models: str = Field(
         default="cerebras/gpt-oss-120b,groq/openai/gpt-oss-120b,gemini/gemini-flash-lite-latest"
     )
-    vocalis_planner_models: str = Field(
-        default="gemini/gemini-flash-latest,cerebras/gpt-oss-120b"
-    )
-    vocalis_judge_models: str = Field(
-        default="gemini/gemini-flash-lite-latest,groq/openai/gpt-oss-120b"
-    )
+    vocalis_planner_models: str = Field(default="gemini/gemini-flash-latest,cerebras/gpt-oss-120b")
+    vocalis_judge_models: str = Field(default="gemini/gemini-flash-lite-latest,groq/openai/gpt-oss-120b")
     vocalis_rep_models: str = Field(default="ollama_chat/qwen3:8b,groq/openai/gpt-oss-20b")
     vocalis_vision_model: str = "gemini-flash-latest"
 

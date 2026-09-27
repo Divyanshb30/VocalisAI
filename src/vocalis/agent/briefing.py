@@ -11,12 +11,42 @@ from vocalis.guards.vault import Vault
 from vocalis.rights.models import RightsAssessment
 
 NATO = {
-    "A": "Alpha", "B": "Bravo", "C": "Charlie", "D": "Delta", "E": "Echo", "F": "Foxtrot",
-    "G": "Golf", "H": "Hotel", "I": "India", "J": "Juliett", "K": "Kilo", "L": "Lima",
-    "M": "Mike", "N": "November", "O": "Oscar", "P": "Papa", "Q": "Quebec", "R": "Romeo",
-    "S": "Sierra", "T": "Tango", "U": "Uniform", "V": "Victor", "W": "Whiskey", "X": "X-ray",
-    "Y": "Yankee", "Z": "Zulu", "0": "Zero", "1": "One", "2": "Two", "3": "Three", "4": "Four",
-    "5": "Five", "6": "Six", "7": "Seven", "8": "Eight", "9": "Nine",
+    "A": "Alpha",
+    "B": "Bravo",
+    "C": "Charlie",
+    "D": "Delta",
+    "E": "Echo",
+    "F": "Foxtrot",
+    "G": "Golf",
+    "H": "Hotel",
+    "I": "India",
+    "J": "Juliett",
+    "K": "Kilo",
+    "L": "Lima",
+    "M": "Mike",
+    "N": "November",
+    "O": "Oscar",
+    "P": "Papa",
+    "Q": "Quebec",
+    "R": "Romeo",
+    "S": "Sierra",
+    "T": "Tango",
+    "U": "Uniform",
+    "V": "Victor",
+    "W": "Whiskey",
+    "X": "X-ray",
+    "Y": "Yankee",
+    "Z": "Zulu",
+    "0": "Zero",
+    "1": "One",
+    "2": "Two",
+    "3": "Three",
+    "4": "Four",
+    "5": "Five",
+    "6": "Six",
+    "7": "Seven",
+    "8": "Eight",
+    "9": "Nine",
 }
 
 OUTCOME_WORDS = {
@@ -70,7 +100,10 @@ class Briefing:
             lines.append(f"Booking email: {c.booking_email}")
         self.facts = "\n".join(lines)
         ents = self.rights.summary_lines()
-        self.entitlements = "\n".join(f"- {e}" for e in ents) or "- No regulation clearly applies; rely on the airline's own policy."
+        self.entitlements = (
+            "\n".join(f"- {e}" for e in ents)
+            or "- No regulation clearly applies; rely on the airline's own policy."
+        )
         m = self.mandate
         acc = ", ".join(OUTCOME_WORDS[o] for o in m.acceptable) or "nothing else"
         forb = ", ".join(OUTCOME_WORDS[o] for o in m.forbidden) or "nothing"
@@ -87,9 +120,7 @@ class Briefing:
         g.allow_text("\n".join(allowed))
         for v in self.vault.allowed_values():
             g.allow_text(v)
-        g.secrets = {
-            k: v for k, v in g.secrets.items() if v not in self.vault.allowed_values()
-        }
+        g.secrets = {k: v for k, v in g.secrets.items() if v not in self.vault.allowed_values()}
         return g
 
     def disclosure(self, rep_name: str | None = None) -> str:

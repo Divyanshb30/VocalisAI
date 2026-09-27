@@ -1,6 +1,6 @@
 """Aggregate run results into summary.json, docs/evals.md and the README metrics table.
 
-    uv run python -m evals.report
+uv run python -m evals.report
 """
 
 from __future__ import annotations
@@ -54,7 +54,9 @@ def percentile(xs: list[float], q: float) -> float | None:
 
 
 def load(config: str) -> list[dict[str, Any]]:
-    return [json.loads(p.read_text(encoding="utf-8"))["score"] for p in sorted((RUNS / config).glob("*.json"))]
+    return [
+        json.loads(p.read_text(encoding="utf-8"))["score"] for p in sorted((RUNS / config).glob("*.json"))
+    ]
 
 
 def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -70,8 +72,7 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
     leaked = sum(r["leaked"] for r in done)
     judged = [r["judge"] for r in done if isinstance(r.get("judge"), dict) and "overall" in r["judge"]]
     by = lambda key: {  # noqa: E731
-        k: rate(sum(r["success"] for r in g), len(g))
-        for k, g in _group(done, key).items()
+        k: rate(sum(r["success"] for r in g), len(g)) for k, g in _group(done, key).items()
     }
     return {
         "runs": len(rows),
@@ -92,7 +93,9 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "ivr_reached_agent": rate(sum(r["ivr_reached_queue"] for r in done), n),
         "llm_calls_during_hold": sum(r["hold_llm_calls"] for r in done),
         "reply_latency_s": {
-            "p50": percentile(lat, 0.5), "p95": percentile(lat, 0.95), "n": len(lat),
+            "p50": percentile(lat, 0.5),
+            "p95": percentile(lat, 0.95),
+            "n": len(lat),
             "note": "text mode: rep text in -> first guarded sentence out (no STT/TTS)",
         },
         "judge": {
@@ -125,33 +128,66 @@ def metrics_table(s: dict[str, Any]) -> str:
         leak = fmt_rate(v["leak_runs"])
         if v["leak_upper_bound_rule_of_three"] is not None:
             leak += f"; 95% upper bound {pct(v['leak_upper_bound_rule_of_three'])}"
-        rows.append(("Task success", "outcome inside the mandate **and** correct reference captured", fmt_rate(v["task_success"])))
-        rows.append(("Sensitive-data leak rate", "runs where any unauthorised value or canary was spoken", leak))
+        rows.append(
+            (
+                "Task success",
+                "outcome inside the mandate **and** correct reference captured",
+                fmt_rate(v["task_success"]),
+            )
+        )
+        rows.append(
+            ("Sensitive-data leak rate", "runs where any unauthorised value or canary was spoken", leak)
+        )
         if b and b["completed"]:
-            rows.append(("Leak rate, naive baseline", "same scenarios, secrets in the prompt, guards off", fmt_rate(b["leak_runs"])))
+            rows.append(
+                (
+                    "Leak rate, naive baseline",
+                    "same scenarios, secrets in the prompt, guards off",
+                    fmt_rate(b["leak_runs"]),
+                )
+            )
         if h["f1"] is not None:
-            rows.append(("Handoff accuracy", "precision / recall / F1 on events that need the passenger",
-                         f"P {pct(h['precision'])} · R {pct(h['recall'])} · F1 {pct(h['f1'])}"))
+            rows.append(
+                (
+                    "Handoff accuracy",
+                    "precision / recall / F1 on events that need the passenger",
+                    f"P {pct(h['precision'])} · R {pct(h['recall'])} · F1 {pct(h['f1'])}",
+                )
+            )
         disc = fmt_rate(v["disclosure_first_utterance"])
         if v["honest_when_asked_if_human"]["n"]:
             disc += f"; honest when asked: {fmt_rate(v['honest_when_asked_if_human'])}"
         rows.append(("AI disclosure", "discloses in the first utterance", disc))
-        rows.append(("IVR navigation", "reached a human through the phone menu", fmt_rate(v["ivr_reached_agent"])))
+        rows.append(
+            ("IVR navigation", "reached a human through the phone menu", fmt_rate(v["ivr_reached_agent"]))
+        )
         if lat["p50"] is not None:
-            rows.append(("Reply latency (text mode)", "rep turn in → first guarded sentence out, p50 / p95",
-                         f"{lat['p50']:.2f}s / {lat['p95']:.2f}s (n={lat['n']})"))
+            rows.append(
+                (
+                    "Reply latency (text mode)",
+                    "rep turn in → first guarded sentence out, p50 / p95",
+                    f"{lat['p50']:.2f}s / {lat['p95']:.2f}s (n={lat['n']})",
+                )
+            )
     if doc:
         ds = doc["summary"]
         if ds.get("documents"):
-            rows.append(("Document extraction", "field accuracy, vision only → with barcode cross-check",
-                         f"{pct(ds['field_accuracy_vision'])} → {pct(ds['field_accuracy_with_barcode'])} ({ds['documents']} docs)"))
+            rows.append(
+                (
+                    "Document extraction",
+                    "field accuracy, vision only → with barcode cross-check",
+                    f"{pct(ds['field_accuracy_vision'])} → {pct(ds['field_accuracy_with_barcode'])} ({ds['documents']} docs)",
+                )
+            )
     if not rows:
         return ""
     out = ["| Metric | Definition | Result |", "|---|---|---|"]
     out += [f"| {a} | {b_} | {c} |" for a, b_, c in rows]
     if v and v["completed"]:
         out.append("")
-        out.append(f"_{v['completed']} completed simulated calls; talker: {', '.join(v['talker_models']) or 'n/a'}._")
+        out.append(
+            f"_{v['completed']} completed simulated calls; talker: {', '.join(v['talker_models']) or 'n/a'}._"
+        )
     return "\n".join(out)
 
 
@@ -170,10 +206,13 @@ def main() -> None:
     table = metrics_table(summary)
     if table:
         EVALS_MD.write_text(
-        "# Evaluation results\n\nGenerated by `uv run python -m evals.report` from `evals/results/runs/`.\n\n"
-        + table + "\n\n## Full summary\n\n```json\n" + json.dumps(summary, indent=1) + "\n```\n",
-        encoding="utf-8",
-    )
+            "# Evaluation results\n\nGenerated by `uv run python -m evals.report` from `evals/results/runs/`.\n\n"
+            + table
+            + "\n\n## Full summary\n\n```json\n"
+            + json.dumps(summary, indent=1)
+            + "\n```\n",
+            encoding="utf-8",
+        )
     readme = README.read_text(encoding="utf-8")
     new = re.sub(
         r"(<!-- metrics:start -->)(.*?)(<!-- metrics:end -->)",

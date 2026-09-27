@@ -11,9 +11,7 @@ from dataclasses import dataclass, field
 
 from vocalis.guards.normalize import compact, digit_runs, spoken_digits_to_numerals
 
-SAFE_FALLBACK = (
-    "I'm sorry, I'm not able to share that detail. The passenger can provide it directly."
-)
+SAFE_FALLBACK = "I'm sorry, I'm not able to share that detail. The passenger can provide it directly."
 _EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.]+")
 _PASSPORT = re.compile(r"\b[A-Z][0-9]{7}\b")
 

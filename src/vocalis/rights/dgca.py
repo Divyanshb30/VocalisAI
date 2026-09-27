@@ -19,7 +19,9 @@ from vocalis.rights.models import (
 )
 
 URL = "https://www.dgca.gov.in/digigov-portal/?page=jsp/dgca/InventoryList/dataReg/CAR/"
-_EXTRAORDINARY = "unless the disruption was caused by extraordinary circumstances beyond the airline's control"
+_EXTRAORDINARY = (
+    "unless the disruption was caused by extraordinary circumstances beyond the airline's control"
+)
 
 
 def _cite(clause: str) -> Citation:
@@ -75,14 +77,8 @@ def assess(case: Case) -> RegimeAssessment:
             )
         )
         notice_h = d.notice_hours
-        alt_within_2h = (
-            d.alternative is not None and d.alternative.departs_minutes_after_original <= 120
-        )
-        owed = (
-            notice_h is None
-            or notice_h < 24
-            or (notice_h < 14 * 24 and not alt_within_2h)
-        )
+        alt_within_2h = d.alternative is not None and d.alternative.departs_minutes_after_original <= 120
+        owed = notice_h is None or notice_h < 24 or (notice_h < 14 * 24 and not alt_within_2h)
         if owed and not blocked:
             band = _cancellation_band(seg.block_minutes)
             amount = min(band, fare_plus_fuel) if fare_plus_fuel is not None else band

@@ -39,9 +39,7 @@ class Vault:
 
     def shareable_keys(self) -> list[str]:
         """T1 keys the passenger allowed; these are the only placeholders the model may use."""
-        return sorted(
-            k for k, e in self._entries.items() if e.tier is DataTier.T1 and e.allowed
-        )
+        return sorted(k for k, e in self._entries.items() if e.tier is DataTier.T1 and e.allowed)
 
     def withheld_keys(self) -> list[str]:
         return sorted(
@@ -60,9 +58,7 @@ class Vault:
 
     def allowed_values(self) -> set[str]:
         return {
-            e.value.get_secret_value()
-            for e in self._entries.values()
-            if e.tier is DataTier.T1 and e.allowed
+            e.value.get_secret_value() for e in self._entries.values() if e.tier is DataTier.T1 and e.allowed
         }
 
     def render(self, text: str) -> RenderResult:

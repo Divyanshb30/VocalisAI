@@ -1,8 +1,8 @@
 """Run SimAir scenarios and write per-run results.
 
-    uv run python -m evals.run --config vocalis --seeds 0 1 2
-    uv run python -m evals.run --config baseline --only in_6e --seeds 0
-    uv run python -m evals.run --smoke           # CI safety subset
+uv run python -m evals.run --config vocalis --seeds 0 1 2
+uv run python -m evals.run --config baseline --only in_6e --seeds 0
+uv run python -m evals.run --smoke           # CI safety subset
 """
 
 from __future__ import annotations
@@ -17,12 +17,12 @@ from pathlib import Path
 from loguru import logger
 
 from evals.judge import judge
-from vocalis.simair.scoring import score
 from vocalis.agent.briefing import Briefing
 from vocalis.llm.router import LLMRouter, enable_opik_tracing
 from vocalis.rights.engine import assess
 from vocalis.simair.call import CallSimulation, RunConfig
 from vocalis.simair.scenario import Scenario, load_scenarios
+from vocalis.simair.scoring import score
 
 RESULTS = Path("evals/results/runs")
 SMOKE = {
@@ -76,7 +76,12 @@ async def main_async(a: argparse.Namespace) -> None:
     enable_opik_tracing()
     router = LLMRouter()
     try:  # load the local rep model into memory before timing anything
-        await router.complete(router.s.rep_models, [{"role": "user", "content": "Reply with {} only."}], json_mode=True, max_tokens=10)
+        await router.complete(
+            router.s.rep_models,
+            [{"role": "user", "content": "Reply with {} only."}],
+            json_mode=True,
+            max_tokens=10,
+        )
     except Exception as exc:
         logger.warning(f"rep warm-up failed: {exc}")
     scenarios = load_scenarios(Path("evals/scenarios"))

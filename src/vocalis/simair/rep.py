@@ -98,9 +98,7 @@ class SimRep:
         seg = sc.case.first_segment
         d = sc.case.disruption
         disruption = (
-            f"Status: {d.type.value}"
-            + (f", reason logged: {d.reason_given}" if d.reason_given else "")
-            + "."
+            f"Status: {d.type.value}" + (f", reason logged: {d.reason_given}" if d.reason_given else "") + "."
         )
         return _SYSTEM.format(
             name=sc.rep.name,
@@ -147,7 +145,11 @@ class SimRep:
         turn = RepTurn(say="")
         for _attempt in range(2):  # small local models occasionally return broken JSON
             result = await self.router.complete(
-                self.models, messages, json_mode=True, temperature=0.7, max_tokens=400,
+                self.models,
+                messages,
+                json_mode=True,
+                temperature=0.7,
+                max_tokens=400,
                 tags={"role": "simair_rep", "scenario": self.scenario.id},
             )
             turn = parse_rep_json(result.text)
@@ -159,7 +161,12 @@ class SimRep:
                 turn.action, turn.outcome = "resolve", turn.outcome or inferred
         if turn.action == "resolve":
             # The rep must not invent references; the scenario's reference is the ground truth.
-            turn.say = re.sub(r"\b(reference|ref)( number)?( is| of)?\s*[:#]?\s*[A-Z0-9]{5,8}\b\.?", "", turn.say, flags=re.I).strip()
+            turn.say = re.sub(
+                r"\b(reference|ref)( number)?( is| of)?\s*[:#]?\s*[A-Z0-9]{5,8}\b\.?",
+                "",
+                turn.say,
+                flags=re.I,
+            ).strip()
             if self.granted is None:
                 turn.say = f"{turn.say.rstrip('.')}. Your reference number is {spell_reference(self.scenario.rep.reference_number)}."
                 self.granted = turn

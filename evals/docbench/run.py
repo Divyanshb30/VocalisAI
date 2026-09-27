@@ -1,6 +1,6 @@
 """Document-extraction benchmark: field-level accuracy, vision-only vs vision + barcode.
 
-    uv run python -m evals.docbench.run --data evals/docbench/data --model gemini-flash-latest
+uv run python -m evals.docbench.run --data evals/docbench/data --model gemini-flash-latest
 """
 
 from __future__ import annotations
@@ -17,9 +17,19 @@ from vocalis.docintel.bcbp import read_image
 from vocalis.docintel.extract import extract_with_gemini, reconcile, redact
 
 FIELDS = [
-    "passenger_first_name", "passenger_last_name", "booking_reference", "airline_code",
-    "flight_number", "origin_iata", "destination_iata", "departure_date", "departure_time",
-    "disruption", "notice_date", "fare_total", "currency",
+    "passenger_first_name",
+    "passenger_last_name",
+    "booking_reference",
+    "airline_code",
+    "flight_number",
+    "origin_iata",
+    "destination_iata",
+    "departure_date",
+    "departure_time",
+    "disruption",
+    "notice_date",
+    "fare_total",
+    "currency",
 ]
 
 
@@ -43,7 +53,12 @@ async def run(data: Path, model: str, limit: int | None) -> dict:
             continue
         latency = time.perf_counter() - t0
         rec = reconcile(doc, read_image(path), reference=date(2026, 10, 1))
-        row = {"doc": name, "type": truth["doc_type"], "latency_s": round(latency, 2), "conflicts": len(rec.conflicts)}
+        row = {
+            "doc": name,
+            "type": truth["doc_type"],
+            "latency_s": round(latency, 2),
+            "conflicts": len(rec.conflicts),
+        }
         for variant, fields in (("vision", doc.model_dump()), ("reconciled", rec.fields.model_dump())):
             checked = [f for f in FIELDS if f in truth]
             correct = [f for f in checked if norm(fields.get(f)) == norm(truth[f])]

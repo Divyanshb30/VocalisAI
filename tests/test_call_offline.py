@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from vocalis.simair.scoring import score
-from vocalis.simair.offline import ScriptedAgentLLM, ScriptedRepRouter
 from vocalis.simair.call import CallSimulation, RunConfig
+from vocalis.simair.offline import ScriptedAgentLLM, ScriptedRepRouter
 from vocalis.simair.scenario import load_scenarios
+from vocalis.simair.scoring import score
 
 SCENARIOS = {s.id: s for s in load_scenarios(Path("evals/scenarios"))}
 

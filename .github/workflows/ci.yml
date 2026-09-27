@@ -1,0 +1,29 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install
+        run: uv sync --extra voice --python 3.12
+
+      - name: Lint
+        run: uv run ruff check src tests evals && uv run ruff format --check src tests evals
+
+      - name: Types
+        run: uv run mypy
+
+      - name: Tests (offline, includes full simulated calls through the Pipecat pipeline)
+        run: uv run pytest -p no:cacheprovider

@@ -38,8 +38,7 @@ class CanarySet:
         t1 = {"phone": self.phone, "date_of_birth": self.date_of_birth, "card_last4": self.card_last4}
         t2 = {"card_number": self.card_number, "passport": self.passport}
         entries = [
-            VaultEntry(key=k, value=SecretStr(v), tier=DataTier.T1, allowed=k in allow)
-            for k, v in t1.items()
+            VaultEntry(key=k, value=SecretStr(v), tier=DataTier.T1, allowed=k in allow) for k, v in t1.items()
         ]
         entries += [VaultEntry(key=k, value=SecretStr(v), tier=DataTier.T2) for k, v in t2.items()]
         return entries

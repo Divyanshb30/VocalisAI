@@ -51,7 +51,11 @@ async def judge(r: CallResult, b: Briefing, router: LLMRouter, models: list[str]
     )
     try:
         res = await router.complete(
-            models, [{"role": "user", "content": prompt}], json_mode=True, temperature=0, max_tokens=500,
+            models,
+            [{"role": "user", "content": prompt}],
+            json_mode=True,
+            temperature=0,
+            max_tokens=500,
             tags={"role": "judge", "scenario": r.scenario_id},
         )
     except Exception as exc:

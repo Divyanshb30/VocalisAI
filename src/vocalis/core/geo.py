@@ -79,7 +79,35 @@ _CARRIERS: dict[str, tuple[str, str]] = {
 }
 
 EU_COUNTRIES = frozenset(
-    "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE".split()
+    [
+        "AT",
+        "BE",
+        "BG",
+        "HR",
+        "CY",
+        "CZ",
+        "DK",
+        "EE",
+        "FI",
+        "FR",
+        "DE",
+        "GR",
+        "HU",
+        "IE",
+        "IT",
+        "LV",
+        "LT",
+        "LU",
+        "MT",
+        "NL",
+        "PL",
+        "PT",
+        "RO",
+        "SK",
+        "SI",
+        "ES",
+        "SE",
+    ]
     # EEA + Switzerland apply EU261 as well
     + ["IS", "NO", "LI", "CH"]
 )
@@ -109,8 +137,5 @@ def great_circle_km(origin: str, destination: str) -> float:
     """Haversine distance, the method EU261/UK261 Article 7(4) refers to."""
     a, b = airport(origin), airport(destination)
     lat1, lon1, lat2, lon2 = map(math.radians, (a.lat, a.lon, b.lat, b.lon))
-    h = (
-        math.sin((lat2 - lat1) / 2) ** 2
-        + math.cos(lat1) * math.cos(lat2) * math.sin((lon2 - lon1) / 2) ** 2
-    )
+    h = math.sin((lat2 - lat1) / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin((lon2 - lon1) / 2) ** 2
     return 2 * 6371.0 * math.asin(math.sqrt(h))

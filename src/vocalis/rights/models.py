@@ -69,9 +69,7 @@ class RightsAssessment(BaseModel):
 
     def best_compensation(self) -> Entitlement | None:
         comps = [
-            e
-            for e in self.entitlements
-            if e.kind == EntitlementKind.COMPENSATION and e.amount is not None
+            e for e in self.entitlements if e.kind == EntitlementKind.COMPENSATION and e.amount is not None
         ]
         return max(comps, key=lambda e: e.amount or Decimal(0), default=None)
 

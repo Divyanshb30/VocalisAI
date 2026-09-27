@@ -66,9 +66,7 @@ def build_talker(
         raise RuntimeError(f"No usable talker model among {wanted}; add a key to .env")
     if len(services) == 1:
         return services[0][1], [services[0][0]]
-    switcher = LLMSwitcher(
-        llms=[svc for _, svc in services], strategy_type=ServiceSwitcherStrategyFailover
-    )
+    switcher = LLMSwitcher(llms=[svc for _, svc in services], strategy_type=ServiceSwitcherStrategyFailover)
     return switcher, [m for m, _ in services]  # type: ignore[return-value]
 
 

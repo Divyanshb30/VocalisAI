@@ -19,9 +19,9 @@ from pydantic import BaseModel, Field
 
 from vocalis.core.models import (
     Case,
-    DocType,
     Disruption,
     DisruptionType,
+    DocType,
     Fare,
     FlightSegment,
     Passenger,
@@ -137,7 +137,9 @@ def reconcile(doc: ExtractedDocument, bp: BCBP | None, reference: date | None = 
     return ExtractionResult(fields=ExtractedDocument.model_validate(data), barcode=bp, conflicts=conflicts)
 
 
-async def extract_with_gemini(image_bytes: bytes, mime_type: str = "image/png", model: str | None = None) -> ExtractedDocument:
+async def extract_with_gemini(
+    image_bytes: bytes, mime_type: str = "image/png", model: str | None = None
+) -> ExtractedDocument:
     from google import genai
     from google.genai import types
 
@@ -179,7 +181,13 @@ def _dec(v: str | None) -> Decimal | None:
 
 
 def to_case(doc: ExtractedDocument) -> Case:
-    if not (doc.booking_reference and doc.airline_code and doc.origin_iata and doc.destination_iata and doc.departure_date):
+    if not (
+        doc.booking_reference
+        and doc.airline_code
+        and doc.origin_iata
+        and doc.destination_iata
+        and doc.departure_date
+    ):
         raise ValueError("document is missing booking reference, airline, route or date")
     dep = datetime.fromisoformat(f"{doc.departure_date}T{doc.departure_time or '00:00'}")
     arr = datetime.fromisoformat(f"{doc.departure_date}T{doc.arrival_time}") if doc.arrival_time else None

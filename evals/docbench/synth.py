@@ -21,14 +21,54 @@ from vocalis.core.geo import carrier_name
 from vocalis.docintel.bcbp import encode, render_barcode
 
 ROUTES = [
-    ("6E", "DEL", "BOM", 130, "INR"), ("6E", "BLR", "DEL", 165, "INR"), ("AI", "DEL", "LHR", 570, "INR"),
-    ("QP", "BOM", "GOI", 75, "INR"), ("BA", "LHR", "DEL", 540, "GBP"), ("BA", "LHR", "EDI", 85, "GBP"),
-    ("VS", "LHR", "BOM", 560, "GBP"), ("EK", "DXB", "BOM", 190, "AED"), ("FZ", "DXB", "DEL", 215, "AED"),
-    ("EY", "AUH", "LHR", 460, "AED"), ("AI", "BOM", "DXB", 195, "INR"), ("6E", "HYD", "DXB", 240, "INR"),
+    ("6E", "DEL", "BOM", 130, "INR"),
+    ("6E", "BLR", "DEL", 165, "INR"),
+    ("AI", "DEL", "LHR", 570, "INR"),
+    ("QP", "BOM", "GOI", 75, "INR"),
+    ("BA", "LHR", "DEL", 540, "GBP"),
+    ("BA", "LHR", "EDI", 85, "GBP"),
+    ("VS", "LHR", "BOM", 560, "GBP"),
+    ("EK", "DXB", "BOM", 190, "AED"),
+    ("FZ", "DXB", "DEL", 215, "AED"),
+    ("EY", "AUH", "LHR", 460, "AED"),
+    ("AI", "BOM", "DXB", 195, "INR"),
+    ("6E", "HYD", "DXB", 240, "INR"),
 ]
-FIRST = ["Asha", "Rohan", "Priya", "Arjun", "Meera", "Kabir", "Sara", "Omar", "Leila", "James", "Emily", "Vikram"]
-LAST = ["Rao", "Sharma", "Iyer", "Khan", "Patel", "Singh", "Ahmed", "Hassan", "Smith", "Clarke", "Mehta", "Das"]
-REASONS = ["operational reasons", "crew availability", "adverse weather", "a technical issue with the aircraft", "air traffic restrictions"]
+FIRST = [
+    "Asha",
+    "Rohan",
+    "Priya",
+    "Arjun",
+    "Meera",
+    "Kabir",
+    "Sara",
+    "Omar",
+    "Leila",
+    "James",
+    "Emily",
+    "Vikram",
+]
+LAST = [
+    "Rao",
+    "Sharma",
+    "Iyer",
+    "Khan",
+    "Patel",
+    "Singh",
+    "Ahmed",
+    "Hassan",
+    "Smith",
+    "Clarke",
+    "Mehta",
+    "Das",
+]
+REASONS = [
+    "operational reasons",
+    "crew availability",
+    "adverse weather",
+    "a technical issue with the aircraft",
+    "air traffic restrictions",
+]
 ALNUM = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
 
@@ -65,7 +105,7 @@ def _degrade(img: Image.Image, rng: random.Random) -> Image.Image:
 
 
 def boarding_pass(rng: random.Random) -> tuple[Image.Image, dict]:
-    carrier, o, d, mins, cur = rng.choice(ROUTES)
+    carrier, o, d, mins, _cur = rng.choice(ROUTES)
     first, last = rng.choice(FIRST), rng.choice(LAST)
     pnr = _pnr(rng)
     fno = str(rng.randint(100, 2999))
@@ -79,24 +119,38 @@ def boarding_pass(rng: random.Random) -> tuple[Image.Image, dict]:
     g.rectangle([0, 0, W, 70], fill=(20, 40, 90))
     g.text((30, 18), f"{carrier_name(carrier).upper()}   BOARDING PASS", font=_font(32), fill="white")
     rows = [
-        ("PASSENGER", f"{last.upper()}/{first.upper()}"), ("FLIGHT", f"{carrier} {fno}"),
-        ("FROM", o), ("TO", d), ("DATE", dep.strftime("%d %b %Y").upper()),
-        ("DEPARTS", dep.strftime("%H:%M")), ("ARRIVES", arr.strftime("%H:%M")),
-        ("SEAT", seat), ("PNR", pnr),
+        ("PASSENGER", f"{last.upper()}/{first.upper()}"),
+        ("FLIGHT", f"{carrier} {fno}"),
+        ("FROM", o),
+        ("TO", d),
+        ("DATE", dep.strftime("%d %b %Y").upper()),
+        ("DEPARTS", dep.strftime("%H:%M")),
+        ("ARRIVES", arr.strftime("%H:%M")),
+        ("SEAT", seat),
+        ("PNR", pnr),
     ]
     x, y = 40, 100
     for i, (k, v) in enumerate(rows):
         cx, cy = x + (i % 3) * 300, y + (i // 3) * 110
         g.text((cx, cy), k, font=_font(20), fill=(90, 90, 90))
         g.text((cx, cy + 28), v, font=_font(34), fill=(10, 10, 10))
-    code = render_barcode(encode(last, first, pnr, o, d, carrier, fno, day, seat=seat), scale=2).convert("RGB")
+    code = render_barcode(encode(last, first, pnr, o, d, carrier, fno, day, seat=seat), scale=2).convert(
+        "RGB"
+    )
     code.thumbnail((440, 420))
     img.paste(code, (W - code.width - 30, 100))
     truth = {
-        "doc_type": "boarding_pass", "passenger_first_name": first, "passenger_last_name": last,
-        "booking_reference": pnr, "airline_code": carrier, "flight_number": fno,
-        "origin_iata": o, "destination_iata": d, "departure_date": dep.date().isoformat(),
-        "departure_time": dep.strftime("%H:%M"), "arrival_time": arr.strftime("%H:%M"),
+        "doc_type": "boarding_pass",
+        "passenger_first_name": first,
+        "passenger_last_name": last,
+        "booking_reference": pnr,
+        "airline_code": carrier,
+        "flight_number": fno,
+        "origin_iata": o,
+        "destination_iata": d,
+        "departure_date": dep.date().isoformat(),
+        "departure_time": dep.strftime("%H:%M"),
+        "arrival_time": arr.strftime("%H:%M"),
         "disruption": "none",
     }
     return img, truth
@@ -114,7 +168,10 @@ def cancellation_notice(rng: random.Random) -> tuple[Image.Image, dict]:
     reason = rng.choice(REASONS)
     email = f"{first.lower()}.{last.lower()}@example.com"
     lines = [
-        (f"From: {carrier_name(carrier)} <noreply@{carrier_name(carrier).lower().replace(' ', '')}.example>", 20),
+        (
+            f"From: {carrier_name(carrier)} <noreply@{carrier_name(carrier).lower().replace(' ', '')}.example>",
+            20,
+        ),
         (f"To: {email}", 20),
         (f"Sent: {notice.strftime('%d %B %Y %H:%M')}", 20),
         ("", 10),
@@ -122,7 +179,10 @@ def cancellation_notice(rng: random.Random) -> tuple[Image.Image, dict]:
         ("", 10),
         (f"Dear {first} {last},", 24),
         (f"We regret to inform you that flight {carrier} {fno} from {o} to {d},", 24),
-        (f"scheduled to depart on {dep.strftime('%d %B %Y at %H:%M')}, has been cancelled due to {reason}.", 24),
+        (
+            f"scheduled to depart on {dep.strftime('%d %B %Y at %H:%M')}, has been cancelled due to {reason}.",
+            24,
+        ),
         (f"Booking reference (PNR): {pnr}", 24),
         (f"Fare paid: {cur} {total:,}  (base fare {cur} {base:,}, fuel surcharge {cur} {fuel:,})", 24),
         ("You may request a refund or rebook through our customer service team.", 24),
@@ -135,12 +195,23 @@ def cancellation_notice(rng: random.Random) -> tuple[Image.Image, dict]:
         g.text((40, y), text, font=_font(size), fill=(20, 20, 20))
         y += size + 16
     truth = {
-        "doc_type": "cancellation_notice", "passenger_first_name": first, "passenger_last_name": last,
-        "booking_reference": pnr, "airline_code": carrier, "flight_number": fno,
-        "origin_iata": o, "destination_iata": d, "departure_date": dep.date().isoformat(),
-        "departure_time": dep.strftime("%H:%M"), "disruption": "cancellation",
-        "notice_date": notice.date().isoformat(), "fare_total": str(total), "base_fare": str(base),
-        "fuel_charge": str(fuel), "currency": cur, "email": email,
+        "doc_type": "cancellation_notice",
+        "passenger_first_name": first,
+        "passenger_last_name": last,
+        "booking_reference": pnr,
+        "airline_code": carrier,
+        "flight_number": fno,
+        "origin_iata": o,
+        "destination_iata": d,
+        "departure_date": dep.date().isoformat(),
+        "departure_time": dep.strftime("%H:%M"),
+        "disruption": "cancellation",
+        "notice_date": notice.date().isoformat(),
+        "fare_total": str(total),
+        "base_fare": str(base),
+        "fuel_charge": str(fuel),
+        "currency": cur,
+        "email": email,
     }
     return img, truth
 

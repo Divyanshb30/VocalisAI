@@ -17,7 +17,7 @@ MU = 255.0
 def mulaw_encode(x: np.ndarray) -> np.ndarray:
     x = np.clip(x, -1.0, 1.0)
     y = np.sign(x) * np.log1p(MU * np.abs(x)) / np.log1p(MU)
-    return np.round((y + 1) / 2 * 255).astype(np.uint8)
+    return np.asarray(np.round((y + 1) / 2 * 255), dtype=np.uint8)
 
 
 def mulaw_decode(q: np.ndarray) -> np.ndarray:
@@ -34,7 +34,7 @@ def resample(x: np.ndarray, src_rate: int, dst_rate: int) -> np.ndarray:
         x = np.convolve(x, np.ones(taps) / taps, mode="same")
     n_out = int(len(x) * dst_rate / src_rate)
     src_idx = np.linspace(0, len(x) - 1, n_out)
-    return np.interp(src_idx, np.arange(len(x)), x).astype(np.float32)
+    return np.asarray(np.interp(src_idx, np.arange(len(x)), x), dtype=np.float32)
 
 
 def _one_pole_highpass(x: np.ndarray, rate: int, cutoff: float) -> np.ndarray:
@@ -92,4 +92,4 @@ def pcm16_to_float(data: bytes) -> np.ndarray:
 
 
 def float_to_pcm16(x: np.ndarray) -> bytes:
-    return (np.clip(x, -1.0, 1.0) * 32767).astype(np.int16).tobytes()
+    return bytes((np.clip(x, -1.0, 1.0) * 32767).astype(np.int16).tobytes())

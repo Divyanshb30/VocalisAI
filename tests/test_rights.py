@@ -58,7 +58,9 @@ def test_distance_sanity():
 
 
 def test_uk261_long_haul_cancellation_short_notice():
-    c = make_case("BA", "LHR", "DEL", Disruption(type=DisruptionType.CANCELLATION, notice_hours=20), block_h=9)
+    c = make_case(
+        "BA", "LHR", "DEL", Disruption(type=DisruptionType.CANCELLATION, notice_hours=20), block_h=9
+    )
     a = assess(c)
     [e] = comp(a, Regime.UK261)
     assert e.amount == Decimal(520) and e.currency == "GBP"
@@ -74,13 +76,17 @@ def test_uk261_arrival_into_uk_on_non_uk_carrier_does_not_apply():
 
 
 def test_uk261_arrival_into_uk_on_uk_carrier_applies():
-    c = make_case("BA", "DEL", "LHR", Disruption(type=DisruptionType.DELAY, arrival_delay_minutes=200), block_h=9)
+    c = make_case(
+        "BA", "DEL", "LHR", Disruption(type=DisruptionType.DELAY, arrival_delay_minutes=200), block_h=9
+    )
     [e] = comp(assess(c), Regime.UK261)
     assert e.amount == Decimal(520)
 
 
 def test_uk261_notice_over_14_days_no_compensation():
-    c = make_case("BA", "LHR", "EDI", Disruption(type=DisruptionType.CANCELLATION, notice_hours=15 * 24), block_h=1.2)
+    c = make_case(
+        "BA", "LHR", "EDI", Disruption(type=DisruptionType.CANCELLATION, notice_hours=15 * 24), block_h=1.2
+    )
     assert comp(assess(c), Regime.UK261) == []
 
 
@@ -101,7 +107,9 @@ def test_uk261_delay_under_3h_no_compensation():
 
 def test_extraordinary_circumstances_blocks_compensation_not_refund():
     c = make_case(
-        "BA", "LHR", "DXB",
+        "BA",
+        "LHR",
+        "DXB",
         Disruption(type=DisruptionType.CANCELLATION, notice_hours=3, extraordinary_circumstances=True),
         block_h=7,
     )
@@ -112,7 +120,9 @@ def test_extraordinary_circumstances_blocks_compensation_not_refund():
 
 
 def test_eu261_intra_eu_middle_band():
-    c = make_case("LH", "DUB", "FCO", Disruption(type=DisruptionType.CANCELLATION, notice_hours=2), block_h=2.5)
+    c = make_case(
+        "LH", "DUB", "FCO", Disruption(type=DisruptionType.CANCELLATION, notice_hours=2), block_h=2.5
+    )
     [e] = comp(assess(c), Regime.EU261)
     assert e.amount == Decimal(400) and e.currency == "EUR"
 
@@ -122,14 +132,23 @@ def test_eu261_intra_eu_middle_band():
     [(0.9, Decimal(5000)), (1.5, Decimal(7500)), (2.5, Decimal(10000))],
 )
 def test_dgca_cancellation_bands(block_h, expected):
-    c = make_case("6E", "DEL", "BOM", Disruption(type=DisruptionType.CANCELLATION, notice_hours=10), block_h=block_h)
+    c = make_case(
+        "6E", "DEL", "BOM", Disruption(type=DisruptionType.CANCELLATION, notice_hours=10), block_h=block_h
+    )
     [e] = comp(assess(c), Regime.DGCA)
     assert e.amount == expected and e.currency == "INR"
 
 
 def test_dgca_cancellation_capped_at_fare_plus_fuel():
     fare = Fare(currency="INR", total=Decimal(4200), base_fare=Decimal(3000), fuel_charge=Decimal(500))
-    c = make_case("6E", "DEL", "BOM", Disruption(type=DisruptionType.CANCELLATION, notice_hours=10), block_h=2.2, fare=fare)
+    c = make_case(
+        "6E",
+        "DEL",
+        "BOM",
+        Disruption(type=DisruptionType.CANCELLATION, notice_hours=10),
+        block_h=2.2,
+        fare=fare,
+    )
     [e] = comp(assess(c), Regime.DGCA)
     assert e.amount == Decimal(3500)
 
@@ -178,6 +197,8 @@ def test_uae_cancellation_refund_care_and_damages():
 
 
 def test_every_entitlement_has_a_citation():
-    c = make_case("6E", "DEL", "DXB", Disruption(type=DisruptionType.CANCELLATION, notice_hours=3), block_h=3.5)
+    c = make_case(
+        "6E", "DEL", "DXB", Disruption(type=DisruptionType.CANCELLATION, notice_hours=3), block_h=3.5
+    )
     for e in assess(c).entitlements:
         assert e.citation.clause and e.citation.url.startswith("https://")

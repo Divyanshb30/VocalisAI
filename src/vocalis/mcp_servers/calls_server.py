@@ -77,12 +77,21 @@ def create_case(
     """Open a case from booking details. Returns the case id, what the passenger is owed, and a
     default mandate (what the agent will ask for; vouchers are refused by default)."""
     case = case_from_fields(
-        passenger_first_name=passenger_first_name, passenger_last_name=passenger_last_name,
-        booking_reference=booking_reference, airline=airline, flight_number=flight_number,
-        origin=origin, destination=destination, departure=departure, arrival=arrival,
-        disruption=disruption, notice_hours=notice_hours,
-        departure_delay_minutes=departure_delay_minutes, arrival_delay_minutes=arrival_delay_minutes,
-        extraordinary_circumstances=extraordinary_circumstances, fare_currency=fare_currency,
+        passenger_first_name=passenger_first_name,
+        passenger_last_name=passenger_last_name,
+        booking_reference=booking_reference,
+        airline=airline,
+        flight_number=flight_number,
+        origin=origin,
+        destination=destination,
+        departure=departure,
+        arrival=arrival,
+        disruption=disruption,
+        notice_hours=notice_hours,
+        departure_delay_minutes=departure_delay_minutes,
+        arrival_delay_minutes=arrival_delay_minutes,
+        extraordinary_circumstances=extraordinary_circumstances,
+        fare_currency=fare_currency,
         fare_total=fare_total,
     )
     save_case(case, default_mandate(assess(case)))
@@ -105,7 +114,9 @@ async def read_travel_document(image_path: str) -> dict[str, Any]:
 
 
 @mcp.tool
-def set_mandate(case_id: str, target: str, acceptable: list[str] | None = None, forbidden: list[str] | None = None) -> dict[str, Any]:
+def set_mandate(
+    case_id: str, target: str, acceptable: list[str] | None = None, forbidden: list[str] | None = None
+) -> dict[str, Any]:
     """Change what the agent may agree to. Outcomes: cash_refund, compensation,
     refund_and_compensation, rebooking, voucher, callback."""
     case, _ = load_case(case_id)

@@ -1,10 +1,10 @@
 """`vocalis` command line.
 
-    vocalis scenarios                                  list SimAir scenarios
-    vocalis call <scenario_id> [--offline]             run one simulated call, print transcript
-    vocalis case --scenario-case <id> | --document P   run the LangGraph case workflow
-    vocalis rights --airline 6E --origin DEL ...       what is the passenger owed?
-    vocalis mcp rights|calls [--http PORT]             start an MCP server
+vocalis scenarios                                  list SimAir scenarios
+vocalis call <scenario_id> [--offline]             run one simulated call, print transcript
+vocalis case --scenario-case <id> | --document P   run the LangGraph case workflow
+vocalis rights --airline 6E --origin DEL ...       what is the passenger owed?
+vocalis mcp rights|calls [--http PORT]             start an MCP server
 """
 
 from __future__ import annotations
@@ -64,11 +64,15 @@ def cmd_case(a: argparse.Namespace) -> None:
         if pending:
             ask = pending[0].value
             c = ask["case"]
-            print(f"\nCase: {c['passenger']['first_name']} {c['passenger']['last_name']}, booking {c['booking_reference']}, "
-                  f"{c['segments'][0]['carrier']}{c['segments'][0]['flight_number']} "
-                  f"{c['segments'][0]['origin']}-{c['segments'][-1]['destination']}, {c['disruption']['type']}")
+            print(
+                f"\nCase: {c['passenger']['first_name']} {c['passenger']['last_name']}, booking {c['booking_reference']}, "
+                f"{c['segments'][0]['carrier']}{c['segments'][0]['flight_number']} "
+                f"{c['segments'][0]['origin']}-{c['segments'][-1]['destination']}, {c['disruption']['type']}"
+            )
             for conflict in ask.get("conflicts_to_confirm", []):
-                print(f"  ! check {conflict['field']}: photo says {conflict['vision']!r}, barcode says {conflict['barcode']!r}")
+                print(
+                    f"  ! check {conflict['field']}: photo says {conflict['vision']!r}, barcode says {conflict['barcode']!r}"
+                )
             print("Entitlements:")
             for e in ask["entitlements"]:
                 print(f"  - {e}")
@@ -89,11 +93,21 @@ def cmd_rights(a: argparse.Namespace) -> None:
 
     fn = getattr(check_entitlements, "fn", check_entitlements)
     out = fn(
-        airline=a.airline, flight_number=a.flight, origin=a.origin, destination=a.destination,
-        departure=a.departure, arrival=a.arrival, disruption=a.disruption, notice_hours=a.notice_hours,
-        departure_delay_minutes=a.delay, arrival_delay_minutes=a.arrival_delay,
-        extraordinary_circumstances=a.extraordinary, fare_currency=a.currency, fare_total=a.fare,
-        base_fare=a.base_fare, fuel_charge=a.fuel,
+        airline=a.airline,
+        flight_number=a.flight,
+        origin=a.origin,
+        destination=a.destination,
+        departure=a.departure,
+        arrival=a.arrival,
+        disruption=a.disruption,
+        notice_hours=a.notice_hours,
+        departure_delay_minutes=a.delay,
+        arrival_delay_minutes=a.arrival_delay,
+        extraordinary_circumstances=a.extraordinary,
+        fare_currency=a.currency,
+        fare_total=a.fare,
+        base_fare=a.base_fare,
+        fuel_charge=a.fuel,
     )
     print(json.dumps(out, indent=1, ensure_ascii=False))
 
@@ -124,7 +138,9 @@ def main() -> None:
 
     p = sub.add_parser("case", help="run the LangGraph case workflow")
     src = p.add_mutually_exclusive_group(required=True)
-    src.add_argument("--document", help="photo of a boarding pass / cancellation notice (needs GOOGLE_API_KEY)")
+    src.add_argument(
+        "--document", help="photo of a boarding pass / cancellation notice (needs GOOGLE_API_KEY)"
+    )
     src.add_argument("--scenario-case", help="use the case from a SimAir scenario")
     p.add_argument("--persona", default="stonewaller")
     p.add_argument("--offline", action="store_true")
