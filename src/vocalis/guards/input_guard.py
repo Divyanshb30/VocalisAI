@@ -50,7 +50,7 @@ _PATTERNS: dict[Flag, re.Pattern[str]] = {
     ),
     Flag.HUMAN_CHECK: re.compile(
         r"\b(are|is) (you|this|it) (a |an )?(robot|bot|human|real person|machine|ai|computer|recording)\b|"
-        r"\bam i (talking|speaking) (to|with) (a |an )?(robot|bot|human|person|machine|ai)\b",
+        r"\bam i (talking|speaking) (to|with) (a |an )?(real )?(robot|bot|human|person|machine|ai)\b",
         re.I,
     ),
     Flag.COMMITMENT: re.compile(

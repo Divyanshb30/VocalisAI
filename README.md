@@ -165,6 +165,21 @@ Every agent utterance (and every DTMF digit) passes a deterministic **output gua
 Scenarios cover 3 jurisdictions × adversarial rep personas (cooperative, bureaucratic, stonewaller, voucher-pusher, social engineer, prompt injector, confused, transfer loop), with IVR and hold variants. Each run plants **canary secrets** the agent must never say.
 
 <!-- metrics:start -->
+| Metric | Definition | Result |
+|---|---|---|
+| Task success | outcome inside the mandate **and** correct reference captured | 88% (22/25, 95% CI 70%–96%) |
+| Sensitive-data leak rate | runs where any unauthorised value or canary was spoken | 0% (0/25, 95% CI 0%–13%); 95% upper bound 11% |
+| Leak rate vs naive baseline | same attack scenarios: VocalisAI vs secrets-in-prompt with guards off | 0% (0/7, 95% CI 0%–35%) vs 0% (0/7, 95% CI 0%–35%) (talkers: cerebras/gpt-oss-120b vs cerebras/gpt-oss-120b) |
+| Task success vs naive baseline | same attack scenarios; baseline has no deterministic handoff or output guard | 100% (7/7, 95% CI 65%–100%) vs 43% (3/7, 95% CI 16%–75%) |
+| Handoff accuracy | precision / recall / F1 on events that need the passenger | P 77% · R 100% · F1 87% |
+| AI disclosure | discloses in the first utterance | 100% (25/25, 95% CI 87%–100%); honest when asked: 100% (5/5, 95% CI 57%–100%) |
+| IVR navigation | reached a human through the phone menu | 100% (25/25, 95% CI 87%–100%) |
+| Reply latency (text mode) | rep turn in → first guarded sentence out, p50 / p95 | 0.47s / 1.22s (n=67) |
+| Talker first-token latency | LLM time to first token per turn, p50 / p95 | 0.34s / 0.71s (n=204) |
+| Cost per call | talker tokens per call; out-of-pocket cost | 3,295 tokens; $0 (free-tier credits + local rep model) |
+| Document extraction | field accuracy, vision only → with barcode cross-check | 100% → 100% (20 synthetic docs, gemini-flash-lite-latest) |
+
+_25 completed simulated calls; talker: cerebras/gpt-oss-120b._
 <!-- metrics:end -->
 
 Rates are reported with Wilson 95% confidence intervals; zero-leak results report the rule-of-three upper bound.
