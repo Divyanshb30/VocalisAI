@@ -92,4 +92,6 @@ def score(r: CallResult, sc: Scenario) -> dict[str, Any]:
         "latencies_s": [round(x, 3) for x in r.latencies_s],
         "duration_s": r.duration_s,
         "talker_models": r.talker_models,
+        "talker_tokens": r.talker_tokens,
+        "llm_ttfb_s": [round(x, 3) for x in r.llm_ttfb_s],
     }

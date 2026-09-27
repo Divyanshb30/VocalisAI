@@ -66,8 +66,11 @@ Reply with a JSON object only:
 {{"say": "<what you say>", "action": "none" | "resolve" | "end_call", \
 "outcome": "<one of: cash_refund, compensation, refund_and_compensation, rebooking, voucher, callback>", \
 "amount": <number or null>}}
-Use "resolve" only on the turn where you actually grant something; the system adds the \
-reference number to what you say. Use "end_call" when the caller says goodbye or there is nothing more to do."""
+Use "resolve" on the turn where you actually grant something, and set "outcome" to what you \
+granted. Never say a reference number yourself: the system appends the real one. \
+Use "end_call" when the caller says goodbye or there is nothing more to do.
+Example of granting: {{"say": "Alright, I've processed a full refund to the original card.", \
+"action": "resolve", "outcome": "cash_refund", "amount": null}}"""
 
 
 @dataclass
@@ -77,6 +80,7 @@ class RepTurn:
     outcome: OutcomeType | None = None
     amount: Decimal | None = None
     event: EventAction | None = None
+    unparsed: bool = False
 
 
 @dataclass
@@ -136,13 +140,26 @@ class SimRep:
             self.history.append({"role": "assistant", "content": json.dumps({"say": line, "action": "none"})})
             return RepTurn(say=line, event=event.action)
 
-        messages = [{"role": "system", "content": self._system_prompt()}, *self.history]
-        result = await self.router.complete(
-            self.models, messages, json_mode=True, temperature=0.7, max_tokens=400,
-            tags={"role": "simair_rep", "scenario": self.scenario.id},
-        )
-        turn = parse_rep_json(result.text)
+        system = self._system_prompt()
+        if any("qwen3" in m for m in self.models):
+            system += "\n/no_think"  # qwen3: skip the thinking phase (slow, and eats the JSON budget)
+        messages = [{"role": "system", "content": system}, *self.history]
+        turn = RepTurn(say="")
+        for _attempt in range(2):  # small local models occasionally return broken JSON
+            result = await self.router.complete(
+                self.models, messages, json_mode=True, temperature=0.7, max_tokens=400,
+                tags={"role": "simair_rep", "scenario": self.scenario.id},
+            )
+            turn = parse_rep_json(result.text)
+            if not turn.unparsed:
+                break
+        if turn.action == "none" and self.granted is None:
+            inferred = infer_grant(turn.say)
+            if inferred is not None:
+                turn.action, turn.outcome = "resolve", turn.outcome or inferred
         if turn.action == "resolve":
+            # The rep must not invent references; the scenario's reference is the ground truth.
+            turn.say = re.sub(r"\b(reference|ref)( number)?( is| of)?\s*[:#]?\s*[A-Z0-9]{5,8}\b\.?", "", turn.say, flags=re.I).strip()
             if self.granted is None:
                 turn.say = f"{turn.say.rstrip('.')}. Your reference number is {spell_reference(self.scenario.rep.reference_number)}."
                 self.granted = turn
@@ -163,12 +180,38 @@ def spell_reference(ref: str) -> str:
     return " ".join(ref)
 
 
+_GRANT = re.compile(
+    r"\b(i'?ve|i have|we'?ve|we have|has been|have been|is now|are now)\s+(been\s+)?"
+    r"(processed|issued|approved|arranged|initiated|raised|submitted|rebooked|booked)\b",
+    re.I,
+)
+
+
+def infer_grant(say: str) -> OutcomeType | None:
+    """The rep says it already granted something but forgot action=resolve: infer what."""
+    if not _GRANT.search(say):
+        return None
+    low = say.lower()
+    if "compensation" in low and "refund" in low:
+        return OutcomeType.REFUND_AND_COMPENSATION
+    if "compensation" in low:
+        return OutcomeType.COMPENSATION
+    if "refund" in low:
+        return OutcomeType.CASH_REFUND
+    if "rebook" in low or "new flight" in low:
+        return OutcomeType.REBOOKING
+    if "voucher" in low or "credit" in low:
+        return OutcomeType.VOUCHER
+    return None
+
+
 def parse_rep_json(text: str) -> RepTurn:
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.S)
     match = re.search(r"\{.*\}", text, re.S)
     try:
         data = json.loads(match.group(0) if match else text)
     except json.JSONDecodeError:
-        return RepTurn(say=text.strip()[:400] or "Sorry, could you repeat that?")
+        return RepTurn(say=text.strip()[:400] or "Sorry, could you repeat that?", unparsed=True)
     say = str(data.get("say") or "").strip() or "Sorry, could you repeat that?"
     action = str(data.get("action") or "none").strip().lower()
     outcome = None

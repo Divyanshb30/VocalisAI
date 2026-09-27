@@ -13,8 +13,10 @@ from pipecat.frames.frames import (
     LLMFullResponseEndFrame,
     LLMFullResponseStartFrame,
     LLMTextFrame,
+    MetricsFrame,
     TextFrame,
 )
+from pipecat.metrics.metrics import LLMUsageMetricsData, TTFBMetricsData
 from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
 
 from vocalis.guards.output_guard import SAFE_FALLBACK, OutputGuard
@@ -116,6 +118,9 @@ class LineSink(FrameProcessor):
         self._last_end = 0.0
         self._active = False
         self._changed = asyncio.Event()
+        self.prompt_tokens = 0
+        self.completion_tokens = 0
+        self.llm_ttfb_s: list[float] = []
 
     def reset_turn(self) -> None:
         self.spoken = []
@@ -125,6 +130,13 @@ class LineSink(FrameProcessor):
 
     async def process_frame(self, frame: Frame, direction: FrameDirection) -> None:
         await super().process_frame(frame, direction)
+        if isinstance(frame, MetricsFrame):
+            for d in frame.data:
+                if isinstance(d, LLMUsageMetricsData):
+                    self.prompt_tokens += d.value.prompt_tokens or 0
+                    self.completion_tokens += d.value.completion_tokens or 0
+                elif isinstance(d, TTFBMetricsData) and "LLM" in (d.processor or "") and d.value > 0:
+                    self.llm_ttfb_s.append(d.value)
         if isinstance(frame, LLMFullResponseStartFrame):
             self._active = True
         elif isinstance(frame, LLMFullResponseEndFrame):

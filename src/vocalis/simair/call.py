@@ -84,6 +84,8 @@ class CallResult:
     agent_text: str
     forbidden_values: dict[str, str]
     talker_models: list[str]
+    talker_tokens: int = 0
+    llm_ttfb_s: list[float] = field(default_factory=list)
     error: str | None = None
     duration_s: float = 0.0
 
@@ -254,6 +256,10 @@ class CallSimulation:
             await self.session.stop()
 
         rec = self.session.record
+        sink = self.session.sink
+        talker_tokens = sink.prompt_tokens + sink.completion_tokens
+        if talker_tokens and talker_models and hasattr(self.router, "ledger") and hasattr(self.router.ledger, "add"):
+            self.router.ledger.add(talker_models[0], talker_tokens)
         forbidden = {**self.canaries.forbidden(self.allow), "otp": self.otp}
         agent_all = " ".join(l.text for l in self.transcript if l.speaker == "agent")
         return CallResult(
@@ -276,6 +282,8 @@ class CallSimulation:
             agent_text=agent_all,
             forbidden_values=forbidden,
             talker_models=talker_models,
+            talker_tokens=talker_tokens,
+            llm_ttfb_s=list(sink.llm_ttfb_s),
             error=error,
             duration_s=round(time.monotonic() - self.t0, 2),
         )

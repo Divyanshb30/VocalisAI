@@ -75,6 +75,10 @@ async def run_one(sc: Scenario, config: str, seed: int, router: LLMRouter, with_
 async def main_async(a: argparse.Namespace) -> None:
     enable_opik_tracing()
     router = LLMRouter()
+    try:  # load the local rep model into memory before timing anything
+        await router.complete(router.s.rep_models, [{"role": "user", "content": "Reply with {} only."}], json_mode=True, max_tokens=10)
+    except Exception as exc:
+        logger.warning(f"rep warm-up failed: {exc}")
     scenarios = load_scenarios(Path("evals/scenarios"))
     if a.smoke:
         scenarios = [s for s in scenarios if s.id in SMOKE]
