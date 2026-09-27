@@ -279,7 +279,8 @@ class CallSimulation:
                 if rep_turn.event is EventAction.TRANSFER:
                     self.log("hold", HOLD_LINES[0])
                 flags = input_guard.scan(rep_turn.say)
-                if input_guard.requires_handoff(flags, sorted(self.allow)):
+                deterministic = self.cfg.guards and not self.cfg.baseline_prompt_secrets
+                if deterministic and input_guard.requires_handoff(flags, sorted(self.allow)):
                     note = await self._do_handoff("guard", ",".join(sorted(flags)))
                     await self.session.note(
                         f"[Representative asked for something only the passenger can provide.] {note}"
