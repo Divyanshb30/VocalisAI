@@ -252,7 +252,14 @@ class CallSimulation:
                     rep_turn = await self.rep.respond(
                         "(The passenger has handed the call back to the assistant.)"
                     )
-                    self.log("rep", rep_turn.say, action=rep_turn.action)
+                    self.log(
+                        "rep",
+                        rep_turn.say,
+                        action=rep_turn.action,
+                        event=rep_turn.event.value if rep_turn.event else None,
+                    )
+                    if rep_turn.event:  # a scripted attack can land right after a handoff too
+                        self.events_fired.append((self.turn, rep_turn.event.value))
                     self._last_rep_event = rep_turn.event
                 if rep_turn.action == "end_call":
                     break
