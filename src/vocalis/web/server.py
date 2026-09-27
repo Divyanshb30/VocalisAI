@@ -12,14 +12,18 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import tempfile
 import uuid
+from collections import Counter, defaultdict
 from dataclasses import asdict
+from datetime import date
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from vocalis.calls import build_report, summary_text
@@ -30,6 +34,7 @@ from vocalis.core.settings import get_settings
 from vocalis.rights.engine import assess
 from vocalis.simair.call import CallSimulation, Line, RunConfig
 from vocalis.simair.scenario import Persona, Scenario, load_scenarios
+from vocalis.web import tts
 
 ROOT = Path(__file__).resolve().parents[3]
 WEB = ROOT / "web"
@@ -37,6 +42,22 @@ SCENARIO_DIR = ROOT / "evals" / "scenarios"
 SUMMARY = ROOT / "evals" / "results" / "summary.json"
 
 app = FastAPI(title="VocalisAI")
+# The always-on demo page (GitHub Pages) talks to this API from another origin.
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"], allow_headers=["*"])
+
+# Public deployments spend free-tier quota: cap live calls per visitor and per day.
+LIVE_PER_IP_PER_DAY = int(os.getenv("VOCALIS_LIVE_PER_IP", "3"))
+LIVE_PER_DAY = int(os.getenv("VOCALIS_LIVE_PER_DAY", "40"))
+_usage: dict[str, Counter[str]] = defaultdict(Counter)
+
+
+def _allow_live(ip: str) -> bool:
+    day = _usage[date.today().isoformat()]
+    if day[ip] >= LIVE_PER_IP_PER_DAY or day["__all__"] >= LIVE_PER_DAY:
+        return False
+    day[ip] += 1
+    day["__all__"] += 1
+    return True
 
 
 def case_view(case: Case, mandate: Mandate) -> dict[str, Any]:
@@ -77,7 +98,26 @@ def _scenarios() -> dict[str, Scenario]:
 @app.get("/api/health")
 def health() -> dict[str, Any]:
     s = get_settings()
-    return {"live": bool(s.cerebras_api_key or s.groq_api_key or s.google_api_key), "offline": True}
+    return {
+        "live": bool(s.cerebras_api_key or s.groq_api_key or s.google_api_key),
+        "offline": True,
+        "tts": tts.available(),
+        "live_per_ip_per_day": LIVE_PER_IP_PER_DAY,
+    }
+
+
+@app.get("/api/tts")
+def speak(text: str, voice: str = "agent") -> Response:
+    """Deepgram Aura-2 audio for one line (cached)."""
+    if not tts.available():
+        raise HTTPException(503, "no DEEPGRAM_API_KEY")
+    if not text.strip() or len(text) > 600:
+        raise HTTPException(400, "text must be 1-600 characters")
+    try:
+        audio = tts.synth(text, voice)
+    except Exception as exc:
+        raise HTTPException(502, f"TTS failed: {str(exc)[:120]}") from exc
+    return Response(audio, media_type="audio/mpeg", headers={"Cache-Control": "public, max-age=86400"})
 
 
 @app.get("/api/scenarios")
@@ -130,6 +170,7 @@ def _sse(event: str, data: Any) -> str:
 
 @app.get("/api/call")
 async def call(
+    request: Request,
     scenario: str | None = None,
     case_id: str | None = None,
     mode: str = "offline",
@@ -151,6 +192,8 @@ async def call(
         queue.put_nowait(asdict(line))
 
     if mode == "live":
+        if not _allow_live(request.client.host if request.client else "?"):
+            raise HTTPException(429, "Daily live-call limit reached; try Offline or Recorded mode.")
         cfg, router = RunConfig(seed=0, label="live", on_line=on_line), None
     else:
         from vocalis.simair.offline import ScriptedAgentLLM, ScriptedRepRouter

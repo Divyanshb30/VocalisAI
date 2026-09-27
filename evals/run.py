@@ -43,7 +43,7 @@ CONFIGS = {
 
 
 async def run_one(sc: Scenario, config: str, seed: int, router: LLMRouter, with_judge: bool) -> dict:
-    cfg = RunConfig(seed=seed, label=config, **CONFIGS[config])
+    cfg = RunConfig(seed=seed, label=config, pace=True, **CONFIGS[config])
     sim = CallSimulation(sc, cfg, router)
     t0 = time.perf_counter()
     result = await sim.run()

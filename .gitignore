@@ -47,3 +47,4 @@ evals/docbench/data/
 
 # eval run logs
 evals/results/*.log
+!web/demo/audio/**/*.mp3

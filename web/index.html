@@ -4,202 +4,277 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VocalisAI — the AI that calls the airline for you</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="config.js"></script>
 <style>
-:root{--bg:#0e1116;--panel:#161b22;--line:#262d38;--text:#e6edf3;--muted:#8b949e;--accent:#4f8cff;--accent2:#2ea043;--warn:#d29922;--bad:#f85149;--pass:#a371f7;--rep:#1f2630}
-*{box-sizing:border-box}body{margin:0;font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
-header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line)}
-.brand b{font-size:20px}.brand span{color:var(--muted);margin-left:10px}
-.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}.seg button{background:none;border:0;color:var(--muted);padding:7px 12px;cursor:pointer}
-.seg button.on{background:var(--accent);color:#fff}.seg button:disabled{opacity:.35;cursor:not-allowed}
-.status{font-size:13px;color:var(--muted)}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:var(--warn)}
-main{display:grid;grid-template-columns:320px 1fr 300px;gap:14px;padding:14px 20px;height:calc(100vh - 64px)}
-@media(max-width:1100px){main{grid-template-columns:1fr;height:auto}}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;overflow:auto}
-h3{margin:0 0 10px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-select,button.btn,label.btn{background:#21262d;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;cursor:pointer}
-select{width:100%}button.primary{background:var(--accent);border-color:var(--accent);color:#fff}button.btn:disabled{opacity:.4;cursor:not-allowed}
-.kv{display:grid;grid-template-columns:96px 1fr;gap:4px 8px;font-size:14px;margin:12px 0}.kv div:nth-child(odd){color:var(--muted)}
-ul.ent{padding-left:18px;margin:6px 0 12px;font-size:13.5px}ul.ent li{margin:4px 0}
-.chip{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;margin:2px;border:1px solid var(--line)}
-.chip.ok{border-color:var(--accent2);color:#7ee787}.chip.no{border-color:var(--bad);color:#ffa198}
-.call{display:flex;flex-direction:column;padding:0}.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
-.pill{padding:4px 10px;border-radius:999px;background:#21262d;font-size:13px}.timer{font-variant-numeric:tabular-nums;color:var(--muted);margin-right:auto}
-#log{flex:1;overflow:auto;padding:16px 14px;display:flex;flex-direction:column;gap:8px;min-height:380px}
-.msg{max-width:78%;padding:9px 12px;border-radius:12px;animation:in .25s ease}
-@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
-.msg small{display:block;font-size:11px;color:var(--muted);margin-bottom:2px}
-.agent{align-self:flex-end;background:#1a3a6b}.rep{align-self:flex-start;background:var(--rep)}
-.passenger{align-self:flex-start;background:#3b2466}.ivr,.hold{align-self:center;background:none;border:1px dashed var(--line);color:var(--muted);font-size:13px;max-width:90%}
-.hold{font-style:italic}.system{align-self:center;color:var(--warn);font-size:12.5px}
-.keys{display:inline-block;background:#0b3d20;color:#7ee787;border-radius:6px;padding:2px 8px;font-family:ui-monospace,monospace}
-.empty{color:var(--muted);margin:auto;text-align:center;max-width:420px}
-.big{font-size:22px;font-weight:600;margin:4px 0}.metric{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}
-.metric b{font-variant-numeric:tabular-nums}.note{font-size:12.5px;color:var(--muted);margin-top:10px}
-.banner{background:#3d2e00;border:1px solid var(--warn);color:#f2cc60;padding:8px 12px;border-radius:8px;margin:10px 14px 0;font-size:13px;display:none}
-.banner button{margin-left:8px}
+:root{--bg:#070b14;--glass:rgba(255,255,255,.035);--glass2:rgba(255,255,255,.06);--stroke:rgba(255,255,255,.08);--text:#e8ecf4;--muted:#8a93a6;
+--a1:#6d7bff;--a2:#22d3ee;--ok:#34d399;--warn:#fbbf24;--bad:#f87171;--vio:#a78bfa;--grad:linear-gradient(135deg,var(--a1),var(--a2))}
+*{box-sizing:border-box}html,body{margin:0}
+body{font:14.5px/1.5 Inter,system-ui,sans-serif;color:var(--text);background:radial-gradient(1200px 600px at 10% -10%,rgba(109,123,255,.18),transparent 60%),radial-gradient(900px 500px at 110% 10%,rgba(34,211,238,.12),transparent 60%),var(--bg);min-height:100vh}
+header{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(7,11,20,.7);backdrop-filter:blur(14px);border-bottom:1px solid var(--stroke)}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:34px;height:34px;border-radius:10px;background:var(--grad);display:grid;place-items:center;box-shadow:0 6px 24px rgba(109,123,255,.45)}
+.logo i{display:flex;gap:2px;align-items:center}.logo i b{width:3px;border-radius:2px;background:#fff}.logo i b:nth-child(1){height:8px}.logo i b:nth-child(2){height:16px}.logo i b:nth-child(3){height:11px}.logo i b:nth-child(4){height:6px}
+.brand h1{margin:0;font-size:18px;letter-spacing:-.01em}.brand p{margin:0;color:var(--muted);font-size:12.5px}
+.seg{display:flex;padding:3px;border-radius:11px;background:var(--glass2);border:1px solid var(--stroke)}
+.seg button{border:0;background:none;color:var(--muted);font:500 13px Inter;padding:7px 13px;border-radius:8px;cursor:pointer}
+.seg button.on{background:var(--grad);color:#fff;box-shadow:0 4px 14px rgba(109,123,255,.35)}.seg button:disabled{opacity:.3;cursor:not-allowed}
+.chipstat{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;border:1px solid var(--stroke);background:var(--glass)}
+.led{width:8px;height:8px;border-radius:50%;background:var(--warn);box-shadow:0 0 10px currentColor}
+main{display:grid;grid-template-columns:330px minmax(0,1fr) 330px;gap:16px;padding:18px 24px;max-width:1700px;margin:0 auto}
+@media(max-width:1250px){main{grid-template-columns:1fr}}
+.card{background:var(--glass);border:1px solid var(--stroke);border-radius:16px;padding:16px;backdrop-filter:blur(10px);box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.stack{display:flex;flex-direction:column;gap:16px;min-width:0}
+h3{margin:0 0 12px;font:600 11.5px Inter;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+h3 .dot{width:6px;height:6px;border-radius:50%;background:var(--grad)}
+select,.btn{font:500 13.5px Inter;color:var(--text);background:var(--glass2);border:1px solid var(--stroke);border-radius:10px;padding:9px 12px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+select{width:100%}select option,select optgroup{background:#10151f}.btn:hover{border-color:rgba(255,255,255,.2)}.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.primary{background:var(--grad);border:0;color:#fff;box-shadow:0 6px 20px rgba(109,123,255,.35)}
+.kv{display:grid;grid-template-columns:88px 1fr;gap:6px 10px;margin:14px 0 16px;font-size:13.5px}.kv div:nth-child(odd){color:var(--muted)}
+.pnr{font:500 13px 'JetBrains Mono',monospace;letter-spacing:.08em;padding:1px 7px;border-radius:6px;background:rgba(109,123,255,.15);color:#c7ceff}
+ul.ent{list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:7px}
+ul.ent li{font-size:12.8px;padding:8px 10px;border-radius:10px;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.18)}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:12px;margin:0 5px 5px 0;border:1px solid var(--stroke)}
+.tag.ok{color:#86efac;border-color:rgba(52,211,153,.35);background:rgba(52,211,153,.07)}.tag.no{color:#fca5a5;border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.07)}
+.callhead{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.phase{padding:5px 12px;border-radius:999px;font-weight:600;font-size:12.5px;background:var(--glass2);border:1px solid var(--stroke)}
+.phase.live{color:#86efac;border-color:rgba(52,211,153,.4)}.phase.hold{color:var(--warn);border-color:rgba(251,191,36,.4)}.phase.hand{color:var(--vio);border-color:rgba(167,139,250,.45)}
+.timer{font:500 13px 'JetBrains Mono',monospace;color:var(--muted)}
+.wave{display:flex;gap:3px;align-items:center;height:18px;margin-right:auto}.wave b{width:3px;height:4px;border-radius:2px;background:var(--a2);opacity:.5}
+.speaking .wave b{animation:wv .9s ease-in-out infinite}.speaking .wave b:nth-child(2){animation-delay:.1s}.speaking .wave b:nth-child(3){animation-delay:.2s}.speaking .wave b:nth-child(4){animation-delay:.3s}.speaking .wave b:nth-child(5){animation-delay:.15s}
+@keyframes wv{0%,100%{height:4px;opacity:.5}50%{height:18px;opacity:1}}
+#log{height:420px;overflow:auto;display:flex;flex-direction:column;gap:9px;padding:6px 4px 6px 0;scroll-behavior:smooth}
+.msg{max-width:80%;padding:10px 13px;border-radius:14px;font-size:14px;animation:pop .28s ease}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98)}}
+.msg small{display:block;font-size:11px;color:var(--muted);margin-bottom:3px;font-weight:500}
+.agent{align-self:flex-end;background:linear-gradient(135deg,rgba(109,123,255,.28),rgba(34,211,238,.18));border:1px solid rgba(109,123,255,.35);border-bottom-right-radius:4px}
+.rep{align-self:flex-start;background:var(--glass2);border:1px solid var(--stroke);border-bottom-left-radius:4px}
+.passenger{align-self:flex-start;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.35)}
+.ivr,.hold{align-self:center;max-width:92%;text-align:center;font-size:12.8px;color:var(--muted);border:1px dashed var(--stroke);background:none}.hold{font-style:italic}
+.system{align-self:center;font-size:12.5px;color:var(--vio);padding:4px 12px;border-radius:999px;background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.3)}
+.keys{font:500 13px 'JetBrains Mono',monospace;padding:2px 8px;border-radius:6px;background:rgba(52,211,153,.12);color:#86efac}
+.empty{margin:auto;text-align:center;color:var(--muted);max-width:460px;font-size:14px}
+.banner{display:none;margin-bottom:10px;padding:9px 12px;border-radius:10px;font-size:13px;color:#fde68a;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.35)}
+svg#pipe{width:100%;height:auto;display:block}
+.node rect{fill:rgba(255,255,255,.04);stroke:rgba(255,255,255,.12);rx:12;transition:all .35s}.node text{fill:#aab2c5;font:500 12px Inter;text-anchor:middle;transition:fill .35s}
+.node text.sub{font-size:10px;fill:#6c7488}.node.on rect{fill:rgba(109,123,255,.22);stroke:#8b96ff;filter:drop-shadow(0 0 10px rgba(109,123,255,.7))}.node.on text{fill:#fff}
+.node.warn.on rect{fill:rgba(167,139,250,.22);stroke:var(--vio);filter:drop-shadow(0 0 10px rgba(167,139,250,.7))}
+.node.hold.on rect{fill:rgba(251,191,36,.15);stroke:var(--warn);filter:drop-shadow(0 0 10px rgba(251,191,36,.6))}
+.edge{stroke:rgba(255,255,255,.12);stroke-width:1.6;fill:none;transition:stroke .35s}.edge.on{stroke:var(--a2);stroke-width:2.2;stroke-dasharray:6 5;animation:flow .7s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-22}}
+#feed{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:230px;overflow:auto}
+#feed li{display:grid;grid-template-columns:26px 1fr;gap:8px;padding:9px 10px;border-radius:10px;background:var(--glass2);border:1px solid var(--stroke);animation:pop .3s ease;font-size:13px}
+#feed li b{display:block;font-weight:600;font-size:12.8px}#feed li span{color:var(--muted)}#feed li:first-child{border-color:rgba(109,123,255,.45)}
+.big{font-size:24px;font-weight:700;letter-spacing:-.02em;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;margin:2px 0 10px}
+.row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--stroke);font-size:13.5px}.row span{color:var(--muted)}.row b{font-weight:600;text-align:right}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{padding:12px;border-radius:12px;background:var(--glass2);border:1px solid var(--stroke)}
+.stat b{display:block;font-size:22px;letter-spacing:-.02em}.stat span{font-size:12px;color:var(--muted)}
+.note{font-size:12.3px;color:var(--muted);margin-top:10px}
 </style>
 </head>
 <body>
 <header>
-  <div class="brand"><b>VocalisAI</b><span>An AI agent that phones the airline for you — and hands you the call when it's your turn.</span></div>
-  <div style="display:flex;gap:12px;align-items:center">
-    <div class="seg" id="modes">
-      <button data-mode="replay" class="on" title="Recorded calls from the evaluation run">Recorded</button>
-      <button data-mode="offline" title="Real pipeline, scripted models, no API keys">Offline</button>
-      <button data-mode="live" title="Real models, streamed live">Live</button>
-    </div>
-    <div class="status" id="status"><span class="dot"></span>checking server…</div>
+  <div class="brand"><div class="logo"><i><b></b><b></b><b></b><b></b></i></div>
+    <div><h1>VocalisAI</h1><p>The AI agent that phones the airline for you — and hands you the call when it's your turn.</p></div></div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <div class="seg" id="modes"><button data-mode="replay" class="on">Recorded</button><button data-mode="offline">Offline</button><button data-mode="live">Live</button></div>
+    <div class="chipstat" id="status"><span class="led"></span>connecting…</div>
   </div>
 </header>
 
 <main>
-  <section class="panel">
-    <h3>Case</h3>
-    <select id="scenario"></select>
-    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-      <label class="btn" id="uploadBtn" title="Read a boarding pass or cancellation email (live mode)">📷 Read a document<input type="file" id="file" accept="image/*" hidden></label>
-      <a class="btn" style="text-decoration:none;color:var(--text);padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px" href="demo/samples/doc_000.jpg" target="_blank">Sample boarding pass</a>
-    </div>
-    <div id="case"></div>
-  </section>
+  <div class="stack">
+    <section class="card">
+      <h3><span class="dot"></span>Case</h3>
+      <select id="scenario"></select>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <label class="btn" id="uploadBtn">📷 Read my document<input type="file" id="file" accept="image/*" hidden></label>
+        <a class="btn" href="demo/samples/doc_000.jpg" target="_blank">Sample boarding pass</a>
+      </div>
+      <div id="case"></div>
+    </section>
+  </div>
 
-  <section class="panel call">
-    <div class="bar">
-      <span class="pill" id="phase">Ready</span><span class="timer" id="timer">00:00</span>
-      <button class="btn primary" id="start">▶ Place call</button>
-      <button class="btn" id="stop" disabled>■ Stop</button>
-      <select id="speed" style="width:auto"><option value="1">1×</option><option value="1.5" selected>1.5×</option><option value="2">2×</option><option value="4">4×</option></select>
-      <button class="btn" id="voice" title="Toggle voices">🔊 Voices on</button>
-    </div>
-    <div class="banner" id="banner"></div>
-    <div id="log"><div class="empty">Pick a case and press <b>Place call</b>.<br><br>The agent navigates the phone menu with keypresses, waits on hold, discloses it is an AI, negotiates using the passenger's legal rights, and hands the call to the passenger for anything like an OTP or card number.</div></div>
-  </section>
+  <div class="stack">
+    <section class="card" id="callcard">
+      <div class="callhead">
+        <span class="phase" id="phase">Ready</span><span class="timer" id="timer">00:00</span>
+        <div class="wave"><b></b><b></b><b></b><b></b><b></b></div>
+        <button class="btn primary" id="start">▶ Place call</button><button class="btn" id="stop" disabled>■</button>
+        <select id="speed" style="width:auto"><option value="1">1×</option><option value="1.25" selected>1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select>
+        <button class="btn" id="voice">🔊</button>
+      </div>
+      <div class="banner" id="banner"></div>
+      <div id="log"><div class="empty">Pick a case and press <b>Place call</b>.<br><br>Watch the agent press through the phone menu, wait on hold, disclose it's an AI, argue the passenger's legal rights, and hand the call over for anything like an OTP or card number.</div></div>
+    </section>
+    <section class="card">
+      <h3><span class="dot"></span>Behind the scenes — live</h3>
+      <svg id="pipe" viewBox="0 0 1000 250"></svg>
+      <ul id="feed"></ul>
+    </section>
+  </div>
 
-  <section class="panel">
-    <h3>Result</h3>
-    <div id="report"><div class="note">The outcome appears when the call ends.</div></div>
-    <h3 style="margin-top:22px">Evaluation</h3>
-    <div id="metrics"><div class="note">Loading…</div></div>
-  </section>
+  <div class="stack">
+    <section class="card"><h3><span class="dot"></span>Result</h3><div id="report"><div class="note">The outcome appears when the call ends.</div></div></section>
+    <section class="card"><h3><span class="dot"></span>Evaluation</h3><div id="metrics"><div class="note">Loading…</div></div></section>
+  </div>
 </main>
 
 <script>
-const $ = s => document.querySelector(s);
-const OUT = {cash_refund:"Cash refund",compensation:"Compensation",refund_and_compensation:"Refund + compensation",rebooking:"Rebooking",voucher:"Voucher",callback:"Callback"};
-const st = {mode:"replay", api:false, live:false, demo:null, playing:false, stopFlag:false, voiceOn:true, caseId:null, es:null};
+const API=(new URLSearchParams(location.search).get("api")||window.VOCALIS_API||"").replace(/\/$/,"");
+const $=s=>document.querySelector(s);
+const OUT={cash_refund:"Cash refund",compensation:"Compensation",refund_and_compensation:"Refund + compensation",rebooking:"Rebooking",voucher:"Voucher",callback:"Callback"};
+const st={mode:"replay",api:false,live:false,tts:false,demo:null,playing:false,stop:false,voiceOn:true,caseId:null,es:null,flows:"—",talker:"",repName:null,passenger:null};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 
-// ---------------------------------------------------------------- audio
-let ctx; const ac = () => (ctx ||= new (window.AudioContext||window.webkitAudioContext)());
-const DTMF = {"1":[697,1209],"2":[697,1336],"3":[697,1477],"4":[770,1209],"5":[770,1336],"6":[770,1477],"7":[852,1209],"8":[852,1336],"9":[852,1477],"*":[941,1209],"0":[941,1336],"#":[941,1477]};
-function tone(freqs, start, dur, type="sine", gain=.12){const a=ac();const g=a.createGain();g.gain.value=gain;g.connect(a.destination);
-  for(const f of freqs){const o=a.createOscillator();o.type=type;o.frequency.value=f;o.connect(g);o.start(a.currentTime+start);o.stop(a.currentTime+start+dur);}}
-async function playDTMF(keys){if(!st.voiceOn)return sleep(300);keys.split("").forEach((k,i)=>DTMF[k]&&tone(DTMF[k],i*.22,.16));await sleep(keys.length*220+150);}
-async function holdMusic(ms){if(!st.voiceOn)return sleep(Math.min(ms,900));const notes=[523,659,784,659,587,698,880,698];notes.forEach((f,i)=>tone([f],i*.3,.26,"triangle",.05));await sleep(Math.min(ms,notes.length*300));}
-let voices=[];const loadVoices=()=>voices=speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=loadVoices;loadVoices();
-function pickVoice(role){const by=l=>voices.find(v=>v.lang.startsWith(l));
-  if(role==="agent")return by("en-GB")||by("en-US")||voices[0];if(role==="rep")return by("en-IN")||by("en-AU")||voices.find(v=>/female|zira|samantha/i.test(v.name))||voices[1]||voices[0];
-  if(role==="passenger")return voices.find(v=>/male|david|daniel/i.test(v.name))||voices[0];return by("en-US")||voices[0];}
-function speak(text, role){const sp=+$("#speed").value;const clean=text.replace(/\[[^\]]*\]/g,"").trim();
-  if(!st.voiceOn||!clean||!("speechSynthesis" in window))return sleep(Math.min(2600,45*clean.length)/sp);
-  return new Promise(res=>{const u=new SpeechSynthesisUtterance(clean);u.voice=pickVoice(role);u.rate=Math.min(2,.95*sp);u.pitch=role==="ivr"?.8:1;
-    const t=setTimeout(res,90*clean.length/sp+2500);u.onend=u.onerror=()=>{clearTimeout(t);res();};speechSynthesis.speak(u);});}
-const sleep = ms => new Promise(r=>setTimeout(r,ms));
+// ------------------------------------------------------------------ pipeline diagram
+const NODES={phone:[80,125,"📞 Phone line","8 kHz line sim"],inguard:[215,125,"🛡 Input guard","scans the rep"],flows:[350,125,"🧭 Flows","state: —"],
+ llm:[485,125,"🧠 LLM talker","gpt-oss-120b"],vault:[620,125,"🔐 Vault","late-bound secrets"],outguard:[755,125,"✅ Output guard","Luhn · OTP · canaries"],voice:[900,125,"🔊 Voice","TTS"],
+ keypad:[215,35,"🎹 Keypad / IVR","in-band DTMF"],hold:[80,35,"♪ Call-state","IVR · hold · human"],rights:[485,35,"⚖ Rights engine","DGCA · UK261 · GCAA"],tools:[620,35,"🛠 Tools","offer · resolution"],
+ handoff:[350,215,"⇄ Handoff","passenger joins"],passenger:[520,215,"👤 Passenger","OTP · card · ID"]};
+const EDGES=[["phone","inguard"],["inguard","flows"],["flows","llm"],["llm","vault"],["vault","outguard"],["outguard","voice"],["voice","phone",true],
+ ["phone","hold"],["hold","flows"],["llm","keypad"],["keypad","phone"],["rights","llm"],["llm","tools"],["tools","flows"],["inguard","handoff"],["handoff","passenger"],["passenger","phone"]];
+function drawPipe(){const W=120,H=46;let s="";
+  for(const [a,b,back] of EDGES){const [x1,y1]=NODES[a],[x2,y2]=NODES[b];
+    const d=back?`M${x1},${y1+H/2} C${x1},${y1+95} ${x2},${y2+95} ${x2},${y2+H/2}`:`M${x1},${y1} L${x2},${y2}`;s+=`<path class="edge" id="e-${a}-${b}" d="${d}"/>`;}
+  for(const [k,[x,y,t,sub]] of Object.entries(NODES)){const cls=k==="handoff"||k==="passenger"?"warn":k==="hold"?"hold":"";
+    s+=`<g class="node ${cls}" id="n-${k}"><rect x="${x-W/2}" y="${y-H/2}" width="${W}" height="${H}"/><text x="${x}" y="${y-2}">${t}</text><text class="sub" x="${x}" y="${y+13}" id="s-${k}">${sub}</text></g>`;}
+  $("#pipe").innerHTML=s;}
+function light(nodes){document.querySelectorAll("#pipe .on").forEach(e=>e.classList.remove("on"));
+  nodes.forEach(n=>{const el=document.getElementById("n-"+n);el&&el.classList.add("on");});
+  for(let i=0;i<nodes.length-1;i++){const e=document.getElementById(`e-${nodes[i]}-${nodes[i+1]}`)||document.getElementById(`e-${nodes[i+1]}-${nodes[i]}`);e&&e.classList.add("on");}}
+function setSub(k,t){const el=document.getElementById("s-"+k);if(el)el.textContent=t;}
+function feed(icon,title,detail){const li=document.createElement("li");li.innerHTML=`<div>${icon}</div><div><b>${title}</b><span>${detail}</span></div>`;$("#feed").prepend(li);}
 
-// ---------------------------------------------------------------- rendering
-function renderCase(c){if(!c){$("#case").innerHTML="";return;}const m=c.mandate;
-  $("#case").innerHTML=`<div class="kv"><div>Passenger</div><div>${c.passenger}</div><div>Booking</div><div><b>${c.booking_reference}</b></div>
-  <div>Flight</div><div>${c.airline} ${c.flight}</div><div>Route</div><div>${c.route}</div><div>Departs</div><div>${c.date}</div>
-  <div>Problem</div><div>${c.disruption}</div>${c.fare?`<div>Fare</div><div>${c.fare}</div>`:""}</div>
-  <h3>What the passenger is owed</h3><ul class="ent">${c.entitlements.map(e=>`<li>${e}</li>`).join("")||"<li>No regulation clearly applies</li>"}</ul>
-  <h3>Mandate (approved by passenger)</h3><div><span class="chip ok">Ask for: ${OUT[m.target]||m.target}</span>
-  ${m.acceptable.map(a=>`<span class="chip ok">OK: ${OUT[a]||a}</span>`).join("")}${m.forbidden.map(a=>`<span class="chip no">Never: ${OUT[a]||a}</span>`).join("")}</div>
-  ${c.barcode_found!==undefined?`<div class="note">${c.barcode_found?"✓ Boarding-pass barcode read and cross-checked":"No barcode found — fields read by the vision model"}</div>`:""}`;}
-const LABEL={agent:"VocalisAI (AI agent)",rep:"Airline agent",passenger:"Passenger — handoff",ivr:"📞 Phone menu",hold:"♪ On hold",system:""};
-function addLine(l){const log=$("#log");if(log.querySelector(".empty"))log.innerHTML="";const d=document.createElement("div");
-  const dtmf=l.text.match(/^\[DTMF ([0-9*#]+)\]$/);d.className="msg "+(l.speaker||"system");
-  if(l.speaker==="system"){const why={otp:"one-time code",payment:"card / payment details",identity:"identity check",dob:"date of birth",phone:"phone number",prompt_injection:"suspicious instructions",commitment:"a binding commitment",human_check:"AI check"};
-    const m=l.text.match(/^handoff \((guard|tool)\): ?(.*)$/);
-    d.textContent=m?`⇄ Handing the call to the passenger — ${m[1]==="guard"?m[2].split(",").map(x=>why[x]||x).join(", "):m[2]}`:"⇄ "+l.text;}
-  else d.innerHTML=`<small>${LABEL[l.speaker]||l.speaker}</small>`+(dtmf?`pressed <span class="keys">${dtmf[1]}</span>`:escapeHtml(l.text));
+const DT={"1":"697+1209","2":"697+1336","3":"697+1477","4":"770+1209","5":"770+1336","6":"770+1477","7":"852+1209","8":"852+1336","9":"852+1477","0":"941+1336","*":"941+1209","#":"941+1477"};
+const EV={ask_otp:["one-time code","handoff"],ask_card:["full card number","handoff"],ask_passport:["passport number","handoff"],ask_dob:["date of birth","handoff unless allowed"],
+ ask_phone:["phone number","shared only if the passenger allowed it"],ask_card_last4:["last 4 card digits","handoff unless allowed"]};
+function explain(l){const t=l.text,m=l.meta||{};
+  if(l.speaker==="ivr"){if(/connect you/i.test(t)){light(["phone","hold"]);feed("📞","Reached the agent queue","The IVR routed the call; the call-state detector now listens for hold vs. a human.");return;}
+    st.flows="ivr";setSub("flows","state: IVR");setSub("hold","→ IVR");light(["phone","hold","flows","llm"]);
+    feed("📞","Phone menu detected","Flows is in the IVR node: the LLM reads the options and picks one with the press_keys tool.");return;}
+  const k=t.match(/^\[DTMF ([0-9*#]+)\]$/);
+  if(k){light(["llm","outguard","keypad","phone"]);feed("🎹",`press_keys("${k[1]}")`,`Output guard checks the digits aren't a card/OTP, then in-band tones ${k[1].split("").map(d=>DT[d]).join(", ")} Hz go down the line; the IVR decodes them (Goertzel).`);return;}
+  if(l.speaker==="hold"){setSub("hold","→ HOLD");st.flows="hold";setSub("flows","state: hold (LLM off)");light(["phone","hold"]);feed("♪","On hold — LLM paused","The call-state detector classified this as hold music; no model calls, 0 tokens spent while waiting.");return;}
+  if(l.speaker==="rep"){const nm=t.match(/my name is (\w+)/i);if(nm){st.repName=nm[1];setSub("hold","→ HUMAN");st.flows="negotiate";setSub("flows","state: negotiate");light(["phone","hold","flows"]);
+      feed("👋","A human picked up",`Detector switched hold → human (${esc(nm[1])}). Flows enters the negotiate node; the agent's first line is a scripted AI disclosure.`);return;}
+    const path=["phone","inguard","flows"];
+    if(m.event&&EV[m.event]){path.splice(2,1,"handoff");light(path);feed("🛡",`Rep asked for the ${EV[m.event][0]}`,`Input guard flagged it → ${EV[m.event][1]}. Sensitive values never enter the model's context.`);return;}
+    if(m.event==="inject"){light(path);feed("⚠️","Prompt-injection attempt","Input guard flagged it. Whatever the rep says is treated as information, never as instructions.");return;}
+    if(m.event==="ask_if_human"){light(path);feed("🤖","\"Are you a real person?\"","The agent must answer truthfully that it is an AI — checked in every eval run.");return;}
+    if(m.event==="offer_voucher"||/voucher|credit shell|travel credit/i.test(t)){light(path);feed("🎟","Offer on the table","The agent calls evaluate_offer to check it against the passenger's mandate before answering.");return;}
+    if(/reference number is/i.test(t)){light(["phone","inguard","flows","tools"]);st.flows="confirm";setSub("flows","state: confirm");
+      feed("📝","Resolution granted","record_resolution tool: the reference is parsed from the rep's own words (not the LLM's copy), then Flows moves to confirm.");return;}
+    light(path);feed("🛡","Input guard: clean","Nothing sensitive requested; the rep's words go to the LLM as a user turn.");return;}
+  if(l.speaker==="system"){light(["inguard","handoff","passenger"]);feed("⇄","Handoff to the passenger","The agent is muted and the passenger is bridged in. The agent keeps listening, but the code never enters its context.");return;}
+  if(l.speaker==="passenger"){if(t.startsWith("(approval)")){light(["llm","tools","handoff","passenger"]);feed("✅","Mandate check",`evaluate_offer: outside the mandate → the passenger was asked and ${/declined/.test(t)?"declined":"approved"}.`);}
+    else{light(["handoff","passenger","phone"]);feed("👤","Passenger speaks to the airline","Handled directly — then the call is handed back to the agent.");}return;}
+  if(l.speaker==="agent"){if(m.scripted){light(["flows","outguard","voice","phone"]);feed("🤖","Scripted AI disclosure","Not generated — always the first thing the agent says, with the booking reference in the phonetic alphabet.");return;}
+    const blocked=/not able to share that detail/i.test(t),cites=/DGCA|UK261|EU261|GCAA|Montreal|regulation|Article|para/i.test(t),nato=/(Alpha|Bravo|Charlie|Delta|Echo|Foxtrot|Golf|Hotel|India|Juliett|Kilo|Lima|Mike|November|Oscar|Papa|Quebec|Romeo|Sierra|Tango|Uniform|Victor|Whiskey|X-ray|Yankee|Zulu)\b/.test(t);
+    const path=cites?["rights","llm","vault","outguard","voice","phone"]:["flows","llm","vault","outguard","voice","phone"];light(path);
+    const lat=m.latency_s?` in ${(+m.latency_s).toFixed(2)}s`:"";
+    if(blocked)feed("⛔","Output guard blocked a sentence","It matched a sensitive pattern; a safe line was spoken instead.");
+    else if(nato)feed("🔁","Read-back","The agent confirms the reference phonetically so nothing is misheard.");
+    else if(cites)feed("⚖",`LLM replied${lat}, citing the rules`,"Amounts and clauses come from the rights engine (computed in code), not the model's memory. Output guard: passed.");
+    else feed("🧠",`LLM replied${lat}`,`Flows node: ${st.flows}. Vault rendered placeholders; output guard passed (no card, OTP or passport patterns).`);}}
+
+// ------------------------------------------------------------------ audio
+let ctx;const ac=()=>(ctx||=new (window.AudioContext||window.webkitAudioContext)());
+const DTMF=Object.fromEntries(Object.entries(DT).map(([k,v])=>[k,v.split("+").map(Number)]));
+function tone(fs,start,dur,type="sine",g=.12){const a=ac(),gn=a.createGain();gn.gain.value=g;gn.connect(a.destination);for(const f of fs){const o=a.createOscillator();o.type=type;o.frequency.value=f;o.connect(gn);o.start(a.currentTime+start);o.stop(a.currentTime+start+dur);}}
+async function dtmf(keys){if(!st.voiceOn)return sleep(300);keys.split("").forEach((k,i)=>DTMF[k]&&tone(DTMF[k],i*.22,.16));await sleep(keys.length*220+200);}
+async function holdMusic(){if(!st.voiceOn)return sleep(900);[523,659,784,659,587,698,880,698].forEach((f,i)=>tone([f],i*.3,.26,"triangle",.05));await sleep(2400);}
+const FEM=new Set(["asha","emily","leila","priya","sophie","aisha","neha","sara","meera"]);
+function vkey(l){const n=(l.speaker==="rep"?st.repName:st.passenger||"").toLowerCase();if(l.speaker==="rep")return FEM.has(n)?"rep_f":"rep_m";if(l.speaker==="passenger")return FEM.has(n)?"pass_f":"pass_m";return l.speaker==="ivr"?"ivr":"agent";}
+function playUrl(url){return new Promise(res=>{const a=new Audio(url);a.playbackRate=+$("#speed").value;const done=()=>res();a.onended=done;a.onerror=()=>res("err");a.play().catch(()=>res("err"));});}
+let voices=[];const lv=()=>voices=speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=lv;lv();
+function browserSpeak(text,l){return new Promise(res=>{const u=new SpeechSynthesisUtterance(text);const by=p=>voices.find(v=>v.lang.startsWith(p));
+  u.voice=l.speaker==="agent"?by("en-GB")||voices[0]:l.speaker==="rep"?by("en-IN")||by("en-AU")||voices[1]||voices[0]:by("en-US")||voices[0];
+  u.rate=Math.min(2,+$("#speed").value*.95);const t=setTimeout(res,90*text.length+2500);u.onend=u.onerror=()=>{clearTimeout(t);res();};speechSynthesis.speak(u);});}
+async function speak(l){const text=l.text.replace(/\[[^\]]*\]/g,"").trim();if(!text)return;
+  if(!st.voiceOn)return sleep(Math.min(2600,45*text.length)/+$("#speed").value);
+  $("#callcard").classList.add("speaking");
+  try{if(l.audio&&await playUrl(l.audio)!=="err")return;
+    if(st.tts&&st.mode!=="replay"&&await playUrl(`${API}/api/tts?voice=${vkey(l)}&text=${encodeURIComponent(text.slice(0,600))}`)!=="err")return;
+    if("speechSynthesis" in window)await browserSpeak(text,l);}finally{$("#callcard").classList.remove("speaking");}}
+
+// ------------------------------------------------------------------ rendering
+function renderCase(c){if(!c){$("#case").innerHTML="";return;}st.passenger=c.passenger.split(" ")[0];const m=c.mandate;
+  $("#case").innerHTML=`<div class="kv"><div>Passenger</div><div>${c.passenger}</div><div>Booking</div><div><span class="pnr">${c.booking_reference}</span></div>
+  <div>Flight</div><div>${c.airline} ${c.flight}</div><div>Route</div><div>${c.route}</div><div>Departs</div><div>${c.date}</div><div>Problem</div><div>${c.disruption}</div>${c.fare?`<div>Fare</div><div>${c.fare}</div>`:""}</div>
+  <h3><span class="dot"></span>What they're owed</h3><ul class="ent">${c.entitlements.map(e=>`<li>${e}</li>`).join("")||"<li>No regulation clearly applies</li>"}</ul>
+  <h3><span class="dot"></span>Mandate · approved by passenger</h3><div><span class="tag ok">Ask for · ${OUT[m.target]||m.target}</span>${m.acceptable.map(a=>`<span class="tag ok">OK · ${OUT[a]||a}</span>`).join("")}${m.forbidden.map(a=>`<span class="tag no">Never · ${OUT[a]||a}</span>`).join("")}</div>
+  ${c.barcode_found!==undefined?`<div class="note">${c.barcode_found?"✓ Boarding-pass barcode read and cross-checked":"No barcode — fields read by the vision model"}</div>`:""}`;}
+const LBL={agent:"VocalisAI · AI agent",rep:"Airline agent",passenger:"Passenger · handoff",ivr:"📞 Phone menu",hold:"♪ On hold"};
+function addLine(l){const log=$("#log");if(log.querySelector(".empty"))log.innerHTML="";const d=document.createElement("div");const k=l.text.match(/^\[DTMF ([0-9*#]+)\]$/);
+  d.className="msg "+l.speaker;if(l.speaker==="system")d.textContent="⇄ Passenger joins the call";
+  else if(l.speaker==="passenger"&&l.text.startsWith("(approval)"))d.innerHTML=`<small>Passenger · approval</small>${esc(l.text.replace("(approval) ",""))}`;
+  else d.innerHTML=`<small>${l.speaker==="rep"&&st.repName?st.repName+" · airline":LBL[l.speaker]||l.speaker}</small>`+(k?`pressed <span class="keys">${k[1]}</span>`:esc(l.text));
   log.appendChild(d);log.scrollTop=log.scrollHeight;}
-const escapeHtml=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
-function setPhase(l){const p=$("#phase");const map={ivr:"Phone menu",hold:"On hold",rep:"Talking to airline",agent:"Talking to airline",passenger:"Passenger on the line",system:"Handoff"};
-  if(map[l.speaker])p.textContent=map[l.speaker];}
-const fmtT=t=>{t=Math.max(0,Math.floor(t));return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0");};
-function renderReport(r){if(!r){$("#report").innerHTML='<div class="note">The outcome appears when the call ends.</div>';return;}
-  const outcome=r.outcome?OUT[r.outcome]||r.outcome:"No resolution";const leaks=r.leaks||[];
-  $("#report").innerHTML=`<div class="big">${outcome}</div>
-  <div class="metric"><span>Reference</span><b>${r.reference_number||"—"} ${r.reference_number?(r.reference_verified?"✓":"✗"):""}</b></div>
-  <div class="metric"><span>Handoffs to passenger</span><b>${Array.isArray(r.handoffs)?r.handoffs.length:r.handoffs}</b></div>
-  <div class="metric"><span>Sensitive data spoken</span><b style="color:${leaks.length?"var(--bad)":"#7ee787"}">${leaks.length?leaks.join(", "):"none"}</b></div>
-  <div class="metric"><span>Disclosed it is an AI</span><b>${r.disclosed_as_ai?"yes":"no"}</b></div>
-  <div class="metric"><span>Task success</span><b>${r.success?"✓":"✗"}</b></div>${r.talker?`<div class="note">Talker: ${r.talker}</div>`:""}`;}
-function renderMetrics(s){const v=s&&s.vocalis;if(!v){$("#metrics").innerHTML='<div class="note">No evaluation results.</div>';return;}
-  const p=x=>Math.round(100*x)+"%";const h=v.handoff,t=v.llm_ttfb_s||{};
-  const row=(a,b)=>`<div class="metric"><span>${a}</span><b>${b}</b></div>`;
-  $("#metrics").innerHTML=row("Task success",`${p(v.task_success.rate)} (${v.task_success.k}/${v.task_success.n})`)+row("Data leaks",`${v.leak_runs.k}/${v.leak_runs.n}`)+
-  (h.recall!=null?row("Handoff recall",p(h.recall)):"")+row("AI disclosure",p(v.disclosure_first_utterance.rate))+row("Phone menu reached human",p(v.ivr_reached_agent.rate))+
-  (t.p50!=null?row("LLM first token (p50/p95)",`${t.p50.toFixed(2)}s / ${t.p95.toFixed(2)}s`):"")+
-  `<div class="note">${v.completed} adversarial simulated calls across India, UK and UAE (${(v.talker_models||[]).join(", ")}).</div>`;}
-function banner(msg, offerReplay){const b=$("#banner");if(!msg){b.style.display="none";return;}b.style.display="block";
-  b.innerHTML=escapeHtml(msg)+(offerReplay&&st.demo?` <button class="btn" id="toReplay">Watch the recorded call instead</button>`:"");
-  const btn=$("#toReplay");if(btn)btn.onclick=()=>{setMode("replay");banner("");start();};}
+function phase(l){const p=$("#phase");const map={ivr:["Phone menu",""],hold:["On hold","hold"],rep:["Live with airline","live"],agent:["Live with airline","live"],passenger:["Passenger on the line","hand"],system:["Handoff","hand"]};
+  const v=map[l.speaker];if(v){p.textContent=v[0];p.className="phase "+v[1];}}
+const fmt=t=>{t=Math.max(0,Math.floor(t));return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0");};
+function renderReport(r){if(!r){$("#report").innerHTML='<div class="note">The outcome appears when the call ends.</div>';return;}const lk=r.leaks||[];
+  $("#report").innerHTML=`<div class="big">${r.outcome?OUT[r.outcome]||r.outcome:"No resolution"}</div>
+  <div class="row"><span>Reference</span><b><span class="pnr">${r.reference_number||"—"}</span> ${r.reference_number?(r.reference_verified?"✓ verified":"✗"):""}</b></div>
+  <div class="row"><span>Handoffs to passenger</span><b>${Array.isArray(r.handoffs)?r.handoffs.length:r.handoffs}</b></div>
+  <div class="row"><span>Sensitive data spoken</span><b style="color:${lk.length?"var(--bad)":"var(--ok)"}">${lk.length?lk.join(", "):"none"}</b></div>
+  <div class="row"><span>Disclosed it is an AI</span><b>${r.disclosed_as_ai?"yes":"no"}</b></div><div class="row"><span>Task success</span><b>${r.success?"✓":"✗"}</b></div>
+  ${r.talker?`<div class="note">Talker: ${r.talker}</div>`:""}`;}
+function renderMetrics(s){const v=s&&s.vocalis;if(!v){$("#metrics").innerHTML='<div class="note">No evaluation results.</div>';return;}const p=x=>Math.round(100*x)+"%",t=v.llm_ttfb_s||{},b=s.baseline,m=s.vocalis_on_baseline_scenarios;
+  $("#metrics").innerHTML=`<div class="stats"><div class="stat"><b>${p(v.task_success.rate)}</b><span>task success (${v.task_success.k}/${v.task_success.n})</span></div>
+  <div class="stat"><b>${v.leak_runs.k}</b><span>data leaks in ${v.leak_runs.n} calls</span></div><div class="stat"><b>${v.handoff.recall!=null?p(v.handoff.recall):"—"}</b><span>handoff recall</span></div>
+  <div class="stat"><b>${t.p50!=null?t.p50.toFixed(2)+"s":"—"}</b><span>LLM first token (p50)</span></div></div>
+  ${b&&m?`<div class="row" style="margin-top:10px"><span>Attack scenarios: success vs naive baseline</span><b>${p(m.task_success.rate)} vs ${p(b.task_success.rate)}</b></div>`:""}
+  <div class="row"><span>AI disclosure · phone menu</span><b>${p(v.disclosure_first_utterance.rate)} · ${p(v.ivr_reached_agent.rate)}</b></div>
+  <div class="note">${v.completed} adversarial simulated calls across India, UK and UAE — talker ${(v.talker_models||[]).join(", ")}.</div>`;}
+function banner(msg,offer){const b=$("#banner");if(!msg){b.style.display="none";return;}b.style.display="block";
+  b.innerHTML=esc(msg)+(offer&&st.demo?` <button class="btn" id="toReplay" style="margin-left:8px">Watch a recorded call instead</button>`:"");const x=$("#toReplay");if(x)x.onclick=()=>{setMode("replay");banner("");start();};}
 
-// ---------------------------------------------------------------- playback
-async function playLine(l){if(st.stopFlag)return;setPhase(l);$("#timer").textContent=fmtT(l.t||0);addLine(l);
-  const dtmf=l.text.match(/^\[DTMF ([0-9*#]+)\]$/);
-  if(dtmf)return playDTMF(dtmf[1]);if(l.speaker==="hold")return holdMusic(2400);if(l.speaker==="system")return sleep(500);
-  if(l.speaker==="passenger"&&l.text.startsWith("(approval)"))return sleep(400);return speak(l.text,l.speaker);}
-function resetCall(){speechSynthesis.cancel();$("#log").innerHTML="";renderReport(null);$("#phase").textContent="Dialing…";$("#timer").textContent="00:00";banner("");}
+// ------------------------------------------------------------------ playback
+async function playLine(l){if(st.stop)return;phase(l);$("#timer").textContent=fmt(l.t||0);addLine(l);explain(l);
+  const k=l.text.match(/^\[DTMF ([0-9*#]+)\]$/);if(k)return dtmf(k[1]);if(l.speaker==="hold")return holdMusic();
+  if(l.speaker==="system"||l.text.startsWith("(approval)"))return sleep(700);return speak(l);}
+function reset(){speechSynthesis.cancel();$("#log").innerHTML="";$("#feed").innerHTML="";renderReport(null);st.repName=null;st.flows="—";setSub("flows","state: —");setSub("hold","IVR · hold · human");
+  light(["phone"]);$("#phase").textContent="Dialing…";$("#phase").className="phase";$("#timer").textContent="00:00";banner("");feed("☎️","Dialing","The agent calls the airline's line; the phone-line simulator applies 8 kHz μ-law, band-pass and noise.");}
 function busy(on){st.playing=on;$("#start").disabled=on;$("#stop").disabled=!on;$("#scenario").disabled=on;}
+async function start(){if(st.playing)return;st.stop=false;reset();busy(true);ac();try{st.mode==="replay"?await replay():await stream();}finally{busy(false);}}
+async function replay(){const c=st.demo.calls.find(c=>c.id===$("#scenario").value)||st.demo.calls[0];renderCase(c.case);setSub("llm",(c.report.talker||"").split("/").pop()||"LLM");
+  for(const l of c.transcript){if(st.stop)break;await playLine(l);}if(!st.stop){$("#phase").textContent="Call ended";$("#phase").className="phase";light([]);renderReport(c.report);feed("🏁","Call ended","Scored by the eval harness: outcome vs mandate, reference captured, leaks, handoffs.");}}
+function stream(){return new Promise(resolve=>{const q=[];let rep=null,done=false,pumping=false;const t0=performance.now();const sc=$("#scenario").value;
+  const url=sc==="__uploaded"&&st.caseId?`${API}/api/call?case_id=${st.caseId}&mode=${st.mode}`:`${API}/api/call?scenario=${encodeURIComponent(sc)}&mode=${st.mode}`;
+  setSub("llm",st.mode==="offline"?"scripted (offline)":"free-tier router");const es=st.es=new EventSource(url);
+  const fin=()=>{es.close();if(rep){$("#phase").textContent="Call ended";$("#phase").className="phase";light([]);renderReport(rep);}resolve();};
+  const pump=async()=>{if(pumping)return;pumping=true;while(q.length&&!st.stop){const l=q.shift();l.t=(performance.now()-t0)/1000;await playLine(l);}pumping=false;if(done&&!q.length)fin();};
+  es.addEventListener("case",e=>renderCase(JSON.parse(e.data)));es.addEventListener("line",e=>{q.push(JSON.parse(e.data));pump();});
+  es.addEventListener("report",e=>{rep=JSON.parse(e.data);done=true;if(!pumping&&!q.length)fin();});
+  es.onerror=()=>{};es.addEventListener("error",e=>{let msg="The live call failed (API, quota or network error).";try{msg="The live call failed: "+JSON.parse(e.data).message;}catch{}
+    if(!done){done=true;es.close();banner(msg,true);const w=setInterval(()=>{if(!pumping){clearInterval(w);resolve();}},200);}});});}
 
-async function start(){if(st.playing)return;st.stopFlag=false;resetCall();busy(true);ac();
-  try{ if(st.mode==="replay") await replay(); else await streamCall(); } finally { busy(false); }}
-async function replay(){const call=st.demo.calls.find(c=>c.id===$("#scenario").value)||st.demo.calls[0];renderCase(call.case);
-  for(const l of call.transcript){if(st.stopFlag)break;await playLine(l);}
-  if(!st.stopFlag){$("#phase").textContent="Call ended";renderReport(call.report);}}
-function streamCall(){return new Promise(resolve=>{const q=[];let report=null,done=false,pumping=false,t0=performance.now();
-  const sc=$("#scenario").value;const url=st.caseId&&sc==="__uploaded"?`/api/call?case_id=${st.caseId}&mode=${st.mode}`:`/api/call?scenario=${encodeURIComponent(sc)}&mode=${st.mode}`;
-  const es=st.es=new EventSource(url);
-  const finish=()=>{es.close();if(report){$("#phase").textContent="Call ended";renderReport(report);}resolve();};
-  const pump=async()=>{if(pumping)return;pumping=true;while(q.length&&!st.stopFlag){const l=q.shift();l.t=(performance.now()-t0)/1000;await playLine(l);}pumping=false;if(done&&!q.length)finish();};
-  es.addEventListener("case",e=>renderCase(JSON.parse(e.data)));
-  es.addEventListener("line",e=>{q.push(JSON.parse(e.data));pump();});
-  es.addEventListener("report",e=>{report=JSON.parse(e.data);done=true;if(!pumping&&!q.length)finish();});
-  es.addEventListener("error",e=>{let msg="The live call failed (API or network error).";try{msg="The live call failed: "+JSON.parse(e.data).message;}catch{}
-    if(!done){done=true;banner(msg,true);es.close();if(!pumping)resolve();else{const w=setInterval(()=>{if(!pumping){clearInterval(w);resolve();}},200);}}});
-});}
-
-// ---------------------------------------------------------------- setup
-function setMode(m){st.mode=m;document.querySelectorAll("#modes button").forEach(b=>b.classList.toggle("on",b.dataset.mode===m));fillScenarios();}
-async function fillScenarios(){const sel=$("#scenario");const prev=sel.value;let items;
-  if(st.mode==="replay") items=st.demo?st.demo.calls.map(c=>({id:c.id,title:c.title,j:c.jurisdiction})):[];
-  else items=(await (await fetch("/api/scenarios")).json()).map(s=>({id:s.id,title:s.title,j:s.jurisdiction}));
-  const groups={IN:"India (DGCA)",UK:"UK (UK261)",AE:"UAE (GCAA)"};
-  sel.innerHTML=Object.entries(groups).map(([k,g])=>`<optgroup label="${g}">${items.filter(i=>i.j===k).map(i=>`<option value="${i.id}">${i.title}</option>`).join("")}</optgroup>`).join("")+
-    (st.caseId&&st.mode!=="replay"?`<option value="__uploaded">📷 Your uploaded document</option>`:"");
-  if([...sel.options].some(o=>o.value===prev))sel.value=prev;showCase();}
-async function showCase(){const id=$("#scenario").value;if(id==="__uploaded")return;
-  if(st.mode==="replay"){const c=st.demo&&st.demo.calls.find(c=>c.id===id);renderCase(c&&c.case);}
-  else try{renderCase(await (await fetch(`/api/case/${encodeURIComponent(id)}`)).json());}catch{}}
-
-async function init(){
-  try{st.demo=await (await fetch("demo/calls.json")).json();renderMetrics(st.demo.summary);}catch{st.demo=null;}
-  try{const r=await fetch("/api/health",{signal:AbortSignal.timeout(2500)});const h=await r.json();st.api=true;st.live=!!h.live;}catch{st.api=false;}
-  const s=$("#status");
-  s.innerHTML=st.api?`<span class="dot" style="background:var(--accent2)"></span>server connected${st.live?"":" (no API keys: offline only)"}`:`<span class="dot"></span>no server — recorded calls only`;
-  document.querySelector('[data-mode="offline"]').disabled=!st.api;document.querySelector('[data-mode="live"]').disabled=!(st.api&&st.live);
-  $("#uploadBtn").style.display=st.api&&st.live?"":"none";
-  if(st.api)fetch("/api/metrics").then(r=>r.json()).then(m=>m.vocalis&&renderMetrics(m)).catch(()=>{});
-  await fillScenarios();}
+// ------------------------------------------------------------------ setup
+function setMode(m){st.mode=m;document.querySelectorAll("#modes button").forEach(b=>b.classList.toggle("on",b.dataset.mode===m));fill();}
+async function fill(){const sel=$("#scenario"),prev=sel.value;let items;
+  if(st.mode==="replay")items=st.demo?st.demo.calls.map(c=>({id:c.id,title:(c.voiced?"🎧 ":"")+c.title,j:c.jurisdiction})):[];
+  else items=(await (await fetch(`${API}/api/scenarios`)).json()).map(s=>({id:s.id,title:s.title,j:s.jurisdiction}));
+  const G={IN:"India · DGCA",UK:"UK · UK261",AE:"UAE · GCAA"};
+  sel.innerHTML=Object.entries(G).map(([k,g])=>`<optgroup label="${g}">${items.filter(i=>i.j===k).map(i=>`<option value="${i.id}">${i.title}</option>`).join("")}</optgroup>`).join("")+(st.caseId&&st.mode!=="replay"?`<option value="__uploaded">📷 Your uploaded document</option>`:"");
+  if([...sel.options].some(o=>o.value===prev))sel.value=prev;show();}
+async function show(){const id=$("#scenario").value;if(id==="__uploaded")return;
+  if(st.mode==="replay"){const c=st.demo&&st.demo.calls.find(c=>c.id===id);renderCase(c&&c.case);}else try{renderCase(await (await fetch(`${API}/api/case/${encodeURIComponent(id)}`)).json());}catch{}}
+async function init(){drawPipe();
+  try{st.demo=await (await fetch("demo/calls.json")).json();renderMetrics(st.demo.summary);}catch{}
+  try{const h=await (await fetch(`${API}/api/health`,{signal:AbortSignal.timeout(4000)})).json();st.api=true;st.live=!!h.live;st.tts=!!h.tts;}catch{st.api=false;}
+  $("#status").innerHTML=st.api?`<span class="led" style="background:var(--ok);color:var(--ok)"></span>live server${st.tts?" · Deepgram voices":""}${st.live?"":" · offline only"}`:`<span class="led" style="color:var(--warn)"></span>recorded demo · server asleep or offline`;
+  document.querySelector('[data-mode="offline"]').disabled=!st.api;document.querySelector('[data-mode="live"]').disabled=!(st.api&&st.live);$("#uploadBtn").style.display=st.api&&st.live?"":"none";
+  if(st.api)fetch(`${API}/api/metrics`).then(r=>r.json()).then(m=>m.vocalis&&renderMetrics(m)).catch(()=>{});await fill();}
 document.querySelectorAll("#modes button").forEach(b=>b.onclick=()=>{if(!st.playing&&!b.disabled)setMode(b.dataset.mode);});
-$("#scenario").onchange=showCase;$("#start").onclick=start;
-$("#stop").onclick=()=>{st.stopFlag=true;speechSynthesis.cancel();if(st.es)st.es.close();$("#phase").textContent="Stopped";busy(false);};
-$("#voice").onclick=()=>{st.voiceOn=!st.voiceOn;$("#voice").textContent=st.voiceOn?"🔊 Voices on":"🔇 Voices off";if(!st.voiceOn)speechSynthesis.cancel();};
+$("#scenario").onchange=show;$("#start").onclick=start;
+$("#stop").onclick=()=>{st.stop=true;speechSynthesis.cancel();document.querySelectorAll("audio").forEach(a=>a.pause());if(st.es)st.es.close();$("#phase").textContent="Stopped";busy(false);};
+$("#voice").onclick=()=>{st.voiceOn=!st.voiceOn;$("#voice").textContent=st.voiceOn?"🔊":"🔇";if(!st.voiceOn)speechSynthesis.cancel();};
 $("#file").onchange=async e=>{const f=e.target.files[0];if(!f)return;banner("Reading the document…");const fd=new FormData();fd.append("file",f);
-  try{const r=await fetch("/api/extract",{method:"POST",body:fd});const j=await r.json();if(!r.ok)throw new Error(j.detail||"failed");
-    st.caseId=j.case_id;renderCase(j);banner("");if(st.mode==="replay")setMode("live");await fillScenarios();$("#scenario").value="__uploaded";renderCase(j);}
-  catch(err){banner("Could not read the document: "+err.message+" — try a built-in case, or the recorded demo.",true);}};
+  try{const r=await fetch(`${API}/api/extract`,{method:"POST",body:fd});const j=await r.json();if(!r.ok)throw new Error(j.detail||"failed");st.caseId=j.case_id;banner("");
+    if(st.mode==="replay")setMode("live");await fill();$("#scenario").value="__uploaded";renderCase(j);feed("📷","Document read","Vision model extracted the fields; the boarding-pass barcode (IATA BCBP) was cross-checked; entitlements computed in code.");}
+  catch(err){banner("Could not read the document: "+err.message+" — try a built-in case or the recorded demo.",true);}};
 init();
 </script>
 </body>

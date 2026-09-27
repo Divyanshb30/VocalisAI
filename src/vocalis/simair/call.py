@@ -55,6 +55,7 @@ class RunConfig:
     label: str = "vocalis"
     llm_factory: Any = None  # () -> (LLMService, model ids); tests inject a scripted LLM
     on_line: Any = None  # (Line) -> None; the web UI streams the call live through this
+    pace: bool = False  # evals: stay under free-tier per-minute caps (live demo relies on failover)
 
 
 @dataclass
@@ -172,6 +173,8 @@ class CallSimulation:
 
         Simulation-only: wall-clock waiting between turns, not counted in reply latency.
         """
+        if not self.cfg.pace:
+            return
         provider = talker_models[0].split("/", 1)[0] if talker_models else ""
         if provider not in self.PACING:
             return

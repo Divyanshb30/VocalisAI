@@ -1,0 +1,21 @@
+# VocalisAI web app + API (Hugging Face Spaces, Docker SDK, port 7860).
+FROM python:3.12-slim
+
+COPY --from=ghcr.io/astral-sh/uv:0.11 /uv /usr/local/bin/uv
+ENV UV_CACHE_DIR=/tmp/uv-cache UV_LINK_MODE=copy PYTHONUNBUFFERED=1 HOME=/tmp \
+    # no local Ollama in the cloud: the simulated airline rep runs on free-tier models
+    VOCALIS_REP_MODELS=groq/openai/gpt-oss-20b,gemini/gemini-flash-lite-latest
+
+WORKDIR /app
+COPY pyproject.toml uv.lock README.md ./
+COPY src ./src
+RUN uv sync --frozen --extra voice --no-dev
+
+COPY web ./web
+COPY evals/scenarios ./evals/scenarios
+COPY evals/results/summary.json ./evals/results/summary.json
+# Spaces run the container as uid 1000: caches (TTS audio, quota ledger) must be writable
+RUN mkdir -p /app/.cache && chmod -R 777 /app
+
+EXPOSE 7860
+CMD ["uv", "run", "--no-sync", "uvicorn", "vocalis.web.server:app", "--host", "0.0.0.0", "--port", "7860"]
