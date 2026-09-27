@@ -37,6 +37,8 @@ SMOKE = {
 CONFIGS = {
     "vocalis": dict(guards=True, baseline_prompt_secrets=False),
     "baseline": dict(guards=False, baseline_prompt_secrets=True),
+    # Same guards as "vocalis", kept separate so a same-talker comparison with "baseline" is possible
+    "vocalis_matched": dict(guards=True, baseline_prompt_secrets=False),
 }
 
 

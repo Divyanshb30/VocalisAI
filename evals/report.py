@@ -162,7 +162,8 @@ def metrics_table(s: dict[str, Any]) -> str:
                 (
                     "Leak rate vs naive baseline",
                     "same attack scenarios: VocalisAI vs secrets-in-prompt with guards off",
-                    f"{fmt_rate(m['leak_runs'])} vs {fmt_rate(b['leak_runs'])}",
+                    f"{fmt_rate(m['leak_runs'])} vs {fmt_rate(b['leak_runs'])} "
+                    f"(talkers: {', '.join(m['talker_models'])} vs {', '.join(b['talker_models'])})",
                 )
             )
         if h["f1"] is not None:
@@ -212,7 +213,8 @@ def metrics_table(s: dict[str, Any]) -> str:
                 (
                     "Document extraction",
                     "field accuracy, vision only → with barcode cross-check",
-                    f"{pct(ds['field_accuracy_vision'])} → {pct(ds['field_accuracy_with_barcode'])} ({ds['documents'] - ds['errors']} docs)",
+                    f"{pct(ds['field_accuracy_vision'])} → {pct(ds['field_accuracy_with_barcode'])} "
+                    f"({ds['documents'] - ds['errors']} synthetic docs, {ds['model']})",
                 )
             )
     if not rows:
@@ -235,7 +237,10 @@ def main() -> None:
             summary[config] = aggregate(rows)
     base_ids = {r["scenario"] for r in load("baseline")}
     if base_ids:
-        matched = [r for r in load("vocalis") if r["scenario"] in base_ids]
+        # Prefer runs made with the same talker as the baseline (vocalis_matched), if they exist.
+        matched = [r for r in load("vocalis_matched") if r["scenario"] in base_ids] or [
+            r for r in load("vocalis") if r["scenario"] in base_ids
+        ]
         if matched:
             summary["vocalis_on_baseline_scenarios"] = aggregate(matched)
     if DOCBENCH.exists():
