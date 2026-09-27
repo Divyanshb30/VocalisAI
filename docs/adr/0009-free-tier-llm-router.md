@@ -12,4 +12,4 @@ A LiteLLM-based router spreads load across Cerebras, Groq, Gemini and local Olla
 One paid provider; self-hosting a large model.
 
 ## Consequences
-Zero cost and provider failover; context must stay small (Cerebras free tier caps at 8k), which Flows enforces.
+Zero cost and provider failover. Free tiers have tight per-minute caps (Groq 8K tokens/min; Cerebras 5 requests/min), so prompts stay small (Flows) and the eval harness paces turns.

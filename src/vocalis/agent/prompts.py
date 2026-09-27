@@ -1,4 +1,4 @@
-"""System and node prompts. Kept short: free-tier talkers run with ~8k context."""
+"""System and node prompts. Kept short: fewer tokens per turn means lower latency and stays under free-tier per-minute caps."""
 
 from __future__ import annotations
 

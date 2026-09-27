@@ -121,6 +121,7 @@ class LineSink(FrameProcessor):
         self.prompt_tokens = 0
         self.completion_tokens = 0
         self.cached_tokens = 0
+        self.total_requests = 0
         self.llm_ttfb_s: list[float] = []
 
     def reset_turn(self) -> None:
@@ -145,6 +146,7 @@ class LineSink(FrameProcessor):
         elif isinstance(frame, LLMFullResponseEndFrame):
             self._active = False
             self.responses += 1
+            self.total_requests += 1
             self._last_end = time.monotonic()
         elif (
             isinstance(frame, TextFrame)

@@ -11,7 +11,7 @@ import random
 import time
 from dataclasses import dataclass, field
 from decimal import Decimal
-from typing import Any
+from typing import Any, ClassVar
 
 from loguru import logger
 
@@ -111,7 +111,8 @@ class CallSimulation:
         self.latencies: list[float] = []
         self.turn = 0
         self._ivr_step: Any = None
-        self._tpm_log: list[tuple[float, int]] = []
+        self._tpm_log: list[tuple[float, int, int]] = []
+        self._rpm_seen = 0
         self._tpm_seen = 0
         self._last_rep_event: EventAction | None = None
         rep_models = config.rep_models or self.router.s.rep_models
@@ -158,20 +159,29 @@ class CallSimulation:
         )
         return approved
 
-    async def _pace_talker(self, talker_models: list[str], tpm_budget: int = 6500) -> None:
-        """Stay under Groq's free-tier tokens-per-minute cap (8K) so the talker doesn't fail over.
+    # Free-tier per-minute caps, with headroom: (tokens/min, requests/min). Measured from
+    # provider rate-limit headers: Groq 8K TPM / 30 RPM, Cerebras 30K TPM / 5 RPM.
+    PACING: ClassVar[dict[str, tuple[int, int]]] = {"groq": (6500, 25), "cerebras": (25000, 4)}
+
+    async def _pace_talker(self, talker_models: list[str]) -> None:
+        """Stay under the talker's per-minute caps so it doesn't fail over mid-call.
 
         Simulation-only: wall-clock waiting between turns, not counted in reply latency.
         """
-        if not talker_models or not talker_models[0].startswith("groq/"):
+        provider = talker_models[0].split("/", 1)[0] if talker_models else ""
+        if provider not in self.PACING:
             return
+        tpm, rpm = self.PACING[provider]
         sink = self.session.sink
         now = time.monotonic()
         used = max(0, sink.prompt_tokens - sink.cached_tokens) + sink.completion_tokens
-        self._tpm_log.append((now, used - self._tpm_seen))
-        self._tpm_seen = used
-        self._tpm_log = [(t, n) for t, n in self._tpm_log if now - t < 60]
-        while sum(n for _, n in self._tpm_log) > tpm_budget and self._tpm_log:
+        self._tpm_log.append((now, used - self._tpm_seen, sink.total_requests - self._rpm_seen))
+        self._tpm_seen, self._rpm_seen = used, sink.total_requests
+        self._tpm_log = [e for e in self._tpm_log if now - e[0] < 60]
+        # leave room for the ~2 requests the next turn may make (reply + tool follow-up)
+        while self._tpm_log and (
+            sum(e[1] for e in self._tpm_log) > tpm or sum(e[2] for e in self._tpm_log) + 2 > rpm
+        ):
             wait = 60 - (time.monotonic() - self._tpm_log[0][0])
             if wait > 0:
                 await asyncio.sleep(wait)
@@ -213,6 +223,7 @@ class CallSimulation:
                 if classify(prompt) is CallState.HOLD:
                     break
                 self._ivr_step = None
+                await self._pace_talker(talker_models)
                 turn = await self.session.hear(prompt)
                 if turn.text:
                     self.log("agent", turn.text, to="ivr")
