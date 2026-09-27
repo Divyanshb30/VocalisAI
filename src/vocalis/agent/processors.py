@@ -120,6 +120,7 @@ class LineSink(FrameProcessor):
         self._changed = asyncio.Event()
         self.prompt_tokens = 0
         self.completion_tokens = 0
+        self.cached_tokens = 0
         self.llm_ttfb_s: list[float] = []
 
     def reset_turn(self) -> None:
@@ -134,6 +135,8 @@ class LineSink(FrameProcessor):
             for d in frame.data:
                 if isinstance(d, LLMUsageMetricsData):
                     self.prompt_tokens += d.value.prompt_tokens or 0
+                    # cached input doesn't count toward provider rate limits (Groq reports it gross)
+                    self.cached_tokens += d.value.cache_read_input_tokens or 0
                     self.completion_tokens += d.value.completion_tokens or 0
                 elif isinstance(d, TTFBMetricsData) and "LLM" in (d.processor or "") and d.value > 0:
                     self.llm_ttfb_s.append(d.value)

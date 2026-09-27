@@ -27,7 +27,7 @@ litellm.suppress_debug_info = True
 # Conservative daily token budgets for free tiers (leave headroom below the published caps).
 DAILY_TOKEN_BUDGET = {
     "cerebras": 900_000,
-    "groq": 180_000,
+    "groq": 190_000,  # uncached tokens only; Groq free tier is 200K/day per model
     "gemini": 2_000_000,
     "ollama_chat": 10**12,
     "ollama": 10**12,

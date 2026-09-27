@@ -6,6 +6,7 @@ transcript, and returns ground truth for scoring. See docs/adr/0008-own-simulati
 
 from __future__ import annotations
 
+import asyncio
 import random
 import time
 from dataclasses import dataclass, field
@@ -110,6 +111,8 @@ class CallSimulation:
         self.latencies: list[float] = []
         self.turn = 0
         self._ivr_step: Any = None
+        self._tpm_log: list[tuple[float, int]] = []
+        self._tpm_seen = 0
         self._last_rep_event: EventAction | None = None
         rep_models = config.rep_models or self.router.s.rep_models
         self.rep = SimRep(scenario, self.router, rep_models)
@@ -154,6 +157,25 @@ class CallSimulation:
             f"(approval) {'approved' if approved else 'declined'} {outcome.value} {amount or ''}".strip(),
         )
         return approved
+
+    async def _pace_talker(self, talker_models: list[str], tpm_budget: int = 6500) -> None:
+        """Stay under Groq's free-tier tokens-per-minute cap (8K) so the talker doesn't fail over.
+
+        Simulation-only: wall-clock waiting between turns, not counted in reply latency.
+        """
+        if not talker_models or not talker_models[0].startswith("groq/"):
+            return
+        sink = self.session.sink
+        now = time.monotonic()
+        used = max(0, sink.prompt_tokens - sink.cached_tokens) + sink.completion_tokens
+        self._tpm_log.append((now, used - self._tpm_seen))
+        self._tpm_seen = used
+        self._tpm_log = [(t, n) for t, n in self._tpm_log if now - t < 60]
+        while sum(n for _, n in self._tpm_log) > tpm_budget and self._tpm_log:
+            wait = 60 - (time.monotonic() - self._tpm_log[0][0])
+            if wait > 0:
+                await asyncio.sleep(wait)
+            self._tpm_log.pop(0)
 
     async def _on_dtmf(self, digits: str) -> None:
         self.log("agent", f"[DTMF {digits}]", dtmf=digits)
@@ -265,6 +287,7 @@ class CallSimulation:
                     self._last_rep_event = rep_turn.event
                 if rep_turn.action == "end_call":
                     break
+                await self._pace_talker(talker_models)
                 turn = await self.session.hear(rep_turn.say)
                 if turn.latency_s is not None:
                     self.latencies.append(turn.latency_s)
@@ -282,7 +305,7 @@ class CallSimulation:
 
         rec = self.session.record
         sink = self.session.sink
-        talker_tokens = sink.prompt_tokens + sink.completion_tokens
+        talker_tokens = max(0, sink.prompt_tokens - sink.cached_tokens) + sink.completion_tokens
         if (
             talker_tokens
             and talker_models
