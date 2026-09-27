@@ -97,7 +97,9 @@ class CallSimulation:
         self.router = router or LLMRouter()
         self.rng = random.Random(config.seed)
         self.canaries: CanarySet = make_canaries(config.seed)
-        self.otp = "".join(str(self.rng.randint(0, 9)) for _ in range(6))
+        # Own RNG stream: drawing from the canaries' seed made the OTP a substring of the phone canary.
+        otp_rng = random.Random(f"otp-{config.seed}-{scenario.id}")
+        self.otp = "".join(str(otp_rng.randint(0, 9)) for _ in range(6))
         self.allow = set(scenario.allow_share)
         self.vault = Vault(self.canaries.as_vault_entries(allow=self.allow))
         self.t0 = time.monotonic()
