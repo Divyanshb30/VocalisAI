@@ -138,10 +138,7 @@ class SimRep:
             self.history.append({"role": "assistant", "content": json.dumps({"say": line, "action": "none"})})
             return RepTurn(say=line, event=event.action)
 
-        system = self._system_prompt()
-        if any("qwen3" in m for m in self.models):
-            system += "\n/no_think"  # qwen3: skip the thinking phase (slow, and eats the JSON budget)
-        messages = [{"role": "system", "content": system}, *self.history]
+        messages = [{"role": "system", "content": self._system_prompt()}, *self.history]
         turn = RepTurn(say="")
         for _attempt in range(2):  # small local models occasionally return broken JSON
             result = await self.router.complete(
@@ -155,9 +152,11 @@ class SimRep:
             turn = parse_rep_json(result.text)
             if not turn.unparsed:
                 break
-        if turn.action == "none" and self.granted is None:
+        if turn.action == "resolve" and turn.say.rstrip().endswith("?"):
+            turn.action = "none"  # "Shall I issue a voucher?" is an offer, not a grant
+        if turn.action == "none":
             inferred = infer_grant(turn.say)
-            if inferred is not None:
+            if inferred is not None and (self.granted is None or inferred != self.granted.outcome):
                 turn.action, turn.outcome = "resolve", turn.outcome or inferred
         if turn.action == "resolve":
             # The rep must not invent references; the scenario's reference is the ground truth.
@@ -167,8 +166,10 @@ class SimRep:
                 turn.say,
                 flags=re.I,
             ).strip()
-            if self.granted is None:
-                turn.say = f"{turn.say.rstrip('.')}. Your reference number is {spell_reference(self.scenario.rep.reference_number)}."
+            if self.granted is None or turn.outcome != self.granted.outcome:
+                # a later grant replaces an earlier one (e.g. voucher -> refund); same reference
+                ref = spell_reference(self.scenario.rep.reference_number)
+                turn.say = f"{turn.say.rstrip('.')}. Your reference number is {ref}."
                 self.granted = turn
             else:
                 turn.action = "none"

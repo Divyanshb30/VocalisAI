@@ -59,7 +59,8 @@ def _litellm_kwargs(model: str, s: Settings) -> dict[str, Any]:
     if p == "gemini":
         return {"api_key": s.google_api_key}
     if p in ("ollama", "ollama_chat"):
-        return {"api_base": s.ollama_base_url}
+        # think=False: qwen3 otherwise spends the whole token budget thinking and returns no content
+        return {"api_base": s.ollama_base_url, "think": False}
     return {}
 
 
