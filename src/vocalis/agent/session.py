@@ -8,6 +8,7 @@ audio mode with STT/TTS added around them.
 from __future__ import annotations
 
 import asyncio
+import re
 import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
@@ -37,6 +38,19 @@ from vocalis.agent.prompts import CONFIRM_TASK, IVR_TASK, NEGOTIATE_TASK, role_m
 from vocalis.core.models import OutcomeType
 
 OUTCOME_VALUES = [o.value for o in OutcomeType]
+
+_REFERENCE = re.compile(
+    r"reference(?: number)?(?: is|:)?\s+((?:[A-Za-z0-9][\s-]?){5,8})(?![A-Za-z0-9])", re.I
+)
+
+
+def reference_in(text: str) -> str | None:
+    """A reference number as spoken by the rep ("R 8 Q 4 Z T" or "R8Q4ZT"), if there is one."""
+    m = _REFERENCE.search(text or "")
+    if not m:
+        return None
+    ref = re.sub(r"[^A-Za-z0-9]", "", m.group(1)).upper()
+    return ref if 5 <= len(ref) <= 8 else None
 
 
 @dataclass
@@ -68,6 +82,7 @@ class SessionRecord:
     guard_blocks: list[GuardEvent] = field(default_factory=list)
     vault_blocks: list[list[str]] = field(default_factory=list)
     nodes: list[str] = field(default_factory=list)
+    reference_corrections: list[dict[str, str]] = field(default_factory=list)
 
 
 class AgentSession:
@@ -112,6 +127,7 @@ class AgentSession:
             global_functions=[self._fn_handoff(), self._fn_end_call()],
         )
         self._runner_task: asyncio.Task[None] | None = None
+        self._last_heard = ""
 
     # ------------------------------------------------------------------ prompts
     def _role(self) -> str:
@@ -233,6 +249,11 @@ class AgentSession:
     def _fn_record_resolution(self) -> FlowsFunctionSchema:
         async def handler(args: dict[str, Any], _fm: FlowManager) -> Any:
             ref = "".join(ch for ch in str(args.get("reference_number", "")).upper() if ch.isalnum())
+            # Don't trust the LLM to copy exact strings: parse the reference from what the rep said.
+            heard = reference_in(self._last_heard)
+            if heard and heard != ref:
+                self.record.reference_corrections.append({"llm": ref, "parsed": heard})
+                ref = heard
             self.record.resolution = {
                 "outcome": args.get("outcome"),
                 "amount": args.get("amount"),
@@ -312,6 +333,7 @@ class AgentSession:
 
     async def hear(self, text: str, *, timeout: float = 90.0) -> AgentTurn:
         """The other side said ``text``; return what the agent says back."""
+        self._last_heard = text
         self.sink.reset_turn()
         t0 = time.monotonic()
         await self.worker.queue_frame(
