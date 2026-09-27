@@ -18,6 +18,16 @@ v1 runs on a **faithfully simulated phone line** (8 kHz μ-law, in-band DTMF, IV
 
 ---
 
+## Try it
+
+- **Always-on demo, no install:** [divyanshb30.github.io/VocalisAI](https://divyanshb30.github.io/VocalisAI/) replays the 25 recorded evaluation calls with voices, keypad tones and hold music, next to the case, the passenger's legal entitlements and the result.
+- **Run it yourself:** `uv run vocalis serve` → http://127.0.0.1:8000
+  - **Live**: real models, the call streams line by line; upload a photo of a boarding pass or cancellation email to open your own case.
+  - **Offline**: the same Pipecat pipeline with scripted models, no API keys.
+  - **Recorded**: the replay demo. If a live call hits an API error, the page offers the recorded call instead.
+
+---
+
 ## Architecture
 
 ### System overview

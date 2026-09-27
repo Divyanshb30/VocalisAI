@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VocalisAI — the AI that calls the airline for you</title>
+<style>
+:root{--bg:#0e1116;--panel:#161b22;--line:#262d38;--text:#e6edf3;--muted:#8b949e;--accent:#4f8cff;--accent2:#2ea043;--warn:#d29922;--bad:#f85149;--pass:#a371f7;--rep:#1f2630}
+*{box-sizing:border-box}body{margin:0;font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line)}
+.brand b{font-size:20px}.brand span{color:var(--muted);margin-left:10px}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}.seg button{background:none;border:0;color:var(--muted);padding:7px 12px;cursor:pointer}
+.seg button.on{background:var(--accent);color:#fff}.seg button:disabled{opacity:.35;cursor:not-allowed}
+.status{font-size:13px;color:var(--muted)}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:var(--warn)}
+main{display:grid;grid-template-columns:320px 1fr 300px;gap:14px;padding:14px 20px;height:calc(100vh - 64px)}
+@media(max-width:1100px){main{grid-template-columns:1fr;height:auto}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;overflow:auto}
+h3{margin:0 0 10px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+select,button.btn,label.btn{background:#21262d;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;cursor:pointer}
+select{width:100%}button.primary{background:var(--accent);border-color:var(--accent);color:#fff}button.btn:disabled{opacity:.4;cursor:not-allowed}
+.kv{display:grid;grid-template-columns:96px 1fr;gap:4px 8px;font-size:14px;margin:12px 0}.kv div:nth-child(odd){color:var(--muted)}
+ul.ent{padding-left:18px;margin:6px 0 12px;font-size:13.5px}ul.ent li{margin:4px 0}
+.chip{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;margin:2px;border:1px solid var(--line)}
+.chip.ok{border-color:var(--accent2);color:#7ee787}.chip.no{border-color:var(--bad);color:#ffa198}
+.call{display:flex;flex-direction:column;padding:0}.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pill{padding:4px 10px;border-radius:999px;background:#21262d;font-size:13px}.timer{font-variant-numeric:tabular-nums;color:var(--muted);margin-right:auto}
+#log{flex:1;overflow:auto;padding:16px 14px;display:flex;flex-direction:column;gap:8px;min-height:380px}
+.msg{max-width:78%;padding:9px 12px;border-radius:12px;animation:in .25s ease}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+.msg small{display:block;font-size:11px;color:var(--muted);margin-bottom:2px}
+.agent{align-self:flex-end;background:#1a3a6b}.rep{align-self:flex-start;background:var(--rep)}
+.passenger{align-self:flex-start;background:#3b2466}.ivr,.hold{align-self:center;background:none;border:1px dashed var(--line);color:var(--muted);font-size:13px;max-width:90%}
+.hold{font-style:italic}.system{align-self:center;color:var(--warn);font-size:12.5px}
+.keys{display:inline-block;background:#0b3d20;color:#7ee787;border-radius:6px;padding:2px 8px;font-family:ui-monospace,monospace}
+.empty{color:var(--muted);margin:auto;text-align:center;max-width:420px}
+.big{font-size:22px;font-weight:600;margin:4px 0}.metric{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}
+.metric b{font-variant-numeric:tabular-nums}.note{font-size:12.5px;color:var(--muted);margin-top:10px}
+.banner{background:#3d2e00;border:1px solid var(--warn);color:#f2cc60;padding:8px 12px;border-radius:8px;margin:10px 14px 0;font-size:13px;display:none}
+.banner button{margin-left:8px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><b>VocalisAI</b><span>An AI agent that phones the airline for you — and hands you the call when it's your turn.</span></div>
+  <div style="display:flex;gap:12px;align-items:center">
+    <div class="seg" id="modes">
+      <button data-mode="replay" class="on" title="Recorded calls from the evaluation run">Recorded</button>
+      <button data-mode="offline" title="Real pipeline, scripted models, no API keys">Offline</button>
+      <button data-mode="live" title="Real models, streamed live">Live</button>
+    </div>
+    <div class="status" id="status"><span class="dot"></span>checking server…</div>
+  </div>
+</header>
+
+<main>
+  <section class="panel">
+    <h3>Case</h3>
+    <select id="scenario"></select>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+      <label class="btn" id="uploadBtn" title="Read a boarding pass or cancellation email (live mode)">📷 Read a document<input type="file" id="file" accept="image/*" hidden></label>
+      <a class="btn" style="text-decoration:none;color:var(--text);padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px" href="demo/samples/doc_000.jpg" target="_blank">Sample boarding pass</a>
+    </div>
+    <div id="case"></div>
+  </section>
+
+  <section class="panel call">
+    <div class="bar">
+      <span class="pill" id="phase">Ready</span><span class="timer" id="timer">00:00</span>
+      <button class="btn primary" id="start">▶ Place call</button>
+      <button class="btn" id="stop" disabled>■ Stop</button>
+      <select id="speed" style="width:auto"><option value="1">1×</option><option value="1.5" selected>1.5×</option><option value="2">2×</option><option value="4">4×</option></select>
+      <button class="btn" id="voice" title="Toggle voices">🔊 Voices on</button>
+    </div>
+    <div class="banner" id="banner"></div>
+    <div id="log"><div class="empty">Pick a case and press <b>Place call</b>.<br><br>The agent navigates the phone menu with keypresses, waits on hold, discloses it is an AI, negotiates using the passenger's legal rights, and hands the call to the passenger for anything like an OTP or card number.</div></div>
+  </section>
+
+  <section class="panel">
+    <h3>Result</h3>
+    <div id="report"><div class="note">The outcome appears when the call ends.</div></div>
+    <h3 style="margin-top:22px">Evaluation</h3>
+    <div id="metrics"><div class="note">Loading…</div></div>
+  </section>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const OUT = {cash_refund:"Cash refund",compensation:"Compensation",refund_and_compensation:"Refund + compensation",rebooking:"Rebooking",voucher:"Voucher",callback:"Callback"};
+const st = {mode:"replay", api:false, live:false, demo:null, playing:false, stopFlag:false, voiceOn:true, caseId:null, es:null};
+
+// ---------------------------------------------------------------- audio
+let ctx; const ac = () => (ctx ||= new (window.AudioContext||window.webkitAudioContext)());
+const DTMF = {"1":[697,1209],"2":[697,1336],"3":[697,1477],"4":[770,1209],"5":[770,1336],"6":[770,1477],"7":[852,1209],"8":[852,1336],"9":[852,1477],"*":[941,1209],"0":[941,1336],"#":[941,1477]};
+function tone(freqs, start, dur, type="sine", gain=.12){const a=ac();const g=a.createGain();g.gain.value=gain;g.connect(a.destination);
+  for(const f of freqs){const o=a.createOscillator();o.type=type;o.frequency.value=f;o.connect(g);o.start(a.currentTime+start);o.stop(a.currentTime+start+dur);}}
+async function playDTMF(keys){if(!st.voiceOn)return sleep(300);keys.split("").forEach((k,i)=>DTMF[k]&&tone(DTMF[k],i*.22,.16));await sleep(keys.length*220+150);}
+async function holdMusic(ms){if(!st.voiceOn)return sleep(Math.min(ms,900));const notes=[523,659,784,659,587,698,880,698];notes.forEach((f,i)=>tone([f],i*.3,.26,"triangle",.05));await sleep(Math.min(ms,notes.length*300));}
+let voices=[];const loadVoices=()=>voices=speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=loadVoices;loadVoices();
+function pickVoice(role){const by=l=>voices.find(v=>v.lang.startsWith(l));
+  if(role==="agent")return by("en-GB")||by("en-US")||voices[0];if(role==="rep")return by("en-IN")||by("en-AU")||voices.find(v=>/female|zira|samantha/i.test(v.name))||voices[1]||voices[0];
+  if(role==="passenger")return voices.find(v=>/male|david|daniel/i.test(v.name))||voices[0];return by("en-US")||voices[0];}
+function speak(text, role){const sp=+$("#speed").value;const clean=text.replace(/\[[^\]]*\]/g,"").trim();
+  if(!st.voiceOn||!clean||!("speechSynthesis" in window))return sleep(Math.min(2600,45*clean.length)/sp);
+  return new Promise(res=>{const u=new SpeechSynthesisUtterance(clean);u.voice=pickVoice(role);u.rate=Math.min(2,.95*sp);u.pitch=role==="ivr"?.8:1;
+    const t=setTimeout(res,90*clean.length/sp+2500);u.onend=u.onerror=()=>{clearTimeout(t);res();};speechSynthesis.speak(u);});}
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+// ---------------------------------------------------------------- rendering
+function renderCase(c){if(!c){$("#case").innerHTML="";return;}const m=c.mandate;
+  $("#case").innerHTML=`<div class="kv"><div>Passenger</div><div>${c.passenger}</div><div>Booking</div><div><b>${c.booking_reference}</b></div>
+  <div>Flight</div><div>${c.airline} ${c.flight}</div><div>Route</div><div>${c.route}</div><div>Departs</div><div>${c.date}</div>
+  <div>Problem</div><div>${c.disruption}</div>${c.fare?`<div>Fare</div><div>${c.fare}</div>`:""}</div>
+  <h3>What the passenger is owed</h3><ul class="ent">${c.entitlements.map(e=>`<li>${e}</li>`).join("")||"<li>No regulation clearly applies</li>"}</ul>
+  <h3>Mandate (approved by passenger)</h3><div><span class="chip ok">Ask for: ${OUT[m.target]||m.target}</span>
+  ${m.acceptable.map(a=>`<span class="chip ok">OK: ${OUT[a]||a}</span>`).join("")}${m.forbidden.map(a=>`<span class="chip no">Never: ${OUT[a]||a}</span>`).join("")}</div>
+  ${c.barcode_found!==undefined?`<div class="note">${c.barcode_found?"✓ Boarding-pass barcode read and cross-checked":"No barcode found — fields read by the vision model"}</div>`:""}`;}
+const LABEL={agent:"VocalisAI (AI agent)",rep:"Airline agent",passenger:"Passenger — handoff",ivr:"📞 Phone menu",hold:"♪ On hold",system:""};
+function addLine(l){const log=$("#log");if(log.querySelector(".empty"))log.innerHTML="";const d=document.createElement("div");
+  const dtmf=l.text.match(/^\[DTMF ([0-9*#]+)\]$/);d.className="msg "+(l.speaker||"system");
+  if(l.speaker==="system"){const why={otp:"one-time code",payment:"card / payment details",identity:"identity check",dob:"date of birth",phone:"phone number",prompt_injection:"suspicious instructions",commitment:"a binding commitment",human_check:"AI check"};
+    const m=l.text.match(/^handoff \((guard|tool)\): ?(.*)$/);
+    d.textContent=m?`⇄ Handing the call to the passenger — ${m[1]==="guard"?m[2].split(",").map(x=>why[x]||x).join(", "):m[2]}`:"⇄ "+l.text;}
+  else d.innerHTML=`<small>${LABEL[l.speaker]||l.speaker}</small>`+(dtmf?`pressed <span class="keys">${dtmf[1]}</span>`:escapeHtml(l.text));
+  log.appendChild(d);log.scrollTop=log.scrollHeight;}
+const escapeHtml=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+function setPhase(l){const p=$("#phase");const map={ivr:"Phone menu",hold:"On hold",rep:"Talking to airline",agent:"Talking to airline",passenger:"Passenger on the line",system:"Handoff"};
+  if(map[l.speaker])p.textContent=map[l.speaker];}
+const fmtT=t=>{t=Math.max(0,Math.floor(t));return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0");};
+function renderReport(r){if(!r){$("#report").innerHTML='<div class="note">The outcome appears when the call ends.</div>';return;}
+  const outcome=r.outcome?OUT[r.outcome]||r.outcome:"No resolution";const leaks=r.leaks||[];
+  $("#report").innerHTML=`<div class="big">${outcome}</div>
+  <div class="metric"><span>Reference</span><b>${r.reference_number||"—"} ${r.reference_number?(r.reference_verified?"✓":"✗"):""}</b></div>
+  <div class="metric"><span>Handoffs to passenger</span><b>${Array.isArray(r.handoffs)?r.handoffs.length:r.handoffs}</b></div>
+  <div class="metric"><span>Sensitive data spoken</span><b style="color:${leaks.length?"var(--bad)":"#7ee787"}">${leaks.length?leaks.join(", "):"none"}</b></div>
+  <div class="metric"><span>Disclosed it is an AI</span><b>${r.disclosed_as_ai?"yes":"no"}</b></div>
+  <div class="metric"><span>Task success</span><b>${r.success?"✓":"✗"}</b></div>${r.talker?`<div class="note">Talker: ${r.talker}</div>`:""}`;}
+function renderMetrics(s){const v=s&&s.vocalis;if(!v){$("#metrics").innerHTML='<div class="note">No evaluation results.</div>';return;}
+  const p=x=>Math.round(100*x)+"%";const h=v.handoff,t=v.llm_ttfb_s||{};
+  const row=(a,b)=>`<div class="metric"><span>${a}</span><b>${b}</b></div>`;
+  $("#metrics").innerHTML=row("Task success",`${p(v.task_success.rate)} (${v.task_success.k}/${v.task_success.n})`)+row("Data leaks",`${v.leak_runs.k}/${v.leak_runs.n}`)+
+  (h.recall!=null?row("Handoff recall",p(h.recall)):"")+row("AI disclosure",p(v.disclosure_first_utterance.rate))+row("Phone menu reached human",p(v.ivr_reached_agent.rate))+
+  (t.p50!=null?row("LLM first token (p50/p95)",`${t.p50.toFixed(2)}s / ${t.p95.toFixed(2)}s`):"")+
+  `<div class="note">${v.completed} adversarial simulated calls across India, UK and UAE (${(v.talker_models||[]).join(", ")}).</div>`;}
+function banner(msg, offerReplay){const b=$("#banner");if(!msg){b.style.display="none";return;}b.style.display="block";
+  b.innerHTML=escapeHtml(msg)+(offerReplay&&st.demo?` <button class="btn" id="toReplay">Watch the recorded call instead</button>`:"");
+  const btn=$("#toReplay");if(btn)btn.onclick=()=>{setMode("replay");banner("");start();};}
+
+// ---------------------------------------------------------------- playback
+async function playLine(l){if(st.stopFlag)return;setPhase(l);$("#timer").textContent=fmtT(l.t||0);addLine(l);
+  const dtmf=l.text.match(/^\[DTMF ([0-9*#]+)\]$/);
+  if(dtmf)return playDTMF(dtmf[1]);if(l.speaker==="hold")return holdMusic(2400);if(l.speaker==="system")return sleep(500);
+  if(l.speaker==="passenger"&&l.text.startsWith("(approval)"))return sleep(400);return speak(l.text,l.speaker);}
+function resetCall(){speechSynthesis.cancel();$("#log").innerHTML="";renderReport(null);$("#phase").textContent="Dialing…";$("#timer").textContent="00:00";banner("");}
+function busy(on){st.playing=on;$("#start").disabled=on;$("#stop").disabled=!on;$("#scenario").disabled=on;}
+
+async function start(){if(st.playing)return;st.stopFlag=false;resetCall();busy(true);ac();
+  try{ if(st.mode==="replay") await replay(); else await streamCall(); } finally { busy(false); }}
+async function replay(){const call=st.demo.calls.find(c=>c.id===$("#scenario").value)||st.demo.calls[0];renderCase(call.case);
+  for(const l of call.transcript){if(st.stopFlag)break;await playLine(l);}
+  if(!st.stopFlag){$("#phase").textContent="Call ended";renderReport(call.report);}}
+function streamCall(){return new Promise(resolve=>{const q=[];let report=null,done=false,pumping=false,t0=performance.now();
+  const sc=$("#scenario").value;const url=st.caseId&&sc==="__uploaded"?`/api/call?case_id=${st.caseId}&mode=${st.mode}`:`/api/call?scenario=${encodeURIComponent(sc)}&mode=${st.mode}`;
+  const es=st.es=new EventSource(url);
+  const finish=()=>{es.close();if(report){$("#phase").textContent="Call ended";renderReport(report);}resolve();};
+  const pump=async()=>{if(pumping)return;pumping=true;while(q.length&&!st.stopFlag){const l=q.shift();l.t=(performance.now()-t0)/1000;await playLine(l);}pumping=false;if(done&&!q.length)finish();};
+  es.addEventListener("case",e=>renderCase(JSON.parse(e.data)));
+  es.addEventListener("line",e=>{q.push(JSON.parse(e.data));pump();});
+  es.addEventListener("report",e=>{report=JSON.parse(e.data);done=true;if(!pumping&&!q.length)finish();});
+  es.addEventListener("error",e=>{let msg="The live call failed (API or network error).";try{msg="The live call failed: "+JSON.parse(e.data).message;}catch{}
+    if(!done){done=true;banner(msg,true);es.close();if(!pumping)resolve();else{const w=setInterval(()=>{if(!pumping){clearInterval(w);resolve();}},200);}}});
+});}
+
+// ---------------------------------------------------------------- setup
+function setMode(m){st.mode=m;document.querySelectorAll("#modes button").forEach(b=>b.classList.toggle("on",b.dataset.mode===m));fillScenarios();}
+async function fillScenarios(){const sel=$("#scenario");const prev=sel.value;let items;
+  if(st.mode==="replay") items=st.demo?st.demo.calls.map(c=>({id:c.id,title:c.title,j:c.jurisdiction})):[];
+  else items=(await (await fetch("/api/scenarios")).json()).map(s=>({id:s.id,title:s.title,j:s.jurisdiction}));
+  const groups={IN:"India (DGCA)",UK:"UK (UK261)",AE:"UAE (GCAA)"};
+  sel.innerHTML=Object.entries(groups).map(([k,g])=>`<optgroup label="${g}">${items.filter(i=>i.j===k).map(i=>`<option value="${i.id}">${i.title}</option>`).join("")}</optgroup>`).join("")+
+    (st.caseId&&st.mode!=="replay"?`<option value="__uploaded">📷 Your uploaded document</option>`:"");
+  if([...sel.options].some(o=>o.value===prev))sel.value=prev;showCase();}
+async function showCase(){const id=$("#scenario").value;if(id==="__uploaded")return;
+  if(st.mode==="replay"){const c=st.demo&&st.demo.calls.find(c=>c.id===id);renderCase(c&&c.case);}
+  else try{renderCase(await (await fetch(`/api/case/${encodeURIComponent(id)}`)).json());}catch{}}
+
+async function init(){
+  try{st.demo=await (await fetch("demo/calls.json")).json();renderMetrics(st.demo.summary);}catch{st.demo=null;}
+  try{const r=await fetch("/api/health",{signal:AbortSignal.timeout(2500)});const h=await r.json();st.api=true;st.live=!!h.live;}catch{st.api=false;}
+  const s=$("#status");
+  s.innerHTML=st.api?`<span class="dot" style="background:var(--accent2)"></span>server connected${st.live?"":" (no API keys: offline only)"}`:`<span class="dot"></span>no server — recorded calls only`;
+  document.querySelector('[data-mode="offline"]').disabled=!st.api;document.querySelector('[data-mode="live"]').disabled=!(st.api&&st.live);
+  $("#uploadBtn").style.display=st.api&&st.live?"":"none";
+  if(st.api)fetch("/api/metrics").then(r=>r.json()).then(m=>m.vocalis&&renderMetrics(m)).catch(()=>{});
+  await fillScenarios();}
+document.querySelectorAll("#modes button").forEach(b=>b.onclick=()=>{if(!st.playing&&!b.disabled)setMode(b.dataset.mode);});
+$("#scenario").onchange=showCase;$("#start").onclick=start;
+$("#stop").onclick=()=>{st.stopFlag=true;speechSynthesis.cancel();if(st.es)st.es.close();$("#phase").textContent="Stopped";busy(false);};
+$("#voice").onclick=()=>{st.voiceOn=!st.voiceOn;$("#voice").textContent=st.voiceOn?"🔊 Voices on":"🔇 Voices off";if(!st.voiceOn)speechSynthesis.cancel();};
+$("#file").onchange=async e=>{const f=e.target.files[0];if(!f)return;banner("Reading the document…");const fd=new FormData();fd.append("file",f);
+  try{const r=await fetch("/api/extract",{method:"POST",body:fd});const j=await r.json();if(!r.ok)throw new Error(j.detail||"failed");
+    st.caseId=j.case_id;renderCase(j);banner("");if(st.mode==="replay")setMode("live");await fillScenarios();$("#scenario").value="__uploaded";renderCase(j);}
+  catch(err){banner("Could not read the document: "+err.message+" — try a built-in case, or the recorded demo.",true);}};
+init();
+</script>
+</body>
+</html>

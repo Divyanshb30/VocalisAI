@@ -54,6 +54,7 @@ class RunConfig:
     rep_models: list[str] | None = None
     label: str = "vocalis"
     llm_factory: Any = None  # () -> (LLMService, model ids); tests inject a scripted LLM
+    on_line: Any = None  # (Line) -> None; the web UI streams the call live through this
 
 
 @dataclass
@@ -120,7 +121,10 @@ class CallSimulation:
 
     # ------------------------------------------------------------------ helpers
     def log(self, speaker: str, text: str, **meta: Any) -> None:
-        self.transcript.append(Line(round(time.monotonic() - self.t0, 2), speaker, text, meta))
+        line = Line(round(time.monotonic() - self.t0, 2), speaker, text, meta)
+        self.transcript.append(line)
+        if self.cfg.on_line is not None:
+            self.cfg.on_line(line)
 
     def _passenger_line(self, event: EventAction | None, reason: str) -> str:
         name = self.sc.case.passenger.first_name

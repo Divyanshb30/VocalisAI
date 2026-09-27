@@ -112,6 +112,13 @@ def cmd_rights(a: argparse.Namespace) -> None:
     print(json.dumps(out, indent=1, ensure_ascii=False))
 
 
+def cmd_serve(a: argparse.Namespace) -> None:
+    import uvicorn
+
+    print(f"VocalisAI web app on http://127.0.0.1:{a.port}")
+    uvicorn.run("vocalis.web.server:app", host="127.0.0.1", port=a.port, log_level="warning")
+
+
 def cmd_mcp(a: argparse.Namespace) -> None:
     if a.server == "rights":
         from vocalis.mcp_servers.rights_server import mcp
@@ -164,6 +171,10 @@ def main() -> None:
     p.add_argument("--base-fare", type=float)
     p.add_argument("--fuel", type=float)
     p.set_defaults(fn=cmd_rights)
+
+    p = sub.add_parser("serve", help="start the web app")
+    p.add_argument("--port", type=int, default=8000)
+    p.set_defaults(fn=cmd_serve)
 
     p = sub.add_parser("mcp", help="start an MCP server")
     p.add_argument("server", choices=["rights", "calls"])

@@ -3622,6 +3622,7 @@ name = "vocalis"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "fastapi" },
     { name = "fastembed" },
     { name = "fastmcp" },
     { name = "google-genai" },
@@ -3634,8 +3635,10 @@ dependencies = [
     { name = "pillow" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
+    { name = "python-multipart" },
     { name = "pyyaml" },
     { name = "rank-bm25" },
+    { name = "uvicorn" },
     { name = "zxing-cpp" },
 ]
 
@@ -3657,6 +3660,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "fastapi", specifier = ">=0.115" },
     { name = "fastembed", specifier = ">=0.5" },
     { name = "fastmcp", specifier = ">=2.10" },
     { name = "google-genai", specifier = ">=1.0" },
@@ -3670,8 +3674,10 @@ requires-dist = [
     { name = "pipecat-ai", extras = ["deepgram", "groq", "google", "silero", "local-smart-turn", "webrtc", "runner", "tracing"], marker = "extra == 'voice'" },
     { name = "pydantic", specifier = ">=2.11" },
     { name = "pydantic-settings", specifier = ">=2.6" },
+    { name = "python-multipart", specifier = ">=0.0.9" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "rank-bm25", specifier = ">=0.2.2" },
+    { name = "uvicorn", specifier = ">=0.30" },
     { name = "zxing-cpp", specifier = ">=2.3" },
 ]
 provides-extras = ["voice"]
