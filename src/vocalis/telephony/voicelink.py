@@ -75,9 +75,12 @@ class VoiceLink:
         self.detector = dtmf.DTMFDetector()
         self._tts_ws: ClientConnection | None = None
         self._tts_lock = asyncio.Lock()
+        self._background: set[asyncio.Task[None]] = set()
         self.tts_reconnects = 0
 
     async def aclose(self) -> None:
+        if self._background:
+            await asyncio.gather(*self._background, return_exceptions=True)
         if self._tts_ws is not None:
             await self._tts_ws.close()
         await self.http.aclose()
@@ -131,58 +134,72 @@ class VoiceLink:
         final_at: float | None = None
         finalized = asyncio.Event()
 
-        async with connect(
+        ws = await connect(
             f"{LISTEN_URL}?{urlencode(params)}",
             additional_headers={"Authorization": f"Token {self.key}"},
             max_size=None,
-        ) as ws:
+        )
 
-            async def reader() -> None:
-                nonlocal final_at
-                async for msg in ws:
-                    d = json.loads(msg)
-                    if d.get("type") != "Results":
-                        continue
-                    alt = d["channel"]["alternatives"][0]["transcript"]
-                    if d.get("is_final") and alt:
-                        finals.append(alt)
-                    if d.get("from_finalize"):
-                        final_at = final_at or time.monotonic()
-                        finalized.set()
+        async def reader() -> None:
+            nonlocal final_at
+            async for msg in ws:
+                d = json.loads(msg)
+                if d.get("type") != "Results":
+                    continue
+                alt = d["channel"]["alternatives"][0]["transcript"]
+                if d.get("is_final") and alt:
+                    finals.append(alt)
+                if d.get("from_finalize"):
+                    final_at = final_at or time.monotonic()
+                    finalized.set()
 
-            task = asyncio.create_task(reader())
+        marks: dict[str, float] = {}
+
+        async def sender() -> None:
             t0 = time.monotonic()
-            speech_end = decided = 0.0
-            sent_finalize = False
             # A frame is delivered once its 20 ms of audio has happened, like a live call.
             for i in range(len(pcm) // (2 * FRAME)):
                 await asyncio.sleep(max(0.0, t0 + (i + 1) * 0.02 - time.monotonic()))
                 await ws.send(pcm[i * 2 * FRAME : (i + 1) * 2 * FRAME])
                 if i == last_voiced:
-                    speech_end = time.monotonic()
-                if not sent_finalize and i == last_voiced + self.hangover_ms // 20:
-                    decided = time.monotonic()
+                    marks["speech_end"] = time.monotonic()
+                if i == last_voiced + self.hangover_ms // 20:
                     await ws.send(json.dumps({"type": "Finalize"}))
-                    sent_finalize = True
-                if finalized.is_set() or (sent_finalize and time.monotonic() - decided > max_wait_s):
-                    break
-            timed_out = not finalized.is_set()
-            if timed_out:
-                final_at = time.monotonic()
-            await ws.send(json.dumps({"type": "CloseStream"}))
-            try:
-                await asyncio.wait_for(task, timeout=3)
-            except (TimeoutError, Exception):
-                task.cancel()
+                    marks["finalize"] = time.monotonic()
+            await asyncio.sleep(max_wait_s)
+
+        read_task = asyncio.create_task(reader())
+        send_task = asyncio.create_task(sender())
+        # Hand the transcript over the moment it is final; the socket closes in the background.
+        await asyncio.wait(
+            {send_task, asyncio.create_task(finalized.wait())}, return_when=asyncio.FIRST_COMPLETED
+        )
+        timed_out = not finalized.is_set()
+        if timed_out:
+            final_at = time.monotonic()
+        send_task.cancel()
+        closer = asyncio.create_task(self._close_stt(ws, read_task))
+        self._background.add(closer)
+        closer.add_done_callback(self._background.discard)
         assert final_at is not None
         return Heard(
             truth=text,
             text=" ".join(finals).strip(),
             speech_s=(last_voiced + 1) * FRAME / 8000,
-            speech_end=speech_end,
+            speech_end=marks.get("speech_end", final_at),
             final_at=final_at,
             timed_out=timed_out,
         )
+
+    @staticmethod
+    async def _close_stt(ws: ClientConnection, read_task: asyncio.Task[None]) -> None:
+        try:
+            await ws.send(json.dumps({"type": "CloseStream"}))
+            await asyncio.wait_for(read_task, timeout=3)
+        except Exception:
+            read_task.cancel()
+        finally:
+            await ws.close()
 
     # ----------------------------------------------------------------- agent
     async def warm_up(self) -> None:
