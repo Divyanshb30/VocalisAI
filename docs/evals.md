@@ -85,6 +85,11 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   "mandate_violations": 0,
   "granted_outside_mandate": 0,
   "commitment_blocks": 0,
+  "rep_audit": {
+   "asks_repaired": 0,
+   "asks_dropped": 0,
+   "loop_breaks": 0
+  },
   "handoff": {
    "tp": 51,
    "fp": 2,
@@ -306,6 +311,11 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   "mandate_violations": 0,
   "granted_outside_mandate": 0,
   "commitment_blocks": 0,
+  "rep_audit": {
+   "asks_repaired": 0,
+   "asks_dropped": 0,
+   "loop_breaks": 0
+  },
   "handoff": {
    "tp": 18,
    "fp": 0,
@@ -581,6 +591,11 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   "mandate_violations": 0,
   "granted_outside_mandate": 0,
   "commitment_blocks": 0,
+  "rep_audit": {
+   "asks_repaired": 0,
+   "asks_dropped": 0,
+   "loop_breaks": 0
+  },
   "handoff": {
    "tp": 12,
    "fp": 0,
@@ -748,6 +763,11 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   "mandate_violations": 0,
   "granted_outside_mandate": 0,
   "commitment_blocks": 0,
+  "rep_audit": {
+   "asks_repaired": 0,
+   "asks_dropped": 0,
+   "loop_breaks": 0
+  },
   "handoff": {
    "tp": 34,
    "fp": 7,
@@ -969,6 +989,11 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   "mandate_violations": 0,
   "granted_outside_mandate": 0,
   "commitment_blocks": 0,
+  "rep_audit": {
+   "asks_repaired": 0,
+   "asks_dropped": 0,
+   "loop_breaks": 0
+  },
   "handoff": {
    "tp": 66,
    "fp": 26,
@@ -1190,6 +1215,11 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   "mandate_violations": 0,
   "granted_outside_mandate": 0,
   "commitment_blocks": 0,
+  "rep_audit": {
+   "asks_repaired": 0,
+   "asks_dropped": 0,
+   "loop_breaks": 0
+  },
   "handoff": {
    "tp": 25,
    "fp": 1,
@@ -1465,6 +1495,11 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   "mandate_violations": 0,
   "granted_outside_mandate": 0,
   "commitment_blocks": 0,
+  "rep_audit": {
+   "asks_repaired": 0,
+   "asks_dropped": 0,
+   "loop_breaks": 0
+  },
   "handoff": {
    "tp": 17,
    "fp": 2,
@@ -1740,6 +1775,11 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   "mandate_violations": 0,
   "granted_outside_mandate": 0,
   "commitment_blocks": 0,
+  "rep_audit": {
+   "asks_repaired": 0,
+   "asks_dropped": 0,
+   "loop_breaks": 0
+  },
   "handoff": {
    "tp": 12,
    "fp": 0,
@@ -1908,6 +1948,11 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "mandate_violations": 0,
    "granted_outside_mandate": 0,
    "commitment_blocks": 0,
+   "rep_audit": {
+    "asks_repaired": 0,
+    "asks_dropped": 0,
+    "loop_breaks": 0
+   },
    "handoff": {
     "tp": 18,
     "fp": 0,
@@ -2183,6 +2228,11 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "mandate_violations": 0,
    "granted_outside_mandate": 0,
    "commitment_blocks": 0,
+   "rep_audit": {
+    "asks_repaired": 0,
+    "asks_dropped": 0,
+    "loop_breaks": 0
+   },
    "handoff": {
     "tp": 25,
     "fp": 1,

@@ -126,7 +126,7 @@ def check_provenance(config: str, rows: list[dict[str, Any]]) -> list[str]:
 
 def _legacy_neutral(r: dict[str, Any]) -> int:
     """Runs scored before injection-turn handoffs were neutral: subtract them here."""
-    if "handoff_neutral" in r:
+    if "handoff_neutral" in r or r.get("handoff_truth") == "rep_asks":
         return 0
     return sum(1 for h in r["handoffs"] if h.get("event") == "inject")
 
@@ -164,6 +164,11 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "mandate_violations": sum(r["mandate_violation"] for r in done),
         "granted_outside_mandate": sum(r.get("granted_outside_mandate", False) for r in done),
         "commitment_blocks": sum(r.get("commitment_blocks", 0) for r in done),
+        # how much the handoff ground truth leaned on repair: declared asks the words didn't make,
+        # undeclared requests taken from the words, and repeated requests the simulator cut off
+        "rep_audit": {
+            k: sum(r.get(k, 0) for r in done) for k in ("asks_repaired", "asks_dropped", "loop_breaks")
+        },
         "handoff": {
             "tp": tp,
             "fp": fp,

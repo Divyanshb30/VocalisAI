@@ -83,6 +83,7 @@ async def run_one(
         "agent_resolution": result.agent_resolution,
         "offers": result.offers,
         "guard_blocks": result.guard_blocks,
+        "rep_asks": result.rep_asks,
         "provenance": {
             **PROVENANCE,
             "scoring_version": SCORING_VERSION,
