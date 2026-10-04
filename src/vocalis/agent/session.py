@@ -40,7 +40,7 @@ from vocalis.core.models import OutcomeType
 OUTCOME_VALUES = [o.value for o in OutcomeType]
 
 _REFERENCE = re.compile(
-    r"reference(?: number)?(?: is|:)?[\s.,:]+(?!number\b|is\b)((?:[A-Za-z0-9][\s-]?){5,8})(?![A-Za-z0-9])",
+    r"reference(?:\s+number)?(?:[\s,]+is\b|\s*:)?[\s.,:]+(?!number\b|is\b)((?:[A-Za-z0-9][\s-]?){5,8})(?![A-Za-z0-9])",
     re.I,
 )
 _TAIL_CHAR = re.compile(r"\s*[.,]\s*([A-Za-z0-9])\s*(?:[.,!?]|$)")

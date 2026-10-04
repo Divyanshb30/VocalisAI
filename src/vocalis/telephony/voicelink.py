@@ -17,10 +17,12 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import io
 import json
 import math
 import re
 import time
+import wave
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlencode
@@ -90,19 +92,22 @@ class VoiceLink:
         """``text`` spoken in ``voice``, as it sounds after the phone line (float32, 8 kHz)."""
         text = spelled_for_tts(text)
         digest = hashlib.sha1(f"{voice}|{text}".encode()).hexdigest()
-        path = CACHE / f"{digest}.pcm16k"
+        path = CACHE / f"{digest}.wav"
         if path.exists():
-            raw = path.read_bytes()
+            wav = path.read_bytes()
         else:
+            # A WAV container, not raw PCM: the raw REST response is cut off mid-word at the end.
             r = await self.http.post(
                 SPEAK_URL,
-                params={"model": voice, "encoding": "linear16", "sample_rate": 16000, "container": "none"},
+                params={"model": voice, "encoding": "linear16", "sample_rate": 16000, "container": "wav"},
                 json={"text": text},
             )
             r.raise_for_status()
-            raw = r.content
+            wav = r.content
             CACHE.mkdir(parents=True, exist_ok=True)
-            path.write_bytes(raw)
+            path.write_bytes(wav)
+        with wave.open(io.BytesIO(wav)) as w:
+            raw = w.readframes(w.getnframes())
         return self.line.process(pcm16_to_float(raw), 16000)
 
     async def listen(self, text: str, voice: str, *, max_wait_s: float = 3.0) -> Heard:

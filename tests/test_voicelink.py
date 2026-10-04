@@ -39,6 +39,7 @@ def test_reference_heard_in_stt_styles() -> None:
     assert reference_in("Your reference number is eight q h seven eight. S.") == "8QH78S"
     assert reference_in("Your reference number is eight s q n eight. Eight.") == "8SQN88"
     assert reference_in("Your reference number is 8QH78S. A refund is on its way.") == "8QH78S"
+    assert reference_in("Your reference number, is h nine seven l k. P.") == "H97LKP"
     # garbled codes are not "recovered" from the surrounding words
     assert reference_in("Your reference number is eight Quetzels h seven eight.") is None
 
