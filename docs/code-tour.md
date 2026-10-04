@@ -115,3 +115,20 @@ uv run python -m evals.report
 ## 9. Tests
 
 `tests/` — 43 tests, all offline, including two full calls through the real Pipecat pipeline and MCP servers exercised through an MCP client. CI runs lint, mypy and tests on every push (`.github/workflows/ci.yml`).
+
+## 10. Web app and hosting
+
+| What | Where |
+|---|---|
+| API: scenarios, cases, document upload, metrics, live call over SSE, Deepgram TTS, per-IP live-call limits | `src/vocalis/web/server.py` |
+| Deepgram Aura-2 voices per speaker, cached on disk | `src/vocalis/web/tts.py` |
+| The page: Live / Offline / Recorded modes, voices, DTMF tones, hold music, live pipeline diagram + explainer feed | `web/index.html` |
+| Recorded-call bundle for the always-on demo (+ pre-voiced showcase calls) | `evals/export_demo.py` → `web/demo/` |
+| Always-on demo (static, GitHub Pages) | `.github/workflows/pages.yml` |
+| Live backend (Cloud Run, scales to zero) | `Dockerfile`, `scripts/deploy_cloudrun.py` |
+
+```bash
+uv run vocalis serve                        # http://127.0.0.1:8000
+uv run python -m evals.export_demo --audio  # rebuild the recorded demo (voices cost Deepgram credit)
+uv run python scripts/deploy_cloudrun.py    # deploy the backend; then commit web/config.js
+```

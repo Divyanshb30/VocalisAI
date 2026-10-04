@@ -20,11 +20,13 @@ v1 runs on a **faithfully simulated phone line** (8 kHz μ-law, in-band DTMF, IV
 
 ## Try it
 
-- **Always-on demo, no install:** [divyanshb30.github.io/VocalisAI](https://divyanshb30.github.io/VocalisAI/) replays the 25 recorded evaluation calls with voices, keypad tones and hold music, next to the case, the passenger's legal entitlements and the result.
-- **Run it yourself:** `uv run vocalis serve` → http://127.0.0.1:8000
-  - **Live**: real models, the call streams line by line; upload a photo of a boarding pass or cancellation email to open your own case.
-  - **Offline**: the same Pipecat pipeline with scripted models, no API keys.
-  - **Recorded**: the replay demo. If a live call hits an API error, the page offers the recorded call instead.
+**[divyanshb30.github.io/VocalisAI](https://divyanshb30.github.io/VocalisAI/)** — no install. Three modes, with a live view of what happens behind the scenes on every turn (guards, Flows state, LLM, tools, handoffs):
+
+- **Live**: real models on a Cloud Run backend; the call streams line by line with Deepgram voices. Upload a photo of a boarding pass or cancellation email to open your own case. Capped at a few calls per visitor per day (free-tier quotas).
+- **Offline**: the same Pipecat pipeline with scripted models, no API usage.
+- **Recorded**: the 25 evaluation calls replayed with voices, keypad tones and hold music. Works even if the backend is asleep or an API fails, and the page falls back to it automatically.
+
+Run it locally with `uv run vocalis serve` → http://127.0.0.1:8000.
 
 ---
 

@@ -1,0 +1,16 @@
+.git/
+.venv/
+.cache/
+.claude/
+.env
+.env.*
+**/__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+evals/docbench/data/
+evals/results/runs/
+evals/results/*.log
+CLAUDE.md
+PROGRESS.md
+CHECKLIST.md
