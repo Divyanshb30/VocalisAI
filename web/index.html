@@ -3,180 +3,291 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VocalisAI — the AI that calls the airline for you</title>
+<title>VocalisAI: the AI agent that phones the airline for you</title>
+<meta name="description" content="A voice agent that navigates airline phone menus, waits on hold, argues passenger rights and hands the call to you for anything only you can do. Live demo and recorded calls.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
 <script src="config.js"></script>
 <style>
-:root{--bg:#070b14;--glass:rgba(255,255,255,.035);--glass2:rgba(255,255,255,.06);--stroke:rgba(255,255,255,.08);--text:#e8ecf4;--muted:#8a93a6;
---a1:#6d7bff;--a2:#22d3ee;--ok:#34d399;--warn:#fbbf24;--bad:#f87171;--vio:#a78bfa;--grad:linear-gradient(135deg,var(--a1),var(--a2))}
+/* Tokens. One accent (instrument amber); green and red only carry state (verified / leaked).
+   Radius rule: controls 8px, panels 12px, pills fully round. */
+:root{
+  --bg:#0c0d0f;--panel:#131417;--raised:#1a1c20;--line:#26282d;--line-strong:#363940;
+  --text:#ecedef;--muted:#9a9ea8;--faint:#6b6f78;
+  --accent:#f0a83a;--accent-ink:#1a1206;--accent-soft:rgba(240,168,58,.12);--accent-line:rgba(240,168,58,.45);
+  --ok:#4cc38a;--ok-soft:rgba(76,195,138,.12);--bad:#e5534b;--bad-soft:rgba(229,83,75,.12);
+  --r-ctl:8px;--r-panel:12px;
+  --sans:Geist,ui-sans-serif,system-ui,sans-serif;--mono:"Geist Mono",ui-monospace,SFMono-Regular,monospace;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#f6f6f4;--panel:#ffffff;--raised:#f1f1ee;--line:#e3e3df;--line-strong:#cfcfc9;
+  --text:#18191b;--muted:#5d6068;--faint:#8a8d94;
+  --accent:#b8740f;--accent-ink:#ffffff;--accent-soft:rgba(184,116,15,.10);--accent-line:rgba(184,116,15,.45);
+  --ok:#1f8a5a;--ok-soft:rgba(31,138,90,.10);--bad:#c43a32;--bad-soft:rgba(196,58,50,.09);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#f6f6f4;--panel:#ffffff;--raised:#f1f1ee;--line:#e3e3df;--line-strong:#cfcfc9;
+    --text:#18191b;--muted:#5d6068;--faint:#8a8d94;
+    --accent:#b8740f;--accent-ink:#ffffff;--accent-soft:rgba(184,116,15,.10);--accent-line:rgba(184,116,15,.45);
+    --ok:#1f8a5a;--ok-soft:rgba(31,138,90,.10);--bad:#c43a32;--bad-soft:rgba(196,58,50,.09);
+    color-scheme:light;
+  }
+}
 *{box-sizing:border-box}html,body{margin:0}
-body{font:14.5px/1.5 Inter,system-ui,sans-serif;color:var(--text);background:radial-gradient(1200px 600px at 10% -10%,rgba(109,123,255,.18),transparent 60%),radial-gradient(900px 500px at 110% 10%,rgba(34,211,238,.12),transparent 60%),var(--bg);min-height:100vh}
-header{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(7,11,20,.7);backdrop-filter:blur(14px);border-bottom:1px solid var(--stroke)}
-.brand{display:flex;align-items:center;gap:12px}.logo{width:34px;height:34px;border-radius:10px;background:var(--grad);display:grid;place-items:center;box-shadow:0 6px 24px rgba(109,123,255,.45)}
-.logo i{display:flex;gap:2px;align-items:center}.logo i b{width:3px;border-radius:2px;background:#fff}.logo i b:nth-child(1){height:8px}.logo i b:nth-child(2){height:16px}.logo i b:nth-child(3){height:11px}.logo i b:nth-child(4){height:6px}
-.brand h1{margin:0;font-size:18px;letter-spacing:-.01em}.brand p{margin:0;color:var(--muted);font-size:12.5px}
-.seg{display:flex;padding:3px;border-radius:11px;background:var(--glass2);border:1px solid var(--stroke)}
-.seg button{border:0;background:none;color:var(--muted);font:500 13px Inter;padding:7px 13px;border-radius:8px;cursor:pointer}
-.seg button.on{background:var(--grad);color:#fff;box-shadow:0 4px 14px rgba(109,123,255,.35)}.seg button:disabled{opacity:.3;cursor:not-allowed}
-.chipstat{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;border:1px solid var(--stroke);background:var(--glass)}
-.led{width:8px;height:8px;border-radius:50%;background:var(--warn);box-shadow:0 0 10px currentColor}
-main{display:grid;grid-template-columns:330px minmax(0,1fr) 330px;gap:16px;padding:18px 24px;max-width:1700px;margin:0 auto}
-@media(max-width:1250px){main{grid-template-columns:1fr}}
-.card{background:var(--glass);border:1px solid var(--stroke);border-radius:16px;padding:16px;backdrop-filter:blur(10px);box-shadow:0 10px 40px rgba(0,0,0,.25)}
-.stack{display:flex;flex-direction:column;gap:16px;min-width:0}
-h3{margin:0 0 12px;font:600 11.5px Inter;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
-h3 .dot{width:6px;height:6px;border-radius:50%;background:var(--grad)}
-select,.btn{font:500 13.5px Inter;color:var(--text);background:var(--glass2);border:1px solid var(--stroke);border-radius:10px;padding:9px 12px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
-select{width:100%}select option,select optgroup{background:#10151f}.btn:hover{border-color:rgba(255,255,255,.2)}.btn:disabled{opacity:.4;cursor:not-allowed}
-.btn.primary{background:var(--grad);border:0;color:#fff;box-shadow:0 6px 20px rgba(109,123,255,.35)}
-.kv{display:grid;grid-template-columns:88px 1fr;gap:6px 10px;margin:14px 0 16px;font-size:13.5px}.kv div:nth-child(odd){color:var(--muted)}
-.pnr{font:500 13px 'JetBrains Mono',monospace;letter-spacing:.08em;padding:1px 7px;border-radius:6px;background:rgba(109,123,255,.15);color:#c7ceff}
-ul.ent{list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:7px}
-ul.ent li{font-size:12.8px;padding:8px 10px;border-radius:10px;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.18)}
-.tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:12px;margin:0 5px 5px 0;border:1px solid var(--stroke)}
-.tag.ok{color:#86efac;border-color:rgba(52,211,153,.35);background:rgba(52,211,153,.07)}.tag.no{color:#fca5a5;border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.07)}
-.callhead{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
-.phase{padding:5px 12px;border-radius:999px;font-weight:600;font-size:12.5px;background:var(--glass2);border:1px solid var(--stroke)}
-.phase.live{color:#86efac;border-color:rgba(52,211,153,.4)}.phase.hold{color:var(--warn);border-color:rgba(251,191,36,.4)}.phase.hand{color:var(--vio);border-color:rgba(167,139,250,.45)}
-.timer{font:500 13px 'JetBrains Mono',monospace;color:var(--muted)}
-.wave{display:flex;gap:3px;align-items:center;height:18px;margin-right:auto}.wave b{width:3px;height:4px;border-radius:2px;background:var(--a2);opacity:.5}
-.speaking .wave b{animation:wv .9s ease-in-out infinite}.speaking .wave b:nth-child(2){animation-delay:.1s}.speaking .wave b:nth-child(3){animation-delay:.2s}.speaking .wave b:nth-child(4){animation-delay:.3s}.speaking .wave b:nth-child(5){animation-delay:.15s}
-@keyframes wv{0%,100%{height:4px;opacity:.5}50%{height:18px;opacity:1}}
-#log{height:420px;overflow:auto;display:flex;flex-direction:column;gap:9px;padding:6px 4px 6px 0;scroll-behavior:smooth}
-.msg{max-width:80%;padding:10px 13px;border-radius:14px;font-size:14px;animation:pop .28s ease}
-@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98)}}
-.msg small{display:block;font-size:11px;color:var(--muted);margin-bottom:3px;font-weight:500}
-.agent{align-self:flex-end;background:linear-gradient(135deg,rgba(109,123,255,.28),rgba(34,211,238,.18));border:1px solid rgba(109,123,255,.35);border-bottom-right-radius:4px}
-.rep{align-self:flex-start;background:var(--glass2);border:1px solid var(--stroke);border-bottom-left-radius:4px}
-.passenger{align-self:flex-start;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.35)}
-.ivr,.hold{align-self:center;max-width:92%;text-align:center;font-size:12.8px;color:var(--muted);border:1px dashed var(--stroke);background:none}.hold{font-style:italic}
-.system{align-self:center;font-size:12.5px;color:var(--vio);padding:4px 12px;border-radius:999px;background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.3)}
-.keys{font:500 13px 'JetBrains Mono',monospace;padding:2px 8px;border-radius:6px;background:rgba(52,211,153,.12);color:#86efac}
-.empty{margin:auto;text-align:center;color:var(--muted);max-width:460px;font-size:14px}
-.banner{display:none;margin-bottom:10px;padding:9px 12px;border-radius:10px;font-size:13px;color:#fde68a;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.35)}
+body{font:15px/1.55 var(--sans);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased;min-height:100dvh}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:var(--r-ctl)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.mono{font-family:var(--mono)}
+.ph{font-size:18px;line-height:1}
+
+/* top bar */
+header.bar{position:sticky;top:0;z-index:10;height:60px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 24px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:saturate(140%) blur(8px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.01em}
+.mark{display:flex;gap:2px;align-items:center;height:18px}.mark b{width:3px;border-radius:2px;background:var(--accent)}
+.mark b:nth-child(1){height:7px}.mark b:nth-child(2){height:16px}.mark b:nth-child(3){height:11px}.mark b:nth-child(4){height:5px}
+.tools{display:flex;align-items:center;gap:10px}
+.seg{display:flex;padding:3px;border-radius:var(--r-ctl);background:var(--panel);border:1px solid var(--line)}
+.seg button{border:0;background:none;color:var(--muted);font:500 13px var(--sans);padding:6px 12px;border-radius:6px;cursor:pointer;transition:color .15s,background .15s}
+.seg button:hover:not(:disabled){color:var(--text)}
+.seg button.on{background:var(--raised);color:var(--text);box-shadow:inset 0 0 0 1px var(--line-strong)}
+.seg button:disabled{opacity:.35;cursor:not-allowed}
+.status{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);padding:6px 10px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.led{width:7px;height:7px;border-radius:50%;background:var(--faint)}.led.up{background:var(--ok)}
+.iconbtn{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:var(--r-ctl);border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer;text-decoration:none;transition:color .15s,border-color .15s}
+.iconbtn:hover{color:var(--text);border-color:var(--line-strong)}
+
+/* intro */
+.intro{max-width:1480px;margin:0 auto;padding:40px 24px 28px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:40px;align-items:end}
+.intro h1{margin:0;font-size:clamp(30px,3.6vw,46px);line-height:1.08;letter-spacing:-.035em;font-weight:600;max-width:17ch}
+.intro p{margin:14px 0 22px;color:var(--muted);font-size:16.5px;max-width:52ch}
+.cta{display:flex;gap:10px;flex-wrap:wrap}
+.btn{font:500 14px var(--sans);color:var(--text);background:var(--panel);border:1px solid var(--line-strong);border-radius:var(--r-ctl);padding:9px 14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;transition:border-color .15s,background .15s,transform .1s}
+.btn:hover:not(:disabled){border-color:var(--faint)}.btn:active:not(:disabled){transform:translateY(1px)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.primary:hover:not(:disabled){background:color-mix(in srgb,var(--accent) 88%,var(--text))}
+.figures{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--line)}
+.fig{padding:16px 16px 4px 0}.fig+.fig{padding-left:16px;border-left:1px solid var(--line)}
+.fig b{display:block;font:500 clamp(26px,2.6vw,34px)/1.1 var(--mono);letter-spacing:-.03em}
+.fig span{display:block;margin-top:6px;font-size:13px;color:var(--muted)}
+.figures-note{grid-column:1/-1;font-size:12.5px;color:var(--faint);padding-top:10px}
+
+/* console */
+main{max-width:1480px;margin:0 auto;padding:0 24px 48px;display:grid;grid-template-columns:300px minmax(0,1fr) 300px;gap:16px}
+@media(max-width:1180px){main{grid-template-columns:minmax(0,1fr)}.intro{grid-template-columns:minmax(0,1fr);gap:24px}}
+@media(max-width:640px){header.bar{padding:0 16px;gap:8px}.status,.gh{display:none}.seg button{padding:6px 9px}.intro{padding:28px 16px 20px}main{padding:0 16px 32px}.figures{grid-template-columns:minmax(0,1fr)}.fig+.fig{padding-left:0;border-left:0;border-top:1px solid var(--line)}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-panel);padding:18px;min-width:0}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.panel h2{margin:0 0 14px;font-size:14px;font-weight:600;letter-spacing:-.005em;display:flex;align-items:center;gap:8px}
+.panel h2 .ph{color:var(--muted);font-size:16px}
+.panel h3{margin:18px 0 8px;font-size:12.5px;font-weight:600;color:var(--muted)}
+label.field{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px}
+select{width:100%;font:500 14px var(--sans);color:var(--text);background:var(--raised);border:1px solid var(--line);border-radius:var(--r-ctl);padding:9px 10px;cursor:pointer}
+select:hover{border-color:var(--line-strong)}select option,select optgroup{background:var(--panel);color:var(--text)}
+.row-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.kv{display:grid;grid-template-columns:84px minmax(0,1fr);gap:7px 10px;margin:16px 0 4px;font-size:13.5px}.kv dt{color:var(--muted)}.kv dd{margin:0}
+.code{font:500 12.5px var(--mono);letter-spacing:.06em;padding:2px 7px;border-radius:6px;background:var(--raised);border:1px solid var(--line)}
+ul.ent{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+ul.ent li{font-size:13px;padding:8px 10px;border-radius:var(--r-ctl);background:var(--raised);border-left:2px solid var(--ok)}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12.5px;margin:0 6px 6px 0;border:1px solid var(--line-strong);color:var(--muted)}
+.pill.yes{color:var(--text)}.pill.target{border-color:var(--accent-line);color:var(--text);background:var(--accent-soft)}
+.pill.never{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,transparent);background:var(--bad-soft)}
+.note{font-size:12.5px;color:var(--muted);margin-top:12px}
+
+/* call */
+.callhead{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding-bottom:14px;margin-bottom:12px;border-bottom:1px solid var(--line)}
+.phase{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;font-weight:600;font-size:12.5px;border:1px solid var(--line-strong);color:var(--muted)}
+.phase::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--faint)}
+.phase.live{color:var(--text);border-color:var(--accent-line)}.phase.live::before{background:var(--accent)}
+.phase.hold{color:var(--text)}.phase.hold::before{background:var(--muted)}
+.phase.hand{color:var(--text);border-style:dashed}.phase.hand::before{background:var(--text)}
+.timer{font:500 13px var(--mono);color:var(--muted)}
+.wave{display:flex;gap:3px;align-items:center;height:18px;margin-right:auto}.wave b{width:3px;height:4px;border-radius:2px;background:var(--faint)}
+.speaking .wave b{background:var(--accent);animation:wv .9s ease-in-out infinite}
+.speaking .wave b:nth-child(2){animation-delay:.1s}.speaking .wave b:nth-child(3){animation-delay:.2s}.speaking .wave b:nth-child(4){animation-delay:.3s}.speaking .wave b:nth-child(5){animation-delay:.15s}
+@keyframes wv{0%,100%{height:4px}50%{height:18px}}
+.callhead select{width:auto;padding:7px 8px}
+#log{height:440px;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:4px 6px 4px 0;scroll-behavior:smooth}
+.msg{max-width:78%;padding:9px 13px;border-radius:var(--r-panel);font-size:14.5px;line-height:1.5;animation:enter .22s cubic-bezier(.16,1,.3,1)}
+@keyframes enter{from{opacity:0;transform:translateY(6px)}}
+.msg small{display:block;font:500 11.5px var(--mono);color:var(--muted);margin-bottom:3px;letter-spacing:.01em}
+.agent{align-self:flex-end;background:var(--accent-soft);border:1px solid var(--accent-line);border-bottom-right-radius:4px}
+.rep{align-self:flex-start;background:var(--raised);border:1px solid var(--line);border-bottom-left-radius:4px}
+.passenger{align-self:flex-start;background:var(--raised);border:1px dashed var(--line-strong);border-bottom-left-radius:4px}
+.ivr,.hold{align-self:center;max-width:90%;text-align:center;font-size:13px;color:var(--muted);background:none;border:0;padding:2px 8px}
+.hold{font-style:italic}
+.system{align-self:stretch;max-width:none;display:flex;align-items:center;gap:10px;font:500 12px var(--mono);color:var(--muted);padding:0;background:none;border:0}
+.system::before,.system::after{content:"";flex:1;height:1px;background:var(--line-strong)}
+.keys{font:500 13px var(--mono);padding:2px 8px;border-radius:6px;background:var(--raised);border:1px solid var(--line-strong)}
+.empty{margin:auto;text-align:center;color:var(--muted);max-width:440px;font-size:14.5px}
+.empty .ph{font-size:30px;color:var(--faint);display:block;margin-bottom:10px}
+.banner{display:none;margin-bottom:10px;padding:10px 12px;border-radius:var(--r-ctl);font-size:13.5px;background:var(--accent-soft);border:1px solid var(--accent-line)}
+
+/* pipeline */
+.flowgrid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;align-items:start}
+@media(max-width:900px){.flowgrid{grid-template-columns:minmax(0,1fr)}}
 svg#pipe{width:100%;height:auto;display:block}
-.node rect{fill:rgba(255,255,255,.04);stroke:rgba(255,255,255,.12);rx:12;transition:all .35s}.node text{fill:#aab2c5;font:500 12px Inter;text-anchor:middle;transition:fill .35s}
-.node text.sub{font-size:10px;fill:#6c7488}.node.on rect{fill:rgba(109,123,255,.22);stroke:#8b96ff;filter:drop-shadow(0 0 10px rgba(109,123,255,.7))}.node.on text{fill:#fff}
-.node.warn.on rect{fill:rgba(167,139,250,.22);stroke:var(--vio);filter:drop-shadow(0 0 10px rgba(167,139,250,.7))}
-.node.hold.on rect{fill:rgba(251,191,36,.15);stroke:var(--warn);filter:drop-shadow(0 0 10px rgba(251,191,36,.6))}
-.edge{stroke:rgba(255,255,255,.12);stroke-width:1.6;fill:none;transition:stroke .35s}.edge.on{stroke:var(--a2);stroke-width:2.2;stroke-dasharray:6 5;animation:flow .7s linear infinite}
+.node rect{fill:var(--raised);stroke:var(--line-strong);stroke-width:1;transition:fill .3s,stroke .3s}
+.node text{fill:var(--text);font:500 12px var(--sans);text-anchor:middle;transition:fill .3s}
+.node text.sub{font:400 10px var(--mono);fill:var(--muted)}
+.node.on rect{fill:var(--accent-soft);stroke:var(--accent)}.node.on text.sub{fill:var(--text)}
+.edge{stroke:var(--line-strong);stroke-width:1.4;fill:none;transition:stroke .3s}
+.edge.on{stroke:var(--accent);stroke-width:2;stroke-dasharray:6 5;animation:flow .7s linear infinite}
 @keyframes flow{to{stroke-dashoffset:-22}}
-#feed{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:230px;overflow:auto}
-#feed li{display:grid;grid-template-columns:26px 1fr;gap:8px;padding:9px 10px;border-radius:10px;background:var(--glass2);border:1px solid var(--stroke);animation:pop .3s ease;font-size:13px}
-#feed li b{display:block;font-weight:600;font-size:12.8px}#feed li span{color:var(--muted)}#feed li:first-child{border-color:rgba(109,123,255,.45)}
-.big{font-size:24px;font-weight:700;letter-spacing:-.02em;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;margin:2px 0 10px}
-.row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--stroke);font-size:13.5px}.row span{color:var(--muted)}.row b{font-weight:600;text-align:right}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{padding:12px;border-radius:12px;background:var(--glass2);border:1px solid var(--stroke)}
-.stat b{display:block;font-size:22px;letter-spacing:-.02em}.stat span{font-size:12px;color:var(--muted)}
-.note{font-size:12.3px;color:var(--muted);margin-top:10px}
+#feed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:270px;overflow:auto}
+#feed li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;padding:9px 10px;border-radius:var(--r-ctl);background:var(--raised);font-size:13px;animation:enter .25s ease}
+#feed li .ph{color:var(--muted);font-size:17px;margin-top:1px}
+#feed li b{display:block;font-weight:600;font-size:13px}#feed li span{color:var(--muted)}
+#feed li:first-child{box-shadow:inset 2px 0 0 var(--accent)}#feed li:first-child .ph{color:var(--accent)}
+
+/* result + metrics */
+.outcome{font-size:24px;font-weight:600;letter-spacing:-.02em;margin:0 0 10px}
+.line{display:flex;justify-content:space-between;gap:10px;padding:9px 0;font-size:13.5px}.line+.line{border-top:1px solid var(--line)}
+.line span{color:var(--muted)}.line b{font-weight:500;text-align:right}
+.good{color:var(--ok)}.badc{color:var(--bad)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r-ctl);overflow:hidden}
+.stat{padding:12px;background:var(--panel)}.stat b{display:block;font:500 21px var(--mono);letter-spacing:-.03em}.stat span{font-size:12px;color:var(--muted)}
+
+footer{max-width:1480px;margin:0 auto;padding:20px 24px 40px;color:var(--faint);font-size:12.5px;border-top:1px solid var(--line)}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
 </style>
 </head>
 <body>
-<header>
-  <div class="brand"><div class="logo"><i><b></b><b></b><b></b><b></b></i></div>
-    <div><h1>VocalisAI</h1><p>The AI agent that phones the airline for you — and hands you the call when it's your turn.</p></div></div>
-  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-    <div class="seg" id="modes"><button data-mode="replay" class="on">Recorded</button><button data-mode="offline">Offline</button><button data-mode="live">Live</button></div>
-    <div class="chipstat" id="status"><span class="led"></span>connecting…</div>
+<header class="bar">
+  <div class="brand"><span class="mark" aria-hidden="true"><b></b><b></b><b></b><b></b></span><span class="name">VocalisAI</span></div>
+  <div class="tools">
+    <div class="seg" id="modes" role="group" aria-label="Call mode"><button data-mode="replay" class="on" aria-pressed="true">Recorded</button><button data-mode="offline" aria-pressed="false">Offline</button><button data-mode="live" aria-pressed="false">Live</button></div>
+    <div class="status" id="status" role="status"><span class="led"></span><span class="txt">connecting</span></div>
+    <button class="iconbtn" id="theme" aria-label="Switch light or dark theme"><i class="ph ph-circle-half"></i></button>
+    <a class="iconbtn gh" href="https://github.com/Divyanshb30/VocalisAI" aria-label="Source on GitHub"><i class="ph ph-github-logo"></i></a>
   </div>
 </header>
 
-<main>
-  <div class="stack">
-    <section class="card">
-      <h3><span class="dot"></span>Case</h3>
+<section class="intro">
+  <div>
+    <h1>An AI agent that phones the airline for you.</h1>
+    <p>It works the phone menu, waits on hold, argues your passenger rights, and hands you the call when only you can answer.</p>
+    <div class="cta"><button class="btn primary" id="heroPlay"><i class="ph ph-play"></i>Play a recorded call</button><a class="btn" href="https://github.com/Divyanshb30/VocalisAI#evaluation">How it's measured</a></div>
+  </div>
+  <div class="figures" id="figures" aria-live="polite"></div>
+</section>
+
+<main id="console">
+  <div class="col">
+    <section class="panel" aria-labelledby="h-case">
+      <h2 id="h-case"><i class="ph ph-airplane-tilt"></i>Case</h2>
+      <label class="field" for="scenario">Scenario</label>
       <select id="scenario"></select>
-      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-        <label class="btn" id="uploadBtn">📷 Read my document<input type="file" id="file" accept="image/*" hidden></label>
-        <a class="btn" href="demo/samples/doc_000.jpg" target="_blank">Sample boarding pass</a>
+      <div class="row-actions">
+        <label class="btn" id="uploadBtn"><i class="ph ph-scan"></i>Read my boarding pass<input type="file" id="file" accept="image/*" hidden></label>
+        <a class="btn" href="demo/samples/doc_000.jpg" target="_blank" rel="noopener">Sample document</a>
       </div>
       <div id="case"></div>
     </section>
   </div>
 
-  <div class="stack">
-    <section class="card" id="callcard">
+  <div class="col">
+    <section class="panel" id="callcard" aria-labelledby="h-call">
+      <h2 id="h-call" class="sr">Call</h2>
       <div class="callhead">
         <span class="phase" id="phase">Ready</span><span class="timer" id="timer">00:00</span>
-        <div class="wave"><b></b><b></b><b></b><b></b><b></b></div>
-        <button class="btn primary" id="start">▶ Place call</button><button class="btn" id="stop" disabled>■</button>
-        <select id="speed" style="width:auto"><option value="1">1×</option><option value="1.25" selected>1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select>
-        <button class="btn" id="voice">🔊</button>
+        <div class="wave" aria-hidden="true"><b></b><b></b><b></b><b></b><b></b></div>
+        <button class="btn primary" id="start"><i class="ph ph-phone-outgoing"></i>Place call</button>
+        <button class="btn" id="stop" disabled aria-label="Stop the call"><i class="ph ph-stop"></i></button>
+        <label class="sr" for="speed">Playback speed</label>
+        <select id="speed"><option value="1">1×</option><option value="1.25" selected>1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select>
+        <button class="btn" id="voice" aria-label="Mute voices" aria-pressed="true"><i class="ph ph-speaker-high"></i></button>
       </div>
-      <div class="banner" id="banner"></div>
-      <div id="log"><div class="empty">Pick a case and press <b>Place call</b>.<br><br>Watch the agent press through the phone menu, wait on hold, disclose it's an AI, argue the passenger's legal rights, and hand the call over for anything like an OTP or card number.</div></div>
+      <div class="banner" id="banner" role="alert"></div>
+      <div id="log" role="log" aria-live="polite" aria-label="Call transcript"><div class="empty"><i class="ph ph-phone-call"></i>Pick a scenario and press <b>Place call</b>. The agent works through the phone menu, waits on hold, says it is an AI, argues the passenger's rights, and hands over for anything like an OTP or card number.</div></div>
     </section>
-    <section class="card">
-      <h3><span class="dot"></span>Behind the scenes — live</h3>
-      <svg id="pipe" viewBox="0 0 1000 250"></svg>
-      <ul id="feed"></ul>
+    <section class="panel" aria-labelledby="h-flow">
+      <h2 id="h-flow"><i class="ph ph-flow-arrow"></i>What the system is doing</h2>
+      <div class="flowgrid">
+        <svg id="pipe" viewBox="0 0 1000 250" role="img" aria-label="Pipeline diagram: the active path lights up as the call progresses"></svg>
+        <ul id="feed" aria-label="Step-by-step explanation"></ul>
+      </div>
     </section>
   </div>
 
-  <div class="stack">
-    <section class="card"><h3><span class="dot"></span>Result</h3><div id="report"><div class="note">The outcome appears when the call ends.</div></div></section>
-    <section class="card"><h3><span class="dot"></span>Evaluation</h3><div id="metrics"><div class="note">Loading…</div></div></section>
+  <div class="col">
+    <section class="panel" aria-labelledby="h-result"><h2 id="h-result"><i class="ph ph-receipt"></i>Result</h2><div id="report"><div class="note">The outcome appears when the call ends.</div></div></section>
+    <section class="panel" aria-labelledby="h-eval"><h2 id="h-eval"><i class="ph ph-chart-bar"></i>Evaluation</h2><div id="metrics"><div class="note">Loading results</div></div></section>
   </div>
 </main>
+<footer>Simulated calls only: VocalisAI never phones real businesses. Every number on this page is read from the evaluation results in the repository.</footer>
 
 <script>
 const API=(new URLSearchParams(location.search).get("api")||window.VOCALIS_API||"").replace(/\/$/,"");
 const $=s=>document.querySelector(s);
-const OUT={cash_refund:"Cash refund",compensation:"Compensation",refund_and_compensation:"Refund + compensation",rebooking:"Rebooking",voucher:"Voucher",callback:"Callback"};
-const st={mode:"replay",api:false,live:false,tts:false,demo:null,playing:false,stop:false,voiceOn:true,caseId:null,es:null,flows:"—",talker:"",repName:null,passenger:null};
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const OUT={cash_refund:"Cash refund",compensation:"Compensation",refund_and_compensation:"Refund and compensation",rebooking:"Rebooking",voucher:"Voucher",callback:"Callback"};
+const st={mode:"replay",api:false,live:false,tts:false,demo:null,playing:false,stop:false,voiceOn:true,caseId:null,es:null,flows:"none",talker:"",repName:null,passenger:null};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const icon=n=>`<i class="ph ph-${n}" aria-hidden="true"></i>`;
+
+// ------------------------------------------------------------------ theme
+(function(){let t=null;try{t=localStorage.getItem("vocalis-theme");}catch{}if(t)document.documentElement.dataset.theme=t;})();
+$("#theme").onclick=()=>{const cur=document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");
+  const next=cur==="light"?"dark":"light";document.documentElement.dataset.theme=next;try{localStorage.setItem("vocalis-theme",next);}catch{}};
 
 // ------------------------------------------------------------------ pipeline diagram
-const NODES={phone:[80,125,"📞 Phone line","8 kHz line sim"],inguard:[215,125,"🛡 Input guard","scans the rep"],flows:[350,125,"🧭 Flows","state: —"],
- llm:[485,125,"🧠 LLM talker","gpt-oss-120b"],vault:[620,125,"🔐 Vault","late-bound secrets"],outguard:[755,125,"✅ Output guard","Luhn · OTP · canaries"],voice:[900,125,"🔊 Voice","TTS"],
- keypad:[215,35,"🎹 Keypad / IVR","in-band DTMF"],hold:[80,35,"♪ Call-state","IVR · hold · human"],rights:[485,35,"⚖ Rights engine","DGCA · UK261 · GCAA"],tools:[620,35,"🛠 Tools","offer · resolution"],
- handoff:[350,215,"⇄ Handoff","passenger joins"],passenger:[520,215,"👤 Passenger","OTP · card · ID"]};
+const NODES={phone:[80,125,"Phone line","8 kHz line sim"],inguard:[215,125,"Input guard","scans the rep"],flows:[350,125,"Flows","state: none"],
+ llm:[485,125,"LLM talker","gpt-oss-120b"],vault:[620,125,"Vault","late-bound secrets"],outguard:[755,125,"Output guard","Luhn, OTP, canaries"],voice:[900,125,"Voice","TTS"],
+ keypad:[215,35,"Keypad / IVR","in-band DTMF"],hold:[80,35,"Call state","IVR, hold, human"],rights:[485,35,"Rights engine","DGCA, UK261, GCAA"],tools:[620,35,"Tools","offer, resolution"],
+ handoff:[350,215,"Handoff","passenger joins"],passenger:[520,215,"Passenger","OTP, card, ID"]};
 const EDGES=[["phone","inguard"],["inguard","flows"],["flows","llm"],["llm","vault"],["vault","outguard"],["outguard","voice"],["voice","phone",true],
  ["phone","hold"],["hold","flows"],["llm","keypad"],["keypad","phone"],["rights","llm"],["llm","tools"],["tools","flows"],["inguard","handoff"],["handoff","passenger"],["passenger","phone"]];
 function drawPipe(){const W=120,H=46;let s="";
   for(const [a,b,back] of EDGES){const [x1,y1]=NODES[a],[x2,y2]=NODES[b];
     const d=back?`M${x1},${y1+H/2} C${x1},${y1+95} ${x2},${y2+95} ${x2},${y2+H/2}`:`M${x1},${y1} L${x2},${y2}`;s+=`<path class="edge" id="e-${a}-${b}" d="${d}"/>`;}
-  for(const [k,[x,y,t,sub]] of Object.entries(NODES)){const cls=k==="handoff"||k==="passenger"?"warn":k==="hold"?"hold":"";
-    s+=`<g class="node ${cls}" id="n-${k}"><rect x="${x-W/2}" y="${y-H/2}" width="${W}" height="${H}"/><text x="${x}" y="${y-2}">${t}</text><text class="sub" x="${x}" y="${y+13}" id="s-${k}">${sub}</text></g>`;}
+  for(const [k,[x,y,t,sub]] of Object.entries(NODES)){
+    s+=`<g class="node" id="n-${k}"><rect x="${x-W/2}" y="${y-H/2}" width="${W}" height="${H}" rx="8"/><text x="${x}" y="${y-3}">${t}</text><text class="sub" x="${x}" y="${y+13}" id="s-${k}">${sub}</text></g>`;}
   $("#pipe").innerHTML=s;}
 function light(nodes){document.querySelectorAll("#pipe .on").forEach(e=>e.classList.remove("on"));
   nodes.forEach(n=>{const el=document.getElementById("n-"+n);el&&el.classList.add("on");});
   for(let i=0;i<nodes.length-1;i++){const e=document.getElementById(`e-${nodes[i]}-${nodes[i+1]}`)||document.getElementById(`e-${nodes[i+1]}-${nodes[i]}`);e&&e.classList.add("on");}}
 function setSub(k,t){const el=document.getElementById("s-"+k);if(el)el.textContent=t;}
-function feed(icon,title,detail){const li=document.createElement("li");li.innerHTML=`<div>${icon}</div><div><b>${title}</b><span>${detail}</span></div>`;$("#feed").prepend(li);}
+function feed(ic,title,detail){const li=document.createElement("li");li.innerHTML=`${icon(ic)}<div><b>${title}</b><span>${detail}</span></div>`;$("#feed").prepend(li);}
 
 const DT={"1":"697+1209","2":"697+1336","3":"697+1477","4":"770+1209","5":"770+1336","6":"770+1477","7":"852+1209","8":"852+1336","9":"852+1477","0":"941+1336","*":"941+1209","#":"941+1477"};
 const EV={ask_otp:["one-time code","handoff"],ask_card:["full card number","handoff"],ask_passport:["passport number","handoff"],ask_dob:["date of birth","handoff unless allowed"],
  ask_phone:["phone number","shared only if the passenger allowed it"],ask_card_last4:["last 4 card digits","handoff unless allowed"]};
 function explain(l){const t=l.text,m=l.meta||{};
-  if(l.speaker==="ivr"){if(/connect you/i.test(t)){light(["phone","hold"]);feed("📞","Reached the agent queue","The IVR routed the call; the call-state detector now listens for hold vs. a human.");return;}
-    st.flows="ivr";setSub("flows","state: IVR");setSub("hold","→ IVR");light(["phone","hold","flows","llm"]);
-    feed("📞","Phone menu detected","Flows is in the IVR node: the LLM reads the options and picks one with the press_keys tool.");return;}
+  if(l.speaker==="ivr"){if(/connect you/i.test(t)){light(["phone","hold"]);feed("phone","Reached the agent queue","The menu routed the call. The call-state detector now listens for hold music or a human.");return;}
+    st.flows="ivr";setSub("flows","state: IVR");setSub("hold","IVR");light(["phone","hold","flows","llm"]);
+    feed("list-numbers","Phone menu detected","Flows is in the IVR step: the LLM reads the options and picks one with the press_keys tool.");return;}
   const k=t.match(/^\[DTMF ([0-9*#]+)\]$/);
-  if(k){light(["llm","outguard","keypad","phone"]);feed("🎹",`press_keys("${k[1]}")`,`Output guard checks the digits aren't a card/OTP, then in-band tones ${k[1].split("").map(d=>DT[d]).join(", ")} Hz go down the line; the IVR decodes them (Goertzel).`);return;}
-  if(l.speaker==="hold"){setSub("hold","→ HOLD");st.flows="hold";setSub("flows","state: hold (LLM off)");light(["phone","hold"]);feed("♪","On hold — LLM paused","The call-state detector classified this as hold music; no model calls, 0 tokens spent while waiting.");return;}
-  if(l.speaker==="rep"){const nm=t.match(/my name is (\w+)/i);if(nm){st.repName=nm[1];setSub("hold","→ HUMAN");st.flows="negotiate";setSub("flows","state: negotiate");light(["phone","hold","flows"]);
-      feed("👋","A human picked up",`Detector switched hold → human (${esc(nm[1])}). Flows enters the negotiate node; the agent's first line is a scripted AI disclosure.`);return;}
+  if(k){light(["llm","outguard","keypad","phone"]);feed("dots-nine",`press_keys("${k[1]}")`,`The output guard checks the digits are not a card or OTP, then tones of ${k[1].split("").map(d=>DT[d]).join(", ")} Hz go down the line and the menu decodes them.`);return;}
+  if(l.speaker==="hold"){setSub("hold","HOLD");st.flows="hold";setSub("flows","state: hold, LLM off");light(["phone","hold"]);feed("music-notes","On hold, LLM paused","The detector classified this as hold music. No model calls and no tokens while waiting.");return;}
+  if(l.speaker==="rep"){const nm=t.match(/my name is (\w+)/i);if(nm){st.repName=nm[1];setSub("hold","HUMAN");st.flows="negotiate";setSub("flows","state: negotiate");light(["phone","hold","flows"]);
+      feed("user-sound","A human picked up",`The detector switched from hold to human (${esc(nm[1])}). Flows enters the negotiate step and the agent opens with a scripted AI disclosure.`);return;}
     const path=["phone","inguard","flows"];
-    if(m.event&&EV[m.event]){path.splice(2,1,"handoff");light(path);feed("🛡",`Rep asked for the ${EV[m.event][0]}`,`Input guard flagged it → ${EV[m.event][1]}. Sensitive values never enter the model's context.`);return;}
-    if(m.event==="inject"){light(path);feed("⚠️","Prompt-injection attempt","Input guard flagged it. Whatever the rep says is treated as information, never as instructions.");return;}
-    if(m.event==="ask_if_human"){light(path);feed("🤖","\"Are you a real person?\"","The agent must answer truthfully that it is an AI — checked in every eval run.");return;}
-    if(m.event==="offer_voucher"||/voucher|credit shell|travel credit/i.test(t)){light(path);feed("🎟","Offer on the table","The agent calls evaluate_offer to check it against the passenger's mandate before answering.");return;}
+    if(m.event&&EV[m.event]){path.splice(2,1,"handoff");light(path);feed("shield-warning",`Rep asked for the ${EV[m.event][0]}`,`The input guard flagged it: ${EV[m.event][1]}. Sensitive values never enter the model's context.`);return;}
+    if(m.event==="inject"){light(path);feed("warning","Prompt-injection attempt","The input guard flagged it. Whatever the rep says is treated as information, never as instructions.");return;}
+    if(m.event==="ask_if_human"){light(path);feed("robot","“Are you a real person?”","The agent must say truthfully that it is an AI. Every eval run checks this.");return;}
+    if(m.event==="offer_voucher"||/voucher|credit shell|travel credit/i.test(t)){light(path);feed("ticket","Offer on the table","The agent calls evaluate_offer to check it against the passenger's mandate before answering.");return;}
     if(/reference number is/i.test(t)){light(["phone","inguard","flows","tools"]);st.flows="confirm";setSub("flows","state: confirm");
-      feed("📝","Resolution granted","record_resolution tool: the reference is parsed from the rep's own words (not the LLM's copy), then Flows moves to confirm.");return;}
-    light(path);feed("🛡","Input guard: clean","Nothing sensitive requested; the rep's words go to the LLM as a user turn.");return;}
-  if(l.speaker==="system"){light(["inguard","handoff","passenger"]);feed("⇄","Handoff to the passenger","The agent is muted and the passenger is bridged in. The agent keeps listening, but the code never enters its context.");return;}
-  if(l.speaker==="passenger"){if(t.startsWith("(approval)")){light(["llm","tools","handoff","passenger"]);feed("✅","Mandate check",`evaluate_offer: outside the mandate → the passenger was asked and ${/declined/.test(t)?"declined":"approved"}.`);}
-    else{light(["handoff","passenger","phone"]);feed("👤","Passenger speaks to the airline","Handled directly — then the call is handed back to the agent.");}return;}
-  if(l.speaker==="agent"){if(m.scripted){light(["flows","outguard","voice","phone"]);feed("🤖","Scripted AI disclosure","Not generated — always the first thing the agent says, with the booking reference in the phonetic alphabet.");return;}
+      feed("receipt","Resolution granted","record_resolution: the reference is parsed from the rep's own words, not the LLM's copy, then Flows moves to confirm.");return;}
+    light(path);feed("shield-check","Input guard: clean","Nothing sensitive requested. The rep's words go to the LLM as a user turn.");return;}
+  if(l.speaker==="system"){light(["inguard","handoff","passenger"]);feed("arrows-left-right","Handoff to the passenger","The agent is muted and the passenger joins. The agent keeps listening, but the code never enters its context.");return;}
+  if(l.speaker==="passenger"){if(t.startsWith("(approval)")){light(["llm","tools","handoff","passenger"]);feed("check-circle","Mandate check",`evaluate_offer: outside the mandate, so the passenger was asked and ${/declined/.test(t)?"declined":"approved"}.`);}
+    else{light(["handoff","passenger","phone"]);feed("user","Passenger speaks to the airline","Handled directly, then the call goes back to the agent.");}return;}
+  if(l.speaker==="agent"){if(m.scripted){light(["flows","outguard","voice","phone"]);feed("robot","Scripted AI disclosure","Not generated: always the agent's first line, with the booking reference in the phonetic alphabet.");return;}
     const blocked=/not able to share that detail/i.test(t),cites=/DGCA|UK261|EU261|GCAA|Montreal|regulation|Article|para/i.test(t),nato=/(Alpha|Bravo|Charlie|Delta|Echo|Foxtrot|Golf|Hotel|India|Juliett|Kilo|Lima|Mike|November|Oscar|Papa|Quebec|Romeo|Sierra|Tango|Uniform|Victor|Whiskey|X-ray|Yankee|Zulu)\b/.test(t);
     const path=cites?["rights","llm","vault","outguard","voice","phone"]:["flows","llm","vault","outguard","voice","phone"];light(path);
-    const lat=m.latency_s?` in ${(+m.latency_s).toFixed(2)}s`:"";
-    if(blocked)feed("⛔","Output guard blocked a sentence","It matched a sensitive pattern; a safe line was spoken instead.");
-    else if(nato)feed("🔁","Read-back","The agent confirms the reference phonetically so nothing is misheard.");
-    else if(cites)feed("⚖",`LLM replied${lat}, citing the rules`,"Amounts and clauses come from the rights engine (computed in code), not the model's memory. Output guard: passed.");
-    else feed("🧠",`LLM replied${lat}`,`Flows node: ${st.flows}. Vault rendered placeholders; output guard passed (no card, OTP or passport patterns).`);}}
+    const lat=m.latency_s?` in ${(+m.latency_s).toFixed(2)} s`:"";
+    if(blocked)feed("prohibit","Output guard blocked a sentence","It matched a sensitive pattern, so a safe line was spoken instead.");
+    else if(nato)feed("repeat","Read-back","The agent confirms the reference phonetically so nothing is misheard.");
+    else if(cites)feed("scales",`LLM replied${lat}, citing the rules`,"Amounts and clauses come from the rights engine, computed in code, not from the model's memory. Output guard passed.");
+    else feed("brain",`LLM replied${lat}`,`Flows step: ${st.flows}. The vault rendered placeholders and the output guard passed.`);}}
 
 // ------------------------------------------------------------------ audio
 let ctx;const ac=()=>(ctx||=new (window.AudioContext||window.webkitAudioContext)());
@@ -200,34 +311,43 @@ async function speak(l){const text=l.text.replace(/\[[^\]]*\]/g,"").trim();if(!t
 
 // ------------------------------------------------------------------ rendering
 function renderCase(c){if(!c){$("#case").innerHTML="";return;}st.passenger=c.passenger.split(" ")[0];const m=c.mandate;
-  $("#case").innerHTML=`<div class="kv"><div>Passenger</div><div>${c.passenger}</div><div>Booking</div><div><span class="pnr">${c.booking_reference}</span></div>
-  <div>Flight</div><div>${c.airline} ${c.flight}</div><div>Route</div><div>${c.route}</div><div>Departs</div><div>${c.date}</div><div>Problem</div><div>${c.disruption}</div>${c.fare?`<div>Fare</div><div>${c.fare}</div>`:""}</div>
-  <h3><span class="dot"></span>What they're owed</h3><ul class="ent">${c.entitlements.map(e=>`<li>${e}</li>`).join("")||"<li>No regulation clearly applies</li>"}</ul>
-  <h3><span class="dot"></span>Mandate · approved by passenger</h3><div><span class="tag ok">Ask for · ${OUT[m.target]||m.target}</span>${m.acceptable.map(a=>`<span class="tag ok">OK · ${OUT[a]||a}</span>`).join("")}${m.forbidden.map(a=>`<span class="tag no">Never · ${OUT[a]||a}</span>`).join("")}</div>
-  ${c.barcode_found!==undefined?`<div class="note">${c.barcode_found?"✓ Boarding-pass barcode read and cross-checked":"No barcode — fields read by the vision model"}</div>`:""}`;}
-const LBL={agent:"VocalisAI · AI agent",rep:"Airline agent",passenger:"Passenger · handoff",ivr:"📞 Phone menu",hold:"♪ On hold"};
+  $("#case").innerHTML=`<dl class="kv"><dt>Passenger</dt><dd>${esc(c.passenger)}</dd><dt>Booking</dt><dd><span class="code">${esc(c.booking_reference)}</span></dd>
+  <dt>Flight</dt><dd>${esc(c.airline)} ${esc(c.flight)}</dd><dt>Route</dt><dd>${esc(c.route)}</dd><dt>Departs</dt><dd>${esc(c.date)}</dd><dt>Problem</dt><dd>${esc(c.disruption)}</dd>${c.fare?`<dt>Fare</dt><dd>${esc(c.fare)}</dd>`:""}</dl>
+  <h3>What they are owed</h3><ul class="ent">${c.entitlements.map(e=>`<li>${esc(e)}</li>`).join("")||"<li>No regulation clearly applies</li>"}</ul>
+  <h3>Mandate, approved by the passenger</h3><div><span class="pill target">Ask for: ${OUT[m.target]||m.target}</span>${m.acceptable.map(a=>`<span class="pill yes">Accept: ${OUT[a]||a}</span>`).join("")}${m.forbidden.map(a=>`<span class="pill never">Never: ${OUT[a]||a}</span>`).join("")}</div>
+  ${c.barcode_found!==undefined?`<div class="note">${c.barcode_found?"Boarding-pass barcode read and cross-checked.":"No barcode found, so the fields were read by the vision model."}</div>`:""}`;}
+const LBL={agent:"VocalisAI, AI agent",rep:"Airline agent",passenger:"Passenger, handoff",ivr:"Phone menu",hold:"On hold"};
 function addLine(l){const log=$("#log");if(log.querySelector(".empty"))log.innerHTML="";const d=document.createElement("div");const k=l.text.match(/^\[DTMF ([0-9*#]+)\]$/);
-  d.className="msg "+l.speaker;if(l.speaker==="system")d.textContent="⇄ Passenger joins the call";
-  else if(l.speaker==="passenger"&&l.text.startsWith("(approval)"))d.innerHTML=`<small>Passenger · approval</small>${esc(l.text.replace("(approval) ",""))}`;
-  else d.innerHTML=`<small>${l.speaker==="rep"&&st.repName?st.repName+" · airline":LBL[l.speaker]||l.speaker}</small>`+(k?`pressed <span class="keys">${k[1]}</span>`:esc(l.text));
+  d.className="msg "+l.speaker;if(l.speaker==="system")d.textContent="Passenger joins the call";
+  else if(l.speaker==="passenger"&&l.text.startsWith("(approval)"))d.innerHTML=`<small>Passenger approval</small>${esc(l.text.replace("(approval) ",""))}`;
+  else if(l.speaker==="ivr"||l.speaker==="hold")d.innerHTML=k?`Pressed <span class="keys">${k[1]}</span>`:esc(l.text);
+  else d.innerHTML=`<small>${l.speaker==="rep"&&st.repName?esc(st.repName)+", airline":LBL[l.speaker]||l.speaker}</small>`+(k?`Pressed <span class="keys">${k[1]}</span>`:esc(l.text));
   log.appendChild(d);log.scrollTop=log.scrollHeight;}
 function phase(l){const p=$("#phase");const map={ivr:["Phone menu",""],hold:["On hold","hold"],rep:["Live with airline","live"],agent:["Live with airline","live"],passenger:["Passenger on the line","hand"],system:["Handoff","hand"]};
   const v=map[l.speaker];if(v){p.textContent=v[0];p.className="phase "+v[1];}}
 const fmt=t=>{t=Math.max(0,Math.floor(t));return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0");};
 function renderReport(r){if(!r){$("#report").innerHTML='<div class="note">The outcome appears when the call ends.</div>';return;}const lk=r.leaks||[];
-  $("#report").innerHTML=`<div class="big">${r.outcome?OUT[r.outcome]||r.outcome:"No resolution"}</div>
-  <div class="row"><span>Reference</span><b><span class="pnr">${r.reference_number||"—"}</span> ${r.reference_number?(r.reference_verified?"✓ verified":"✗"):""}</b></div>
-  <div class="row"><span>Handoffs to passenger</span><b>${Array.isArray(r.handoffs)?r.handoffs.length:r.handoffs}</b></div>
-  <div class="row"><span>Sensitive data spoken</span><b style="color:${lk.length?"var(--bad)":"var(--ok)"}">${lk.length?lk.join(", "):"none"}</b></div>
-  <div class="row"><span>Disclosed it is an AI</span><b>${r.disclosed_as_ai?"yes":"no"}</b></div><div class="row"><span>Task success</span><b>${r.success?"✓":"✗"}</b></div>
-  ${r.talker?`<div class="note">Talker: ${r.talker}</div>`:""}`;}
-function renderMetrics(s){const v=s&&s.vocalis;if(!v){$("#metrics").innerHTML='<div class="note">No evaluation results.</div>';return;}const p=x=>Math.round(100*x)+"%",t=v.llm_ttfb_s||{},b=s.baseline,m=s.vocalis_on_baseline_scenarios;
-  $("#metrics").innerHTML=`<div class="stats"><div class="stat"><b>${p(v.task_success.rate)}</b><span>task success (${v.task_success.k}/${v.task_success.n})</span></div>
-  <div class="stat"><b>${v.leak_runs.k}</b><span>data leaks in ${v.leak_runs.n} calls</span></div><div class="stat"><b>${v.handoff.recall!=null?p(v.handoff.recall):"—"}</b><span>handoff recall</span></div>
-  <div class="stat"><b>${t.p50!=null?t.p50.toFixed(2)+"s":"—"}</b><span>LLM first token (p50)</span></div></div>
-  ${b&&m?`<div class="row" style="margin-top:10px"><span>Attack scenarios: success vs naive baseline</span><b>${p(m.task_success.rate)} vs ${p(b.task_success.rate)}</b></div>`:""}
-  <div class="row"><span>AI disclosure · phone menu</span><b>${p(v.disclosure_first_utterance.rate)} · ${p(v.ivr_reached_agent.rate)}</b></div>
-  <div class="note">${v.completed} adversarial simulated calls across India, UK and UAE — talker ${(v.talker_models||[]).join(", ")}.</div>`;}
+  $("#report").innerHTML=`<p class="outcome">${r.outcome?OUT[r.outcome]||r.outcome:"No resolution"}</p>
+  <div class="line"><span>Reference</span><b><span class="code">${esc(r.reference_number||"none")}</span> ${r.reference_number?(r.reference_verified?'<span class="good">verified</span>':'<span class="badc">mismatch</span>'):""}</b></div>
+  <div class="line"><span>Handoffs to passenger</span><b>${Array.isArray(r.handoffs)?r.handoffs.length:r.handoffs}</b></div>
+  <div class="line"><span>Sensitive data spoken</span><b class="${lk.length?"badc":"good"}">${lk.length?esc(lk.join(", ")):"none"}</b></div>
+  <div class="line"><span>Disclosed it is an AI</span><b>${r.disclosed_as_ai?"yes":"no"}</b></div><div class="line"><span>Task success</span><b class="${r.success?"good":"badc"}">${r.success?"yes":"no"}</b></div>
+  ${r.talker?`<div class="note">Talker model: ${esc(r.talker)}</div>`:""}`;}
+const pct=x=>Math.round(100*x)+"%";
+function renderFigures(s){const v=s&&s.vocalis;if(!v){$("#figures").innerHTML="";return;}
+  const vo=s.vocalis_voice&&s.vocalis_voice.voice&&s.vocalis_voice.voice.voice_to_voice_s,t=v.llm_ttfb_s||{};
+  const lat=vo&&vo.p50!=null?[`${vo.p50.toFixed(2)} s`,"voice-to-voice reply, median"]:t.p50!=null?[`${t.p50.toFixed(2)} s`,"LLM first token, median"]:null;
+  $("#figures").innerHTML=`<div class="fig"><b>${pct(v.task_success.rate)}</b><span>calls ending in the passenger's target outcome</span></div>
+  <div class="fig"><b>${v.leak_runs.k}</b><span>sensitive values leaked in ${v.leak_runs.n} calls</span></div>
+  ${lat?`<div class="fig"><b>${lat[0]}</b><span>${lat[1]}</span></div>`:""}
+  <div class="figures-note">From ${v.completed} adversarial simulated calls across India, the UK and the UAE.</div>`;}
+function renderMetrics(s){const v=s&&s.vocalis;renderFigures(s);if(!v){$("#metrics").innerHTML='<div class="note">No evaluation results.</div>';return;}const t=v.llm_ttfb_s||{},b=s.baseline,m=s.vocalis_on_baseline_scenarios;
+  $("#metrics").innerHTML=`<div class="stats"><div class="stat"><b>${pct(v.task_success.rate)}</b><span>task success, ${v.task_success.k} of ${v.task_success.n}</span></div>
+  <div class="stat"><b>${v.leak_runs.k}</b><span>leaks in ${v.leak_runs.n} calls</span></div><div class="stat"><b>${v.handoff.recall!=null?pct(v.handoff.recall):"n/a"}</b><span>handoff recall</span></div>
+  <div class="stat"><b>${t.p50!=null?t.p50.toFixed(2)+" s":"n/a"}</b><span>LLM first token, median</span></div></div>
+  ${b&&m?`<div class="line" style="margin-top:12px"><span>Attack scenarios vs naive baseline</span><b>${pct(m.task_success.rate)} vs ${pct(b.task_success.rate)}</b></div>`:""}
+  <div class="line"><span>AI disclosure, phone menu</span><b>${pct(v.disclosure_first_utterance.rate)}, ${pct(v.ivr_reached_agent.rate)}</b></div>
+  <div class="note">${v.completed} simulated calls. Talker: ${esc((v.talker_models||[]).join(", "))}.</div>`;}
 function banner(msg,offer){const b=$("#banner");if(!msg){b.style.display="none";return;}b.style.display="block";
   b.innerHTML=esc(msg)+(offer&&st.demo?` <button class="btn" id="toReplay" style="margin-left:8px">Watch a recorded call instead</button>`:"");const x=$("#toReplay");if(x)x.onclick=()=>{setMode("replay");banner("");start();};}
 
@@ -235,12 +355,12 @@ function banner(msg,offer){const b=$("#banner");if(!msg){b.style.display="none";
 async function playLine(l){if(st.stop)return;phase(l);$("#timer").textContent=fmt(l.t||0);addLine(l);explain(l);
   const k=l.text.match(/^\[DTMF ([0-9*#]+)\]$/);if(k)return dtmf(k[1]);if(l.speaker==="hold")return holdMusic();
   if(l.speaker==="system"||l.text.startsWith("(approval)"))return sleep(700);return speak(l);}
-function reset(){speechSynthesis.cancel();$("#log").innerHTML="";$("#feed").innerHTML="";renderReport(null);st.repName=null;st.flows="—";setSub("flows","state: —");setSub("hold","IVR · hold · human");
-  light(["phone"]);$("#phase").textContent="Dialing…";$("#phase").className="phase";$("#timer").textContent="00:00";banner("");feed("☎️","Dialing","The agent calls the airline's line; the phone-line simulator applies 8 kHz μ-law, band-pass and noise.");}
+function reset(){speechSynthesis.cancel();$("#log").innerHTML="";$("#feed").innerHTML="";renderReport(null);st.repName=null;st.flows="none";setSub("flows","state: none");setSub("hold","IVR, hold, human");
+  light(["phone"]);$("#phase").textContent="Dialing";$("#phase").className="phase";$("#timer").textContent="00:00";banner("");feed("phone-outgoing","Dialing","The agent calls the airline. The line simulator applies 8 kHz mu-law, band-pass filtering and noise.");}
 function busy(on){st.playing=on;$("#start").disabled=on;$("#stop").disabled=!on;$("#scenario").disabled=on;}
 async function start(){if(st.playing)return;st.stop=false;reset();busy(true);ac();try{st.mode==="replay"?await replay():await stream();}finally{busy(false);}}
 async function replay(){const c=st.demo.calls.find(c=>c.id===$("#scenario").value)||st.demo.calls[0];renderCase(c.case);setSub("llm",(c.report.talker||"").split("/").pop()||"LLM");
-  for(const l of c.transcript){if(st.stop)break;await playLine(l);}if(!st.stop){$("#phase").textContent="Call ended";$("#phase").className="phase";light([]);renderReport(c.report);feed("🏁","Call ended","Scored by the eval harness: outcome vs mandate, reference captured, leaks, handoffs.");}}
+  for(const l of c.transcript){if(st.stop)break;await playLine(l);}if(!st.stop){$("#phase").textContent="Call ended";$("#phase").className="phase";light([]);renderReport(c.report);feed("flag-checkered","Call ended","Scored by the eval harness: outcome against the mandate, reference captured, leaks and handoffs.");}}
 function stream(){return new Promise(resolve=>{const q=[];let rep=null,done=false,pumping=false;const t0=performance.now();const sc=$("#scenario").value;
   const url=sc==="__uploaded"&&st.caseId?`${API}/api/call?case_id=${st.caseId}&mode=${st.mode}`:`${API}/api/call?scenario=${encodeURIComponent(sc)}&mode=${st.mode}`;
   setSub("llm",st.mode==="offline"?"scripted (offline)":"free-tier router");const es=st.es=new EventSource(url);
@@ -252,29 +372,31 @@ function stream(){return new Promise(resolve=>{const q=[];let rep=null,done=fals
     if(!done){done=true;es.close();banner(msg,true);const w=setInterval(()=>{if(!pumping){clearInterval(w);resolve();}},200);}});});}
 
 // ------------------------------------------------------------------ setup
-function setMode(m){st.mode=m;document.querySelectorAll("#modes button").forEach(b=>b.classList.toggle("on",b.dataset.mode===m));fill();}
+function setMode(m){st.mode=m;document.querySelectorAll("#modes button").forEach(b=>{const on=b.dataset.mode===m;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on);});fill();}
 async function fill(){const sel=$("#scenario"),prev=sel.value;let items;
-  if(st.mode==="replay")items=st.demo?st.demo.calls.map(c=>({id:c.id,title:(c.voiced?"🎧 ":"")+c.title,j:c.jurisdiction})):[];
+  if(st.mode==="replay")items=st.demo?st.demo.calls.map(c=>({id:c.id,title:c.title+(c.voiced?" (with audio)":""),j:c.jurisdiction})):[];
   else items=(await (await fetch(`${API}/api/scenarios`)).json()).map(s=>({id:s.id,title:s.title,j:s.jurisdiction}));
-  const G={IN:"India · DGCA",UK:"UK · UK261",AE:"UAE · GCAA"};
-  sel.innerHTML=Object.entries(G).map(([k,g])=>`<optgroup label="${g}">${items.filter(i=>i.j===k).map(i=>`<option value="${i.id}">${i.title}</option>`).join("")}</optgroup>`).join("")+(st.caseId&&st.mode!=="replay"?`<option value="__uploaded">📷 Your uploaded document</option>`:"");
+  const G={IN:"India, DGCA",UK:"UK, UK261",AE:"UAE, GCAA"};
+  sel.innerHTML=Object.entries(G).map(([k,g])=>`<optgroup label="${g}">${items.filter(i=>i.j===k).map(i=>`<option value="${esc(i.id)}">${esc(i.title)}</option>`).join("")}</optgroup>`).join("")+(st.caseId&&st.mode!=="replay"?`<option value="__uploaded">Your uploaded document</option>`:"");
   if([...sel.options].some(o=>o.value===prev))sel.value=prev;show();}
 async function show(){const id=$("#scenario").value;if(id==="__uploaded")return;
   if(st.mode==="replay"){const c=st.demo&&st.demo.calls.find(c=>c.id===id);renderCase(c&&c.case);}else try{renderCase(await (await fetch(`${API}/api/case/${encodeURIComponent(id)}`)).json());}catch{}}
 async function init(){drawPipe();
-  try{st.demo=await (await fetch("demo/calls.json")).json();renderMetrics(st.demo.summary);}catch{}
+  try{st.demo=await (await fetch("demo/calls.json",{cache:"no-cache"})).json();renderMetrics(st.demo.summary);}catch{}
   try{const h=await (await fetch(`${API}/api/health`,{signal:AbortSignal.timeout(4000)})).json();st.api=true;st.live=!!h.live;st.tts=!!h.tts;}catch{st.api=false;}
-  $("#status").innerHTML=st.api?`<span class="led" style="background:var(--ok);color:var(--ok)"></span>live server${st.tts?" · Deepgram voices":""}${st.live?"":" · offline only"}`:`<span class="led" style="color:var(--warn)"></span>recorded demo · server asleep or offline`;
+  $("#status").innerHTML=st.api?`<span class="led up"></span><span class="txt">server live${st.tts?", Deepgram voices":""}${st.live?"":", offline only"}</span>`:`<span class="led"></span><span class="txt">recorded calls only, server asleep</span>`;
   document.querySelector('[data-mode="offline"]').disabled=!st.api;document.querySelector('[data-mode="live"]').disabled=!(st.api&&st.live);$("#uploadBtn").style.display=st.api&&st.live?"":"none";
-  if(st.api)fetch(`${API}/api/metrics`).then(r=>r.json()).then(m=>m.vocalis&&renderMetrics(m)).catch(()=>{});await fill();}
+  if(!st.demo&&st.api)fetch(`${API}/api/metrics`).then(r=>r.json()).then(m=>m.vocalis&&renderMetrics(m)).catch(()=>{});  // the exported results are newer than a deployed server's
+  await fill();}
 document.querySelectorAll("#modes button").forEach(b=>b.onclick=()=>{if(!st.playing&&!b.disabled)setMode(b.dataset.mode);});
 $("#scenario").onchange=show;$("#start").onclick=start;
+$("#heroPlay").onclick=()=>{if(st.mode!=="replay")setMode("replay");$("#console").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});start();};
 $("#stop").onclick=()=>{st.stop=true;speechSynthesis.cancel();document.querySelectorAll("audio").forEach(a=>a.pause());if(st.es)st.es.close();$("#phase").textContent="Stopped";busy(false);};
-$("#voice").onclick=()=>{st.voiceOn=!st.voiceOn;$("#voice").textContent=st.voiceOn?"🔊":"🔇";if(!st.voiceOn)speechSynthesis.cancel();};
-$("#file").onchange=async e=>{const f=e.target.files[0];if(!f)return;banner("Reading the document…");const fd=new FormData();fd.append("file",f);
+$("#voice").onclick=()=>{st.voiceOn=!st.voiceOn;$("#voice").innerHTML=icon(st.voiceOn?"speaker-high":"speaker-slash");$("#voice").setAttribute("aria-pressed",st.voiceOn);$("#voice").setAttribute("aria-label",st.voiceOn?"Mute voices":"Unmute voices");if(!st.voiceOn)speechSynthesis.cancel();};
+$("#file").onchange=async e=>{const f=e.target.files[0];if(!f)return;banner("Reading the document");const fd=new FormData();fd.append("file",f);
   try{const r=await fetch(`${API}/api/extract`,{method:"POST",body:fd});const j=await r.json();if(!r.ok)throw new Error(j.detail||"failed");st.caseId=j.case_id;banner("");
-    if(st.mode==="replay")setMode("live");await fill();$("#scenario").value="__uploaded";renderCase(j);feed("📷","Document read","Vision model extracted the fields; the boarding-pass barcode (IATA BCBP) was cross-checked; entitlements computed in code.");}
-  catch(err){banner("Could not read the document: "+err.message+" — try a built-in case or the recorded demo.",true);}};
+    if(st.mode==="replay")setMode("live");await fill();$("#scenario").value="__uploaded";renderCase(j);feed("scan","Document read","The vision model extracted the fields, the boarding-pass barcode (IATA BCBP) was cross-checked, and entitlements were computed in code.");}
+  catch(err){banner("Could not read the document: "+err.message+". Try a built-in scenario or a recorded call.",true);}};
 init();
 </script>
 </body>

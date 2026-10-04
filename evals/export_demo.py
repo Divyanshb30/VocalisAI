@@ -55,7 +55,7 @@ def render_audio(calls: list[dict]) -> None:
 def main() -> None:
     scenarios = {s.id: s for s in load_scenarios(Path("evals/scenarios"))}
     calls = []
-    for path in sorted(RUNS.glob("*.json")):
+    for path in sorted(RUNS.glob("*__s0.json")):  # one recorded call per scenario
         data = json.loads(path.read_text(encoding="utf-8"))
         s = data["score"]
         sc = scenarios.get(s["scenario"])
@@ -80,7 +80,7 @@ def main() -> None:
                     "handoffs": len(s["handoffs"]),
                     "leaks": s["leaks"],
                     "disclosed_as_ai": s["disclosed_first"],
-                    "talker": ", ".join(s.get("talker_models", [])),
+                    "talker": (s.get("talker_models") or [""])[0],  # primary; the rest is failover
                 },
             }
         )
