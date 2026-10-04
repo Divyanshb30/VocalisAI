@@ -37,7 +37,8 @@ SMOKE = {
     "ae_ek_cancel_weather__prompt_injector",
 }
 
-CONFIGS = {
+QWEN = "cerebras/qwen-3.8-27b"
+CONFIGS: dict[str, dict[str, Any]] = {
     "vocalis": dict(guards=True, baseline_prompt_secrets=False),
     "baseline": dict(guards=False, baseline_prompt_secrets=True),
     # Same guards as "vocalis", kept separate so a same-talker comparison with "baseline" is possible
@@ -45,6 +46,9 @@ CONFIGS = {
     # Same agent, but the far end is heard as phone audio through streaming STT and replies are timed
     # to the first TTS audio byte (see vocalis/telephony/voicelink.py)
     "vocalis_voice": dict(guards=True, baseline_prompt_secrets=False),
+    # Same agent with a different talker model, for a model comparison (Cerebras qwen-3.8-27b, 450 req/min)
+    "vocalis_qwen": dict(guards=True, baseline_prompt_secrets=False, talker_models=[QWEN]),
+    "vocalis_qwen_voice": dict(guards=True, baseline_prompt_secrets=False, talker_models=[QWEN]),
 }
 
 
@@ -82,9 +86,9 @@ async def run_one(
     return scored
 
 
-async def cerebras_hour_used(router: LLMRouter) -> int | None:
-    """Requests Cerebras counts against this key in the last hour (a 1-token call, read from its headers)."""
-    model = router.s.talker_models[0].split("/", 1)[1]
+async def cerebras_hour_used(router: LLMRouter, talker: str) -> int | None:
+    """Requests Cerebras counts against this model in the last hour (a 1-token call, read from its headers)."""
+    model = talker.split("/", 1)[1]
     try:
         async with httpx.AsyncClient(timeout=30) as http:
             r = await http.post(
@@ -102,15 +106,14 @@ async def cerebras_hour_used(router: LLMRouter) -> int | None:
     return used
 
 
-async def watch_hourly_budget(router: LLMRouter) -> None:
-    """Pace against Cerebras' rolling 150 requests/hour, starting from what it has already counted."""
-    talker = router.s.talker_models[0] if router.s.talker_models else ""
-    if not talker.startswith("cerebras/") or not router.s.cerebras_api_key:
+async def watch_hourly_budget(router: LLMRouter, talker: str) -> None:
+    """Pace against a model's rolling requests/hour cap (gpt-oss-120b: 150), from what Cerebras has counted."""
+    if talker not in CallSimulation.HOURLY or not router.s.cerebras_api_key:
         return
-    CallSimulation.hour_probe = lambda: cerebras_hour_used(router)
-    used = await cerebras_hour_used(router)
+    CallSimulation.hour_probe = lambda: cerebras_hour_used(router, talker)
+    used = await cerebras_hour_used(router, talker)
     if used:
-        CallSimulation.hour_log["cerebras"] = [time.monotonic()] * used
+        CallSimulation.hour_log[talker] = [time.monotonic()] * used
 
 
 async def main_async(a: argparse.Namespace) -> None:
@@ -125,7 +128,8 @@ async def main_async(a: argparse.Namespace) -> None:
         )
     except Exception as exc:
         logger.warning(f"rep warm-up failed: {exc}")
-    await watch_hourly_budget(router)
+    talker = (CONFIGS[a.config].get("talker_models") or router.s.talker_models or [""])[0]
+    await watch_hourly_budget(router, talker)
     scenarios = load_scenarios(Path("evals/scenarios"))
     if a.smoke:
         scenarios = [s for s in scenarios if s.id in SMOKE]

@@ -171,9 +171,17 @@ class CallSimulation:
         )
         return approved
 
-    # Free-tier per-minute caps, with headroom: (tokens/min, requests/min). Measured from
-    # provider rate-limit headers: Groq 8K TPM / 30 RPM, Cerebras 30K TPM / 5 RPM.
-    PACING: ClassVar[dict[str, tuple[int, int]]] = {"groq": (6500, 25), "cerebras": (25000, 4)}
+    # Free-tier per-minute caps, with headroom: (uncached tokens/min, requests/min), per model or provider.
+    # From rate-limit headers: Groq 8K TPM / 30 RPM; Cerebras gpt-oss-120b 30K / 5; qwen-3.8-27b 150K / 450.
+    PACING: ClassVar[dict[str, tuple[int, int]]] = {
+        "groq": (6500, 25),
+        "cerebras/gpt-oss-120b": (25000, 4),
+        "cerebras/qwen-3.8-27b": (140000, 400),
+    }
+
+    def _limits_key(self, talker_models: list[str]) -> str:
+        model = talker_models[0] if talker_models else ""
+        return model if model in self.PACING else model.split("/", 1)[0]
 
     async def _pace_talker(self, talker_models: list[str]) -> None:
         """Stay under the talker's per-minute caps so it doesn't fail over mid-call.
@@ -182,7 +190,7 @@ class CallSimulation:
         """
         if not self.cfg.pace:
             return
-        provider = talker_models[0].split("/", 1)[0] if talker_models else ""
+        provider = self._limits_key(talker_models)
         if provider not in self.PACING:
             return
         tpm, rpm = self.PACING[provider]
@@ -203,8 +211,8 @@ class CallSimulation:
             self._tpm_log.pop(0)
         await self._pace_hourly(provider, new_requests)
 
-    # Requests per hour, shared by every call in the process (Cerebras free tier: 150/h, rolling).
-    HOURLY: ClassVar[dict[str, int]] = {"cerebras": 145}
+    # Requests per hour, shared by every call in the process (Cerebras gpt-oss-120b free tier: 150/h, rolling).
+    HOURLY: ClassVar[dict[str, int]] = {"cerebras/gpt-oss-120b": 145}
     hour_log: ClassVar[dict[str, list[float]]] = {}
     # async () -> requests the provider counts in the last hour; corrects the local estimate when it says full
     hour_probe: ClassVar[Any] = None
