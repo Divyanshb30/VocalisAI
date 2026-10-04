@@ -14,6 +14,7 @@ from vocalis.cases import case_from_fields
 from vocalis.core.geo import _AIRPORTS, _CARRIERS
 from vocalis.rights.engine import assess
 from vocalis.rights.models import Regime
+from vocalis.rights.policy import PolicyIndex
 
 mcp = FastMCP(
     "vocalis-rights",
@@ -107,6 +108,24 @@ def explain_regime(regime: str) -> str:
         return REGIME_NOTES[Regime(regime.upper())]
     except ValueError:
         return f"Unknown regime {regime!r}. Choose from: {', '.join(r.value for r in Regime)}."
+
+
+_POLICY: PolicyIndex | None = None
+
+
+@mcp.tool
+def search_regulations(question: str, jurisdiction: str | None = None, k: int = 5) -> list[dict[str, Any]]:
+    """Find the regulation paragraphs that answer a question (EU261, UK261), each with its citation.
+
+    jurisdiction: "UK" or "EU" to restrict the search. Hybrid BM25 + dense retrieval.
+    """
+    global _POLICY
+    if _POLICY is None:
+        _POLICY = PolicyIndex()
+    return [
+        {"citation": h.passage.id, "title": h.passage.title, "text": h.passage.text, "url": h.passage.url}
+        for h in _POLICY.search(question, k=k, jurisdiction=jurisdiction)
+    ]
 
 
 @mcp.tool

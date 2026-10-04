@@ -18,6 +18,7 @@ RUNS = Path("evals/results/runs")
 SUMMARY = Path("evals/results/summary.json")
 DOCBENCH = Path("evals/results/docbench.json")
 NETWORK = Path("evals/results/network.json")
+RETRIEVAL = Path("evals/results/retrieval.json")
 EVALS_MD = Path("docs/evals.md")
 README = Path("README.md")
 
@@ -346,6 +347,18 @@ def metrics_table(s: dict[str, Any]) -> str:
                     f"({ds['documents'] - ds['errors']} synthetic docs, {ds['model']})",
                 )
             )
+    ret = s.get("retrieval")
+    if ret:
+        r = ret["results"]
+        fmt = lambda m: f"{pct(r[m]['recall_at_1'])} / {pct(r[m]['recall_at_5'])} / {r[m]['mrr_at_10']:.2f}"  # noqa: E731
+        rows.append(
+            (
+                "Regulation retrieval",
+                "hand-written passenger questions over EU261/UK261 article paragraphs; top-1 / top-5 / MRR@10",
+                f"hybrid {fmt('hybrid')} vs BM25 {fmt('bm25')} vs dense {fmt('dense')} "
+                f"({ret['questions']} questions, {ret['passages']} passages)",
+            )
+        )
     if not rows:
         return ""
     out = ["| Metric | Definition | Result |", "|---|---|---|"]
@@ -382,6 +395,10 @@ def main() -> None:
     if DOCBENCH.exists():
         summary["docbench"] = json.loads(DOCBENCH.read_text(encoding="utf-8"))
         summary["docbench"].pop("per_doc", None)
+    if RETRIEVAL.exists():
+        summary["retrieval"] = json.loads(RETRIEVAL.read_text(encoding="utf-8"))
+        for r in summary["retrieval"]["results"].values():
+            r.pop("misses_at_5", None)
     SUMMARY.parent.mkdir(parents=True, exist_ok=True)
     SUMMARY.write_text(json.dumps(summary, indent=1), encoding="utf-8")
 

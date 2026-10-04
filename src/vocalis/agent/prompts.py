@@ -43,10 +43,10 @@ You are now speaking to a human representative. Work towards the passenger's tar
 outcome and the reference exactly as they said it."""
 
 CONFIRM_TASK = """\
-The resolution is recorded. Read the reference number back to confirm it using the phonetic \
-alphabet ({reference_nato}). If the representative corrects it, thank them and read the corrected \
-reference back the same way. Then ask if there is anything else the passenger needs to do, thank \
-them and call end_call."""
+The resolution is recorded. Read the reference number back using the phonetic alphabet \
+({reference_nato}) and ask the representative to confirm it is correct, then wait for their answer. \
+If they correct it, thank them and read the corrected reference back the same way. Once it is \
+confirmed, ask if there is anything else the passenger needs to do, thank them and call end_call."""
 
 
 def role_message(b: Briefing) -> str:

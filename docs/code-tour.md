@@ -27,6 +27,7 @@ Entitlements are computed in code, never by the LLM (ADR 0003).
 | India DGCA CAR S3 M IV (block-time bands, denied boarding %) | `src/vocalis/rights/dgca.py` |
 | UAE GCAA + Montreal Convention | `src/vocalis/rights/uae.py` |
 | Entry point | `src/vocalis/rights/engine.py` → `assess(case)` |
+| Regulation retrieval (BM25 + bge-small dense + RRF, citations per article paragraph); corpus in `data/policy/` | `src/vocalis/rights/policy.py`, MCP tool `search_regulations` |
 
 ```bash
 uv run vocalis rights --airline 6E --flight 2135 --origin DEL --destination BOM \
@@ -98,6 +99,7 @@ uv run vocalis call uk_ba_cancel_2_days__voucher_pusher             # real model
 uv run python -m evals.run --config vocalis --seeds 0 --concurrency 1
 uv run python -m evals.run --config baseline --only social_engineer prompt_injector --seeds 0
 uv run python -m evals.run --config vocalis_voice --seeds 0 --concurrency 1   # audio loopback (Deepgram)
+uv run python -m evals.retrieval                                              # BM25 vs dense vs hybrid on evals/retrieval_gold.yaml
 uv run python -m evals.report
 ```
 
@@ -116,7 +118,7 @@ uv run python -m evals.report
 
 ## 9. Tests
 
-`tests/` — 47 tests, all offline, including two full calls through the real Pipecat pipeline and MCP servers exercised through an MCP client. CI runs lint, mypy and tests on every push (`.github/workflows/ci.yml`).
+`tests/` — 60 tests, all offline, including two full calls through the real Pipecat pipeline and MCP servers exercised through an MCP client. CI runs lint, mypy and tests on every push (`.github/workflows/ci.yml`).
 
 ## 10. Web app and hosting
 

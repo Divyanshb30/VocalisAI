@@ -1,0 +1,83 @@
+# Hand-written questions for regulation retrieval. Phrased the way a passenger or agent would ask,
+# not copied from the regulation. `relevant` lists every paragraph that answers the question;
+# questions without a jurisdiction cue accept the EU or UK version.
+- q: My flight was cancelled six days before departure. Am I owed compensation?
+  relevant: [EU261 Art. 5(1), UK261 Art. 5(1)]
+- q: The airline blamed a storm for the cancellation and refuses to pay anything.
+  relevant: [EU261 Art. 5(3), UK261 Art. 5(3)]
+- q: Who has to prove when I was told about the cancellation, me or the airline?
+  relevant: [EU261 Art. 5(4), UK261 Art. 5(4)]
+- q: How much compensation in euros for a flight of about 1,200 km?
+  relevant: [EU261 Art. 7(1)]
+- q: Compensation in pounds for a long-haul flight from London to Delhi
+  relevant: [UK261 Art. 7(1)]
+- q: Can the airline cut my compensation in half because they rebooked me and I arrived only a bit late?
+  relevant: [EU261 Art. 7(2), UK261 Art. 7(2)]
+- q: The airline wants to pay my compensation as a travel voucher. Are they allowed to?
+  relevant: [EU261 Art. 7(3), UK261 Art. 7(3)]
+- q: How is the flight distance worked out for the compensation band?
+  relevant: [EU261 Art. 7(4), UK261 Art. 7(4)]
+- q: How quickly must the airline refund the ticket after a cancellation?
+  relevant: [EU261 Art. 8(1), UK261 Art. 8(1)]
+- q: Instead of a refund, can I pick a later flight that suits me?
+  relevant: [EU261 Art. 8(1), UK261 Art. 8(1)]
+- q: They flew me into a different airport in the same city. Who pays to get me to the one I booked?
+  relevant: [EU261 Art. 8(3), UK261 Art. 8(3)]
+- q: Do they have to give me food and drinks while I wait at the airport?
+  relevant: [EU261 Art. 9(1), UK261 Art. 9(1)]
+- q: Is the airline required to pay for a hotel if I'm stuck overnight?
+  relevant: [EU261 Art. 9(1), UK261 Art. 9(1)]
+- q: Can I make free phone calls or send emails during a long delay?
+  relevant: [EU261 Art. 9(2), UK261 Art. 9(2)]
+- q: Extra care for a passenger in a wheelchair or a child travelling alone during disruption
+  relevant: [EU261 Art. 9(3), UK261 Art. 9(3), EU261 Art. 11(1), EU261 Art. 11(2)]
+- q: I was moved from business to economy on a 4,000 km flight. How much do I get back?
+  relevant: [EU261 Art. 10(2), UK261 Art. 10(2)]
+- q: I got bumped up to a better cabin. Can they charge me the difference?
+  relevant: [EU261 Art. 10(1), UK261 Art. 10(1)]
+- q: The flight was overbooked and I was refused boarding against my will.
+  relevant: [EU261 Art. 4(3), UK261 Art. 4(3), EU261 Art. 4(2), UK261 Art. 4(2)]
+- q: Before bumping people, does the airline have to ask for volunteers first?
+  relevant: [EU261 Art. 4(1), UK261 Art. 4(1)]
+- q: My 800 km flight is running three hours late. What help must they give me at the airport?
+  relevant: [EU261 Art. 6(1), UK261 Art. 6(1)]
+- q: The delay is over five hours and I no longer want to travel. Can I get my money back?
+  relevant: [EU261 Art. 6(1), UK261 Art. 6(1)]
+- q: I reached my final destination four hours late. Is there cash compensation in the UK?
+  relevant: [UK261 Art. 6(3)]
+- q: The airline says the delay was caused by extraordinary circumstances so it owes nothing.
+  relevant: [UK261 Art. 6(4), EU261 Art. 5(3), UK261 Art. 5(3)]
+- q: Does the regulation cover a flight leaving from an airport in an EU member state?
+  relevant: [EU261 Art. 3(1)]
+- q: Do I need a confirmed booking and to turn up for check-in on time to have these rights?
+  relevant: [EU261 Art. 3(2)]
+- q: Does any of this apply if I was flying free or on a staff discount ticket?
+  relevant: [EU261 Art. 3(3)]
+- q: Does it cover helicopter flights or only aeroplanes?
+  relevant: [EU261 Art. 3(4)]
+- q: My flight was part of a package holiday. Do I still have these rights?
+  relevant: [EU261 Art. 3(6), EU261 Art. 8(2), UK261 Art. 8(2)]
+- q: What counts as the final destination when I have connecting flights?
+  relevant: [EU261 Art. 2]
+- q: Who is the operating carrier if I booked through another airline?
+  relevant: [EU261 Art. 2]
+- q: The agent asked me to sign a form giving up my claim. Is that allowed?
+  relevant: [EU261 Art. 15(1), EU261 Art. 15(2)]
+- q: I accepted a settlement that said I couldn't claim more. Can I still claim?
+  relevant: [EU261 Art. 15(2)]
+- q: Where can I complain if the airline ignores the passenger rights rules?
+  relevant: [EU261 Art. 16(1), EU261 Art. 16(2)]
+- q: Does taking the fixed compensation stop me suing for my other losses?
+  relevant: [EU261 Art. 12(1)]
+- q: Must the airline display a notice about passenger rights at check-in?
+  relevant: [EU261 Art. 14(1)]
+- q: Should the airline hand me a written notice of my rights when it cancels my flight?
+  relevant: [EU261 Art. 14(2)]
+- q: Can an airline that paid compensation recover the cost from someone else who caused the problem?
+  relevant: [EU261 Art. 13]
+- q: Who gets priority for help when the airline is dealing with people with disabilities?
+  relevant: [EU261 Art. 11(1)]
+- q: When they cancel, do they have to tell me what alternative transport is available?
+  relevant: [EU261 Art. 5(2), UK261 Art. 5(2)]
+- q: They told me about the cancellation more than two weeks before. No compensation then?
+  relevant: [EU261 Art. 5(1), UK261 Art. 5(1)]

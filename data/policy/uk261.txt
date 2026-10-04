@@ -1,0 +1,64 @@
+# source: Regulation (EC) No 261/2004 as it has effect in UK law (retained, amended by S.I. 2019/278), Articles 4-10
+# url: https://www.legislation.gov.uk/eur/2004/261/body
+# licence: Contains public sector information licensed under the Open Government Licence v3.0
+# retrieved: 2026-10-04 (amendment footnotes removed)
+Article 4
+Denied boarding
+1.
+When an operating air carrier reasonably expects to deny boarding on a flight, it shall first call for volunteers to surrender their reservations in exchange for benefits under conditions to be agreed between the passenger concerned and the operating air carrier. Volunteers shall be assisted in accordance with Article 8, such assistance being additional to the benefits mentioned in this paragraph.
+2.
+If an insufficient number of volunteers comes forward to allow the remaining passengers with reservations to board the flight, the operating air carrier may then deny boarding to passengers against their will.
+3.
+If boarding is denied to passengers against their will, the operating air carrier shall immediately compensate them in accordance with Article 7 and assist them in accordance with Articles 8 and 9.
+Article 5
+Cancellation
+1.
+In case of cancellation of a flight, the passengers concerned shall: (a) be offered assistance by the operating air carrier in accordance with Article 8; and (b) be offered assistance by the operating air carrier in accordance with Article 9(1)(a) and 9(2), as well as, in event of re-routing when the reasonably expected time of departure of the new flight is at least the day after the departure as it was planned for the cancelled flight, the assistance specified in Article 9(1)(b) and 9(1)(c); and (c) have the right to compensation by the operating air carrier in accordance with Article 7, unless: (i) they are informed of the cancellation at least two weeks before the scheduled time of departure; or (ii) they are informed of the cancellation between two weeks and seven days before the scheduled time of departure and are offered re-routing, allowing them to depart no more than two hours before the scheduled time of departure and to reach their final destination less than four hours after the scheduled time of arrival; or (iii) they are informed of the cancellation less than seven days before the scheduled time of departure and are offered re-routing, allowing them to depart no more than one hour before the scheduled time of departure and to reach their final destination less than two hours after the scheduled time of arrival.
+2.
+When passengers are informed of the cancellation, an explanation shall be given concerning possible alternative transport.
+3.
+An operating air carrier shall not be obliged to pay compensation in accordance with Article 7, if it can prove that the cancellation is caused by extraordinary circumstances which could not have been avoided even if all reasonable measures had been taken.
+4.
+The burden of proof concerning the questions as to whether and when the passenger has been informed of the cancellation of the flight shall rest with the operating air carrier.
+Article 6
+Delay
+1.
+When an operating air carrier reasonably expects a flight to be delayed beyond its scheduled time of departure: (a) for two hours or more in the case of flights of 1500 kilometres or less; or (b) for three hours or more in the case of all flights between 1500 and 3500 kilometres; or (c) for four hours or more in the case of all flights not falling under (a) or (b), passengers shall be offered by the operating air carrier: (i) the assistance specified in Article 9(1)(a) and 9(2); and (ii) when the reasonably expected time of departure is at least the day after the time of departure previously announced, the assistance specified in Article 9(1)(b) and 9(1)(c); and (iii) when the delay is at least five hours, the assistance specified in Article 8(1)(a).
+2.
+In any event, the assistance shall be offered within the time limits set out above with respect to each distance bracket.
+3.
+In case of a delay of three hours or more in reaching the final destination, the passengers concerned have the right to compensation laid down in Article 7.
+4.
+An operating air carrier shall not be obliged to pay compensation in accordance with Article 7, if it can prove that the delay is caused by extraordinary circumstances which could not have been avoided even if all reasonable measures had been taken.
+Article 7
+Right to compensation
+1.
+Where reference is made to this Article, passengers shall receive compensation amounting to: (a) £220 for all flights of 1500 kilometres or less; (b) £350 for all flights between 1500 and 3500 kilometres; (c) £520 for all flights not falling under (a) or (b). In determining the distance, the basis shall be the last destination at which the denial of boarding, delay or cancellation will delay the passenger's arrival after the scheduled time.
+2.
+When passengers are offered re-routing to their final destination on an alternative flight pursuant to Article 8, the arrival time of which does not exceed the scheduled arrival time of the flight originally booked (a) by two hours, in respect of all flights of 1500 kilometres or less; or (b) by three hours, in respect of all flights between 1500 and 3500 kilometres; or (c) by four hours, in respect of all flights not falling under (a) or (b), the operating air carrier may reduce the compensation provided for in paragraph 1 by 50 %.
+3.
+The compensation referred to in paragraph 1 shall be paid in cash, by electronic bank transfer, bank orders or bank cheques or, with the signed agreement of the passenger, in travel vouchers and/or other services.
+4.
+The distances given in paragraphs 1 and 2 shall be measured by the great circle route method.
+Article 8
+Right to reimbursement or re-routing
+1.
+Where reference is made to this Article, passengers shall be offered the choice between: (a) reimbursement within seven days, by the means provided for in Article 7(3), of the full cost of the ticket at the price at which it was bought, for the part or parts of the journey not made, and for the part or parts already made if the flight is no longer serving any purpose in relation to the passenger's original travel plan, together with, when relevant, a return flight to the first point of departure, at the earliest opportunity; (b) re-routing, under comparable transport conditions, to their final destination at the earliest opportunity; or (c) re-routing, under comparable transport conditions, to their final destination at a later date at the passenger's convenience, subject to availability of seats.
+2.
+Paragraph 1(a) shall also apply to passengers whose flights form part of a package, except for the right to reimbursement where such right arises under the Package Travel and Linked Travel Arrangements Regulations 2018.
+3.
+When, in the case where a town, city or region is served by several airports, an operating air carrier offers a passenger a flight to an airport alternative to that for which the booking was made, the operating air carrier shall bear the cost of transferring the passenger from that alternative airport either to that for which the booking was made, or to another close-by destination agreed with the passenger.
+Article 9
+Right to care
+1.
+Where reference is made to this Article, passengers shall be offered free of charge: (a) meals and refreshments in a reasonable relation to the waiting time; (b) hotel accommodation in cases where a stay of one or more nights becomes necessary, or where a stay additional to that intended by the passenger becomes necessary; (c) transport between the airport and place of accommodation (hotel or other).
+2.
+In addition, passengers shall be offered free of charge two telephone calls, telex or fax messages, or e-mails.
+3.
+In applying this Article, the operating air carrier shall pay particular attention to the needs of persons with reduced mobility and any persons accompanying them, as well as to the needs of unaccompanied children.
+Article 10
+Upgrading and downgrading
+1.
+If an operating air carrier places a passenger in a class higher than that for which the ticket was purchased, it may not request any supplementary payment.
+2.
+If an operating air carrier places a passenger in a class lower than that for which the ticket was purchased, it shall within seven days, by the means provided for in Article 7(3), reimburse (a) 30 % of the price of the ticket for all flights of 1500 kilometres or less, or (b) 50 % of the price of the ticket for all flights between 1500 and 3500 kilometres, or (c) 75 % of the price of the ticket for all flights not falling under (a) or (b).

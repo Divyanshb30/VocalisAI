@@ -1,0 +1,231 @@
+{
+ "questions": 40,
+ "passages": 68,
+ "sources": [
+  "Regulation (EC) No 261/2004 as it has effect in UK law (retained, amended by S.I. 2019/278), Articles 4-10",
+  "Regulation (EC) No 261/2004 of the European Parliament and of the Council, Articles 1-17"
+ ],
+ "dense_model": "BAAI/bge-small-en-v1.5",
+ "rrf_k": 60,
+ "results": {
+  "bm25": {
+   "recall_at_1": 0.5,
+   "recall_at_5": 0.7,
+   "mrr_at_10": 0.5895,
+   "misses_at_5": [
+    {
+     "q": "Who has to prove when I was told about the cancellation, me or the airline?",
+     "first_relevant_rank": 9,
+     "top": [
+      "EU261 Art. 5(3)",
+      "UK261 Art. 5(3)",
+      "EU261 Art. 16(2)"
+     ]
+    },
+    {
+     "q": "How much compensation in euros for a flight of about 1,200 km?",
+     "first_relevant_rank": 9,
+     "top": [
+      "EU261 Art. 16(2)",
+      "EU261 Art. 12(1)",
+      "EU261 Art. 7(3)"
+     ]
+    },
+    {
+     "q": "Can the airline cut my compensation in half because they rebooked me and I arrived only a bit late?",
+     "first_relevant_rank": 20,
+     "top": [
+      "EU261 Art. 3(4)",
+      "EU261 Art. 5(3)",
+      "UK261 Art. 5(3)"
+     ]
+    },
+    {
+     "q": "How quickly must the airline refund the ticket after a cancellation?",
+     "first_relevant_rank": 21,
+     "top": [
+      "EU261 Art. 5(1)",
+      "UK261 Art. 5(1)",
+      "UK261 Art. 10(2)"
+     ]
+    },
+    {
+     "q": "Do they have to give me food and drinks while I wait at the airport?",
+     "first_relevant_rank": 10,
+     "top": [
+      "EU261 Art. 11(1)",
+      "EU261 Art. 8(3)",
+      "UK261 Art. 8(3)"
+     ]
+    },
+    {
+     "q": "Extra care for a passenger in a wheelchair or a child travelling alone during disruption",
+     "first_relevant_rank": 6,
+     "top": [
+      "EU261 Art. 3(3)",
+      "EU261 Art. 9(2)",
+      "UK261 Art. 9(2)"
+     ]
+    },
+    {
+     "q": "I was moved from business to economy on a 4,000 km flight. How much do I get back?",
+     "first_relevant_rank": 20,
+     "top": [
+      "UK261 Art. 6(1)",
+      "EU261 Art. 6(1)",
+      "EU261 Art. 5(1)"
+     ]
+    },
+    {
+     "q": "I got bumped up to a better cabin. Can they charge me the difference?",
+     "first_relevant_rank": 36,
+     "top": [
+      "EU261 Art. 5(3)",
+      "UK261 Art. 5(3)",
+      "UK261 Art. 6(4)"
+     ]
+    },
+    {
+     "q": "Who is the operating carrier if I booked through another airline?",
+     "first_relevant_rank": 8,
+     "top": [
+      "EU261 Art. 8(3)",
+      "UK261 Art. 8(3)",
+      "UK261 Art. 7(2)"
+     ]
+    },
+    {
+     "q": "The agent asked me to sign a form giving up my claim. Is that allowed?",
+     "first_relevant_rank": 42,
+     "top": [
+      "EU261 Art. 2",
+      "EU261 Art. 8(2)",
+      "UK261 Art. 8(2)"
+     ]
+    },
+    {
+     "q": "Does taking the fixed compensation stop me suing for my other losses?",
+     "first_relevant_rank": 10,
+     "top": [
+      "EU261 Art. 3(4)",
+      "EU261 Art. 7(2)",
+      "UK261 Art. 7(2)"
+     ]
+    },
+    {
+     "q": "Can an airline that paid compensation recover the cost from someone else who caused the problem?",
+     "first_relevant_rank": 15,
+     "top": [
+      "EU261 Art. 5(3)",
+      "UK261 Art. 5(3)",
+      "UK261 Art. 6(4)"
+     ]
+    }
+   ]
+  },
+  "dense": {
+   "recall_at_1": 0.6,
+   "recall_at_5": 0.875,
+   "mrr_at_10": 0.7048,
+   "misses_at_5": [
+    {
+     "q": "The delay is over five hours and I no longer want to travel. Can I get my money back?",
+     "first_relevant_rank": 10,
+     "top": [
+      "UK261 Art. 8(1)",
+      "EU261 Art. 8(1)",
+      "EU261 Art. 7(2)"
+     ]
+    },
+    {
+     "q": "What counts as the final destination when I have connecting flights?",
+     "first_relevant_rank": 29,
+     "top": [
+      "EU261 Art. 7(1)",
+      "UK261 Art. 7(1)",
+      "UK261 Art. 5(1)"
+     ]
+    },
+    {
+     "q": "Who is the operating carrier if I booked through another airline?",
+     "first_relevant_rank": 7,
+     "top": [
+      "UK261 Art. 8(3)",
+      "EU261 Art. 8(3)",
+      "UK261 Art. 10(1)"
+     ]
+    },
+    {
+     "q": "The agent asked me to sign a form giving up my claim. Is that allowed?",
+     "first_relevant_rank": 23,
+     "top": [
+      "EU261 Art. 12(2)",
+      "EU261 Art. 14(2)",
+      "UK261 Art. 5(4)"
+     ]
+    },
+    {
+     "q": "Can an airline that paid compensation recover the cost from someone else who caused the problem?",
+     "first_relevant_rank": 20,
+     "top": [
+      "UK261 Art. 5(3)",
+      "EU261 Art. 5(3)",
+      "UK261 Art. 8(3)"
+     ]
+    }
+   ]
+  },
+  "hybrid": {
+   "recall_at_1": 0.7,
+   "recall_at_5": 0.875,
+   "mrr_at_10": 0.7636,
+   "misses_at_5": [
+    {
+     "q": "How quickly must the airline refund the ticket after a cancellation?",
+     "first_relevant_rank": 7,
+     "top": [
+      "EU261 Art. 5(1)",
+      "UK261 Art. 5(1)",
+      "UK261 Art. 10(2)"
+     ]
+    },
+    {
+     "q": "I got bumped up to a better cabin. Can they charge me the difference?",
+     "first_relevant_rank": 6,
+     "top": [
+      "UK261 Art. 9(1)",
+      "EU261 Art. 9(1)",
+      "UK261 Art. 9(2)"
+     ]
+    },
+    {
+     "q": "What counts as the final destination when I have connecting flights?",
+     "first_relevant_rank": 13,
+     "top": [
+      "EU261 Art. 5(1)",
+      "UK261 Art. 5(1)",
+      "UK261 Art. 6(3)"
+     ]
+    },
+    {
+     "q": "The agent asked me to sign a form giving up my claim. Is that allowed?",
+     "first_relevant_rank": 36,
+     "top": [
+      "EU261 Art. 14(2)",
+      "UK261 Art. 8(2)",
+      "EU261 Art. 8(2)"
+     ]
+    },
+    {
+     "q": "Can an airline that paid compensation recover the cost from someone else who caused the problem?",
+     "first_relevant_rank": 14,
+     "top": [
+      "EU261 Art. 5(3)",
+      "UK261 Art. 5(3)",
+      "UK261 Art. 6(4)"
+     ]
+    }
+   ]
+  }
+ }
+}

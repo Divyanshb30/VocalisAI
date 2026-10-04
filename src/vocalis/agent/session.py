@@ -159,6 +159,7 @@ class AgentSession:
         self._runner_task: asyncio.Task[None] | None = None
         self._last_heard = ""
         self._heard: list[str] = []
+        self._heard_since_readback = 0
 
     # ------------------------------------------------------------------ prompts
     def _role(self) -> str:
@@ -204,6 +205,12 @@ class AgentSession:
 
     def _fn_end_call(self) -> FlowsFunctionSchema:
         async def handler(args: dict[str, Any], _fm: FlowManager) -> Any:
+            if self.current_node == "confirm" and self._heard_since_readback == 0:
+                # never hang up on our own read-back: the rep has to get the chance to correct it
+                return {
+                    "status": "not_ended",
+                    "note": "Wait for the representative to confirm the reference.",
+                }
             self.record.ended = True
             return ({"status": "call_ended"}, NO_RESPONSE)
 
@@ -292,6 +299,7 @@ class AgentSession:
                 "reference_number": ref,
             }
             self.record.nodes.append("confirm")
+            self._heard_since_readback = 0
             return ({"status": "recorded"}, self._confirm_node(ref))
 
         return FlowsFunctionSchema(
@@ -366,6 +374,8 @@ class AgentSession:
         """The other side said ``text``; return what the agent says back."""
         self._last_heard = text
         self._heard.append(text)
+        if self.current_node == "confirm":
+            self._heard_since_readback += 1
         self._check_readback(text)
         self.sink.reset_turn()
         t0 = time.monotonic()
