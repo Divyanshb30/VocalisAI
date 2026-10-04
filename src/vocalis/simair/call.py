@@ -212,7 +212,9 @@ class CallSimulation:
         await self._pace_hourly(provider, new_requests)
 
     # Requests per hour, shared by every call in the process (Cerebras gpt-oss-120b free tier: 150/h, rolling).
-    HOURLY: ClassVar[dict[str, int]] = {"cerebras/gpt-oss-120b": 145}
+    # Headroom covers the budget probes themselves, which count against the same cap.
+    HOURLY: ClassVar[dict[str, int]] = {"cerebras/gpt-oss-120b": 135}
+    PROBE_EVERY_S: ClassVar[float] = 300.0
     hour_log: ClassVar[dict[str, list[float]]] = {}
     # async () -> requests the provider counts in the last hour; corrects the local estimate when it says full
     hour_probe: ClassVar[Any] = None
@@ -230,13 +232,13 @@ class CallSimulation:
             if len(log) + 2 <= cap:
                 return
             probe = CallSimulation.hour_probe  # read off the class so it isn't bound as a method
-            if probe is not None and now - CallSimulation._last_probe > 120:
+            if probe is not None and now - CallSimulation._last_probe > self.PROBE_EVERY_S:
                 CallSimulation._last_probe = now
                 used = await probe()
                 if used is not None:
                     log[:] = log[len(log) - used :] if used <= len(log) else [now] * (used - len(log)) + log
                     continue
-            await asyncio.sleep(min(120.0, 3600 - (now - log[0]) + 1))
+            await asyncio.sleep(min(self.PROBE_EVERY_S, 3600 - (now - log[0]) + 1))
 
     async def _on_dtmf(self, digits: str) -> None:
         self.log("agent", f"[DTMF {digits}]", dtmf=digits)
