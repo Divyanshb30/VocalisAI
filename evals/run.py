@@ -82,30 +82,35 @@ async def run_one(
     return scored
 
 
-def seed_hourly_window(router: LLMRouter) -> None:
-    """Start the shared hourly request window from what the provider says is already used this hour."""
-    talker = router.s.talker_models[0] if router.s.talker_models else ""
-    if not talker.startswith("cerebras/") or not router.s.cerebras_api_key:
-        return
+async def cerebras_hour_used(router: LLMRouter) -> int | None:
+    """Requests Cerebras counts against this key in the last hour (a 1-token call, read from its headers)."""
+    model = router.s.talker_models[0].split("/", 1)[1]
     try:
-        r = httpx.post(
-            "https://api.cerebras.ai/v1/chat/completions",
-            headers={"Authorization": f"Bearer {router.s.cerebras_api_key}"},
-            json={
-                "model": talker.split("/", 1)[1],
-                "messages": [{"role": "user", "content": "hi"}],
-                "max_tokens": 1,
-            },
-            timeout=30,
-        )
+        async with httpx.AsyncClient(timeout=30) as http:
+            r = await http.post(
+                "https://api.cerebras.ai/v1/chat/completions",
+                headers={"Authorization": f"Bearer {router.s.cerebras_api_key}"},
+                json={"model": model, "messages": [{"role": "user", "content": "hi"}], "max_tokens": 1},
+            )
         used = int(r.headers["x-ratelimit-limit-requests-hour"]) - int(
             r.headers["x-ratelimit-remaining-requests-hour"]
         )
     except Exception as exc:
         logger.warning(f"could not read the hourly request budget: {exc}")
+        return None
+    logger.info(f"cerebras: {used} requests used in the last hour")
+    return used
+
+
+async def watch_hourly_budget(router: LLMRouter) -> None:
+    """Pace against Cerebras' rolling 150 requests/hour, starting from what it has already counted."""
+    talker = router.s.talker_models[0] if router.s.talker_models else ""
+    if not talker.startswith("cerebras/") or not router.s.cerebras_api_key:
         return
-    CallSimulation.hour_log["cerebras"] = [time.monotonic()] * used
-    logger.info(f"cerebras: {used} requests already used this hour")
+    CallSimulation.hour_probe = lambda: cerebras_hour_used(router)
+    used = await cerebras_hour_used(router)
+    if used:
+        CallSimulation.hour_log["cerebras"] = [time.monotonic()] * used
 
 
 async def main_async(a: argparse.Namespace) -> None:
@@ -120,7 +125,7 @@ async def main_async(a: argparse.Namespace) -> None:
         )
     except Exception as exc:
         logger.warning(f"rep warm-up failed: {exc}")
-    seed_hourly_window(router)
+    await watch_hourly_budget(router)
     scenarios = load_scenarios(Path("evals/scenarios"))
     if a.smoke:
         scenarios = [s for s in scenarios if s.id in SMOKE]

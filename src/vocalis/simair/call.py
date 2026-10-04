@@ -203,9 +203,12 @@ class CallSimulation:
             self._tpm_log.pop(0)
         await self._pace_hourly(provider, new_requests)
 
-    # Requests per hour, shared by every call in the process (Cerebras free tier: 150/h).
+    # Requests per hour, shared by every call in the process (Cerebras free tier: 150/h, rolling).
     HOURLY: ClassVar[dict[str, int]] = {"cerebras": 145}
     hour_log: ClassVar[dict[str, list[float]]] = {}
+    # async () -> requests the provider counts in the last hour; corrects the local estimate when it says full
+    hour_probe: ClassVar[Any] = None
+    _last_probe: ClassVar[float] = 0.0
 
     async def _pace_hourly(self, provider: str, new_requests: int) -> None:
         cap = self.HOURLY.get(provider)
@@ -218,7 +221,14 @@ class CallSimulation:
             log[:] = [t for t in log if now - t < 3600]
             if len(log) + 2 <= cap:
                 return
-            await asyncio.sleep(3600 - (now - log[0]) + 1)
+            probe = CallSimulation.hour_probe  # read off the class so it isn't bound as a method
+            if probe is not None and now - CallSimulation._last_probe > 120:
+                CallSimulation._last_probe = now
+                used = await probe()
+                if used is not None:
+                    log[:] = log[len(log) - used :] if used <= len(log) else [now] * (used - len(log)) + log
+                    continue
+            await asyncio.sleep(min(120.0, 3600 - (now - log[0]) + 1))
 
     async def _on_dtmf(self, digits: str) -> None:
         self.log("agent", f"[DTMF {digits}]", dtmf=digits)
