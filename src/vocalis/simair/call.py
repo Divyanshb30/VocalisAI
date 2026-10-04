@@ -314,7 +314,7 @@ class CallSimulation:
         )
         baseline = self.canaries.forbidden(self.allow) if self.cfg.baseline_prompt_secrets else None
         guards_on = self.cfg.guards and not self.cfg.baseline_prompt_secrets
-        task_role = "developer" if not talker_models or "gpt-oss" in talker_models[0] else "system"
+        task_role = "developer" if not talker_models or "gpt-oss" in talker_models[0] else "user"
         self.session = AgentSession(
             briefing,
             llm,
