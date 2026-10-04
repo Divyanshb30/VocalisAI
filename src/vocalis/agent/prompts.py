@@ -44,7 +44,8 @@ outcome and the reference exactly as they said it."""
 
 CONFIRM_TASK = """\
 The resolution is recorded. Read the reference number back to confirm it using the phonetic \
-alphabet ({reference_nato}), ask if there is anything else the passenger needs to do, then thank \
+alphabet ({reference_nato}). If the representative corrects it, thank them and read the corrected \
+reference back the same way. Then ask if there is anything else the passenger needs to do, thank \
 them and call end_call."""
 
 

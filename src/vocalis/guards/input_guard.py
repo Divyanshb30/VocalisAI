@@ -34,7 +34,8 @@ _PATTERNS: dict[Flag, re.Pattern[str]] = {
         re.I,
     ),
     Flag.IDENTITY: re.compile(
-        r"\b(passport( number)?|aadhaar|national id|emirates id|security question|"
+        r"\b(passport( number)?|(?<!boarding )pass (number|no\.?)|id (number|card)|travel document|"
+        r"aadhaar|national id|emirates id|security question|"
         r"mother'?s maiden|verify (your|the passenger'?s|their) identity|"
         r"last (four|4) (digits )?of (the |your )?card|billing address|password)\b",
         re.I,

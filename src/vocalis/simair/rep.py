@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Any
 
+from vocalis.agent.briefing import NATO
 from vocalis.core.geo import carrier_name
 from vocalis.core.models import OutcomeType
 from vocalis.llm.router import LLMRouter
@@ -93,6 +94,18 @@ class SimRep:
     granted: RepTurn | None = None
     _done_events: set[int] = field(default_factory=set)
     _scripted_lines: set[str] = field(default_factory=set)
+    _corrections: int = 0
+
+    def _correct_readback(self, caller_text: str) -> str | None:
+        """A real agent corrects a wrong read-back of the reference, spelling it phonetically."""
+        ref = self.scenario.rep.reference_number
+        heard = readback_in(caller_text)
+        if self.granted is None or self._corrections >= 2 or heard is None:
+            return None
+        if heard in (ref, self.scenario.case.booking_reference):
+            return None
+        self._corrections += 1
+        return f"Sorry, no. The reference number is {phonetic(ref)}."
 
     def _system_prompt(self) -> str:
         sc = self.scenario
@@ -133,6 +146,12 @@ class SimRep:
     async def respond(self, caller_text: str) -> RepTurn:
         self.turn += 1
         self.history.append({"role": "user", "content": caller_text})
+        correction = self._correct_readback(caller_text)
+        if correction is not None:
+            self.history.append(
+                {"role": "assistant", "content": json.dumps({"say": correction, "action": "none"})}
+            )
+            return RepTurn(say=correction)
         event = self._due_event()
         if event is not None:
             line = event.text or EVENT_LINES[event.action]
@@ -206,6 +225,36 @@ class SimRep:
 def spell_reference(ref: str) -> str:
     """How a call-centre agent reads a reference: 'R 8 Q 4 Z T'."""
     return " ".join(ref)
+
+
+def phonetic(ref: str) -> str:
+    """How an agent corrects a misheard reference: 'R as in Romeo, 8, Q as in Quebec'."""
+    return ", ".join(f"{ch} as in {NATO[ch]}" if ch.isalpha() else ch for ch in ref.upper())
+
+
+_DIGIT_WORDS = {
+    w: str(i)
+    for i, w in enumerate(["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"])
+}
+_NATO_WORDS = {w.lower(): ch for ch, w in NATO.items()} | {"juliet": "J", "alfa": "A", "xray": "X"}
+
+
+def readback_in(text: str) -> str | None:
+    """The code a caller reads back ("Golf Six Sierra Six Mike Five" or "G 6 S 6 M 5"), if any."""
+    codes, run = [], ""
+    for tok in re.findall(r"[A-Za-z]+(?:'[A-Za-z]+)?|\d|[.!?;:]", text.replace("-", "")):
+        ch = _NATO_WORDS.get(tok.lower()) or _DIGIT_WORDS.get(tok.lower())
+        if ch is None and len(tok) == 1 and tok not in ("a", "A", "I") and tok.isalnum():
+            ch = tok.upper()
+        if ch is None:  # a word or the end of a sentence ends the code
+            codes.append(run)
+            run = ""
+            continue
+        run += ch
+    codes.append(run)
+    # a reference has letters in it; "10,000" is an amount, not a read-back
+    found = [c for c in codes if 5 <= len(c) <= 8 and re.search(r"[A-Z]", c)]
+    return max(found, key=len) if found else None
 
 
 _GRANT = re.compile(

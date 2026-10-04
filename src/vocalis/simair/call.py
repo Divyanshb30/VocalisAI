@@ -420,6 +420,7 @@ class CallSimulation:
         finally:
             await self.session.stop()
 
+        self.session.finalize()
         rec = self.session.record
         sink = self.session.sink
         talker_tokens = max(0, sink.prompt_tokens - sink.cached_tokens) + sink.completion_tokens

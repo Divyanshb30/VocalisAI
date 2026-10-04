@@ -61,9 +61,12 @@ _SPOKEN_CHARS = {
 
 
 def _spoken_code(text: str) -> str:
-    """Speech-to-text writes codes as words: "r j z eight e a", "Romeo Juliet 8". Map them to characters."""
+    """Speech-to-text writes codes as words: "r j z eight e a", "Romeo Juliet 8", "V as in Victor, B as in
+    Bravo". Map them to characters."""
     text = re.sub(r"\bx-ray\b", "X", text, flags=re.I)
-    return re.sub(r"[A-Za-z]+", lambda m: _SPOKEN_CHARS.get(m.group(0).lower(), m.group(0)), text)
+    text = re.sub(r"\b([A-Za-z0-9]),?\s+(?:as in\s+|for\s+)[A-Za-z]+", r"\1", text, flags=re.I)
+    text = re.sub(r"[A-Za-z]+", lambda m: _SPOKEN_CHARS.get(m.group(0).lower(), m.group(0)), text)
+    return re.sub(r"(?<=\b[A-Za-z0-9]),\s*(?=[A-Za-z0-9]\b)", " ", text)  # "v, b, z" -> "v b z"
 
 
 def reference_in(text: str) -> str | None:
@@ -155,6 +158,7 @@ class AgentSession:
         )
         self._runner_task: asyncio.Task[None] | None = None
         self._last_heard = ""
+        self._heard: list[str] = []
 
     # ------------------------------------------------------------------ prompts
     def _role(self) -> str:
@@ -361,6 +365,8 @@ class AgentSession:
     async def hear(self, text: str, *, timeout: float = 90.0) -> AgentTurn:
         """The other side said ``text``; return what the agent says back."""
         self._last_heard = text
+        self._heard.append(text)
+        self._check_readback(text)
         self.sink.reset_turn()
         t0 = time.monotonic()
         await self.worker.queue_frame(
@@ -384,6 +390,35 @@ class AgentSession:
         spoken = verdict.text
         await self.note(spoken, role="assistant")
         return spoken
+
+    def _check_readback(self, text: str) -> None:
+        """After the read-back, a rep who corrects the reference wins over what was recorded (parsed in
+        code; the model is not trusted to copy strings)."""
+        res = self.record.resolution
+        if self.current_node != "confirm" or not res:
+            return
+        heard = reference_in(text)
+        if heard and heard != res.get("reference_number") and heard != self.b.case.booking_reference:
+            self.record.reference_corrections.append(
+                {"llm": str(res.get("reference_number")), "parsed": heard, "source": "readback"}
+            )
+            res["reference_number"] = heard
+
+    def finalize(self) -> None:
+        """Post-call report: if no resolution was recorded but the rep read out a reference, keep it."""
+        if self.record.resolution is not None:
+            return
+        for text in reversed(self._heard):
+            ref = reference_in(text)
+            if ref and ref != self.b.case.booking_reference:
+                self.record.resolution = {
+                    "outcome": None,
+                    "amount": None,
+                    "currency": None,
+                    "reference_number": ref,
+                    "source": "post_call_transcript",
+                }
+                return
 
     @property
     def current_node(self) -> str | None:
