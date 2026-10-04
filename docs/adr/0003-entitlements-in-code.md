@@ -6,7 +6,7 @@
 Compensation depends on distance bands, delay thresholds, notice periods and exceptions. LLMs are unreliable at this arithmetic.
 
 ## Decision
-Deterministic per-jurisdiction engines (DGCA, UK261/EU261, GCAA) return entitlements with clause citations. Retrieval supplies airline policy text; the LLM phrases arguments.
+Deterministic per-jurisdiction engines (DGCA, UK261/EU261, GCAA) return entitlements with clause citations. Hybrid retrieval (BM25 + dense + RRF) supplies the regulation text behind each entitlement; the LLM phrases arguments.
 
 ## Alternatives considered
 Let the LLM reason over retrieved regulation text.

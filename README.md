@@ -1,20 +1,20 @@
 # VocalisAI
 
-**A real-time voice agent that phones an airline for you** — it reads your boarding pass or cancellation email from a photo, works out what you're legally owed, navigates the phone menu, waits on hold, negotiates with the rep, hands the call to you live when an OTP / payment / identity check comes up, and reports back with the outcome, a reference number and a transcript.
+**A voice agent that phones an airline for you.** It reads your boarding pass or cancellation email from a photo, works out what you're legally owed, navigates the phone menu, waits on hold, negotiates with the rep, hands the call over to you when an OTP, payment or identity check comes up, and reports back with the outcome, a reference number and a transcript.
 
-> Every metric in this README is generated from `evals/results/` by `evals/report.py`; none is typed by hand.
+> Every metric in this README is generated from `evals/results/` by `evals/report.py`; none is typed by hand. Every claim is mapped to its code, tests and measurements in [`docs/claims.md`](docs/claims.md), and a test fails the build if they drift.
 
 ---
 
 ## What it does
 
-1. **Reads the document** — a photo of a boarding pass, e-ticket, cancellation notice or receipt → a typed `Case` (vision model + IATA boarding-pass barcode cross-check).
-2. **Knows your rights** — computes entitlements **in code** for India (DGCA CAR), UK/EU (UK261/EU261) and UAE (GCAA), and retrieves the airline's own conditions of carriage.
-3. **Makes the call** — navigates the IVR (keypress tones and speech), survives hold, discloses it is an AI, and negotiates against a mandate you approved.
-4. **Knows when to stop** — hands the call to you live for OTPs, payments, identity checks, or any offer outside your mandate. Sensitive data never enters the model's context.
-5. **Reports back** — outcome, reference number (verified by read-back), full transcript, cost.
+1. **Reads the document**: a photo of a boarding pass, e-ticket or cancellation email becomes a typed `Case` (vision model, cross-checked against the IATA boarding-pass barcode when there is one).
+2. **Knows your rights**: computes entitlements **in code** for India (DGCA CAR), the UK and EU (UK261/EU261) and the UAE (GCAA), each tied to the clause it comes from, which the agent cites on the call. Hybrid search over the regulation text (EU261/UK261 so far) finds the paragraph behind a clause.
+3. **Makes the call**: navigates the phone menu with keypress tones, waits through hold with the LLM switched off, discloses that it is an AI, and negotiates against the passenger's mandate (what to ask for, what is acceptable, what to refuse), checking every offer against it.
+4. **Knows when to stop**: hands over to the passenger for OTPs, payments, identity checks and any offer outside the mandate. Sensitive values never enter the model's context.
+5. **Reports back**: outcome, reference number (read back phonetically and confirmed by the rep) and the transcript.
 
-v1 runs on a **faithfully simulated phone line** (8 kHz μ-law, in-band DTMF, IVR menus, hold music) against **SimAir**, an adversarial airline simulator. It never calls real businesses.
+v1 runs on a **simulated phone line** (8 kHz μ-law, in-band DTMF, IVR menus, hold) against **SimAir**, an adversarial airline simulator; during a handoff the passenger is simulated too. It never calls real businesses.
 
 ---
 
@@ -36,57 +36,52 @@ Run it locally with `uv run vocalis serve` → http://127.0.0.1:8000.
 
 ```mermaid
 flowchart LR
-    subgraph Client["Web client"]
-        UI["Upload photo / review case / approve mandate<br/>Live call view / take over / report"]
+    subgraph Client["Web page (GitHub Pages / vocalis serve)"]
+        UI["Recorded / Offline / Live modes<br/>upload a document, watch the call,<br/>live pipeline view, result, eval metrics"]
     end
 
-    subgraph API["FastAPI service"]
-        ORCH["LangGraph case agent<br/>extract - assess rights - mandate - call - report<br/>Postgres checkpoints, human approval interrupts"]
-        MCP["MCP servers (FastMCP)<br/>calls / rights / calendar / mail"]
+    subgraph API["FastAPI service (Cloud Run)"]
+        SRV["/api/extract, /api/case, /api/call (SSE),<br/>/api/tts, /api/metrics<br/>per-visitor live-call limits"]
+    end
+
+    subgraph Case["Case workflow"]
+        ORCH["LangGraph: read document - assess rights -<br/>draft mandate - passenger approval (interrupt) - call<br/>(CLI: vocalis case)"]
+        MCP["MCP servers (FastMCP)<br/>vocalis-calls, vocalis-rights"]
     end
 
     subgraph Intel["Case intelligence"]
-        DOC["docintel<br/>Gemini structured extraction<br/>+ IATA BCBP barcode cross-check"]
-        RIGHTS["rights<br/>entitlements computed in code<br/>+ hybrid RAG over airline policies"]
+        DOC["docintel<br/>Gemini structured extraction<br/>+ IATA BCBP barcode cross-check, redaction"]
+        RIGHTS["rights<br/>entitlements computed in code<br/>+ hybrid retrieval over regulation text"]
     end
 
-    subgraph Voice["Real-time voice agent (Pipecat)"]
+    subgraph Agent["Voice agent (Pipecat + Flows)"]
         direction TB
-        IN["VAD + smart-turn<br/>Deepgram streaming STT"]
-        GIN["Input guard<br/>(parallel classifier)"]
-        FLOW["Pipecat Flows state machine<br/>talker LLM + async planner"]
+        GIN["Input guard on every rep turn"]
+        FLOW["Flows: ivr - negotiate - confirm<br/>tools: press_keys, evaluate_offer,<br/>record_resolution, request_handoff, end_call"]
         VAULT["Vault renderer<br/>late-binding secrets"]
-        GOUT["Output guard<br/>Luhn / OTP / canaries"]
-        OUT["TTS + DTMF tones"]
-        IN --> GIN --> FLOW --> VAULT --> GOUT --> OUT
+        GOUT["Output guard<br/>Luhn, OTP, canaries, tool-call text"]
+        GIN --> FLOW --> VAULT --> GOUT
     end
 
-    subgraph Line["Phone line"]
-        BRIDGE["CallBridge<br/>legs: agent / remote / owner<br/>mute + transfer = handoff"]
-        SIM["PhoneLineSim<br/>8 kHz mu-law, band-pass, noise"]
+    subgraph Line["Simulated call"]
+        LOOP["Call loop<br/>IVR - hold (LLM off) - pickup -<br/>scripted disclosure - negotiation - handoffs"]
+        AUDIO["Audio leg (evals)<br/>Deepgram Aura-2 + PhoneLineSim 8 kHz<br/>+ streaming Deepgram STT, DTMF tones"]
+        SIMAIR["SimAir<br/>IVR trees, adversarial rep personas,<br/>simulated passenger for handoffs"]
     end
 
-    subgraph Remote["Remote party"]
-        SIMAIR["SimAir<br/>IVR tree - hold - adversarial rep persona"]
-        HUMAN["Human red-teamer<br/>(browser mic)"]
-        TWILIO["Twilio PSTN"]
-    end
+    LLM["LLM router<br/>Cerebras qwen-3.8-27b talker (gpt-oss, Groq failover)<br/>local Ollama rep, Gemini judge"]
 
-    LLM["LLM router (LiteLLM)<br/>Cerebras - Groq - Gemini - local Ollama<br/>quota-aware fallback"]
-    OBS["Opik traces (OpenTelemetry)<br/>Sentry / CloudWatch"]
-
-    UI --> ORCH
+    UI --> SRV
+    SRV --> DOC & RIGHTS
+    SRV --> LOOP
     ORCH --> DOC & RIGHTS
-    ORCH --> MCP
-    MCP --> Voice
-    Voice <--> BRIDGE
-    BRIDGE <--> SIM
-    SIM <--> SIMAIR & HUMAN & TWILIO
-    UI <-. "take over" .-> BRIDGE
+    ORCH --> LOOP
+    MCP --> LOOP & RIGHTS
+    LOOP <--> Agent
+    LOOP <--> AUDIO
+    LOOP <--> SIMAIR
     FLOW -.-> LLM
-    ORCH -.-> LLM
-    Voice -.-> OBS
-    ORCH -.-> OBS
+    SIMAIR -.-> LLM
 ```
 
 ### A call, end to end
@@ -94,53 +89,50 @@ flowchart LR
 ```mermaid
 sequenceDiagram
     autonumber
-    participant U as Passenger (web)
-    participant G as LangGraph case agent
+    participant P as Passenger
+    participant G as LangGraph case workflow
     participant A as Voice agent (Pipecat Flows)
-    participant L as Phone line (CallBridge + PhoneLineSim)
     participant R as Airline (SimAir IVR + rep)
 
-    U->>G: photo of cancellation email
+    P->>G: photo of cancellation email
     G->>G: extract Case, compute entitlements, draft mandate
-    G-->>U: review case + mandate
-    U->>G: approve mandate
-    G->>A: place_call(case, mandate)
-    A->>L: dial
+    G-->>P: review case + mandate
+    P->>G: approve mandate
+    G->>A: place the call
     R-->>A: "Press 1 for bookings, 2 for refunds"
-    A->>R: DTMF "2" (in-band tone)
-    R-->>A: hold music ...
-    Note over A: hold node: LLM off, pickup detector on
+    A->>R: DTMF "2" (in-band tone, checked by the output guard)
+    R-->>A: hold announcements
+    Note over A: hold: LLM off, call-state detector listening
     R-->>A: "Thanks for holding, this is Priya"
-    A->>R: AI disclosure + booking reference
-    A->>R: cites DGCA / UK261 entitlement
+    A->>R: scripted AI disclosure + booking reference (NATO)
+    A->>R: cites the DGCA / UK261 entitlement
     R-->>A: offers a travel voucher
-    A-->>U: approval request (outside mandate)
-    U-->>A: decline, insist on refund
+    Note over A: evaluate_offer: outside the mandate, the passenger decides
+    A->>R: declines, restates the entitlement
     R-->>A: "I need the OTP sent to the passenger"
-    A->>L: handoff (mute agent, bridge owner leg)
-    U->>R: speaks the OTP directly
-    U->>A: hand back
+    Note over A,R: input guard: handoff; the passenger gives the OTP to the rep,<br/>the agent's context only gets a summary
     R-->>A: "Refund issued, reference X7K2QB"
-    A->>R: read-back "X-ray Seven Kilo Two Quebec Bravo"
+    A->>R: read-back "X-ray Seven Kilo Two Quebec Bravo", waits for confirmation
     A-->>G: outcome + reference + transcript
-    G-->>U: report
+    G-->>P: report
 ```
 
 ### Components
 
 | Component | Path | Responsibility |
 |---|---|---|
-| Domain models | `src/vocalis/core` | `Case`, `Mandate`, `Vault` (data tiers), settings |
+| Domain models | `src/vocalis/core` | `Case`, `Mandate`, vault entries and data tiers, settings |
 | Document intelligence | `src/vocalis/docintel` | Photo → `Case`; BCBP barcode parser; reconcile + redact |
-| Rights engine | `src/vocalis/rights` | Entitlements as code (DGCA, UK261/EU261, GCAA) + hybrid policy retrieval with citations |
+| Rights engine | `src/vocalis/rights` | Entitlements as code (DGCA, UK261/EU261, GCAA, Montreal) + hybrid regulation retrieval with citations |
 | Guardrails | `src/vocalis/guards` | Vault renderer, output guard, input guard, canaries |
-| LLM router | `src/vocalis/llm` | Free-tier provider pool with quota tracking and fallback |
-| Telephony | `src/vocalis/telephony` | CallBridge, PhoneLineSim, DTMF generation + Goertzel detection |
-| Voice agent | `src/vocalis/agent` | Pipecat pipeline + Flows nodes (IVR → hold → disclose → negotiate → handoff → confirm) |
-| SimAir | `src/vocalis/simair` | IVR trees, hold, adversarial rep personas |
-| Orchestrator | `src/vocalis/orchestrator` | LangGraph case workflow with human-approval interrupts |
-| MCP servers | `src/vocalis/mcp_servers` | `vocalis-calls`, `vocalis-rights` (+ calendar, mail later) |
-| Evals | `evals/` | Scenarios, runner, deterministic scoring, LLM judge, reports |
+| LLM router | `src/vocalis/llm` | Free-tier provider pool with per-model quota tracking and fallback |
+| Telephony | `src/vocalis/telephony` | PhoneLineSim, DTMF generation + Goertzel detection, call-state heuristics, audio leg (`voicelink`) |
+| Voice agent | `src/vocalis/agent` | Pipecat pipeline + Flows nodes (ivr → negotiate → confirm), tools, sentence-level output guard |
+| SimAir | `src/vocalis/simair` | IVR trees, hold, adversarial rep personas, the call loop, scoring |
+| Orchestrator | `src/vocalis/orchestrator` | LangGraph case workflow with a passenger-approval interrupt |
+| MCP servers | `src/vocalis/mcp_servers` | `vocalis-calls`, `vocalis-rights` |
+| Web app | `src/vocalis/web`, `web/` | FastAPI service and the demo page |
+| Evals | `evals/` | Scenarios, runner, deterministic scoring, LLM judge, reports, benchmarks |
 
 ### Design decisions
 
@@ -149,14 +141,14 @@ Each decision has a short ADR in [`docs/adr/`](docs/adr/). The full rationale wi
 | Decision | Chosen | Main alternative | Why |
 |---|---|---|---|
 | Voice architecture | Cascaded STT → LLM → TTS | Speech-to-speech (OpenAI Realtime, Gemini Live) | Guardrails need a text checkpoint before audio; every stage swappable |
-| Voice framework | Pipecat + Pipecat Flows | LiveKit Agents, Vapi/Retell | Open source; IVR + voicemail built in; direct telephony serializers; OpenTelemetry |
+| Voice framework | Pipecat + Pipecat Flows | LiveKit Agents, Vapi/Retell | Open source; Flows state machines; per-service metrics; telephony serializers for later |
 | Dialogue control | Flows state machine | One large prompt | Small per-node prompts → lower latency, fits small context windows, predictable |
-| Knowledge | Entitlements in code + hybrid RAG | LLM reasons about the law | Legal arithmetic must be deterministic; LLM only explains |
+| Knowledge | Entitlements in code + hybrid retrieval of the regulation text | LLM reasons about the law | Legal arithmetic must be deterministic; retrieval supplies the clause to cite |
 | Safety | Late-binding secrets + deterministic output guard | Prompt instructions / LLM guard models | The model cannot leak what it never sees; regex is fast and auditable |
-| Handoff | Mute/transfer at the call bridge | Conference call / cold transfer | Agent keeps listening, can take the call back, no extra paid leg |
-| Workflow | LangGraph for the case, Pipecat for the call | LangGraph in the audio loop | Durable checkpoints + human approvals, without adding latency to audio |
-| Evals | Simulation harness + deterministic checks + calibrated judge + CI gate | Manual testing / LLM judge alone | Reproducible, scalable, safety is provable |
-| LLM budget | Quota-aware multi-provider free-tier router | Single paid provider | $0 with failover; talker/planner split keeps quality without latency |
+| Handoff | The passenger handles the step; the agent's context gets only a summary | Agent relays the data | Sensitive values never pass through the model |
+| Workflow | LangGraph for the case, Pipecat for the call | LangGraph in the audio loop | Human approval as an interrupt, without adding latency to audio |
+| Evals | Simulation harness + deterministic checks + LLM judge + Wilson CIs | Manual testing / LLM judge alone | Reproducible and scalable; safety checked by code, not by a model |
+| LLM budget | Quota-aware multi-provider free-tier router | Single paid provider | $0 with failover; each model paced by its own limits |
 
 ---
 
@@ -218,11 +210,13 @@ Rates are reported with Wilson 95% confidence intervals; zero-leak results repor
 
 ```
 src/vocalis/
-  core/  docintel/  rights/  guards/  llm/  telephony/  agent/  simair/  orchestrator/  mcp_servers/
+  core/  docintel/  rights/  guards/  llm/  telephony/  agent/  simair/  orchestrator/  mcp_servers/  web/
+data/policy/            regulation text used for retrieval
 evals/
-  scenarios/  runner  scoring  judge  results/
+  scenarios/  run.py  report.py  judge.py  retrieval.py  docbench/  export_demo.py  results/
 docs/
-  design-brief.md  adr/  responsible-use.md
+  claims.md  code-tour.md  design-brief.md  evals.md  adr/  responsible-use.md
+web/                    the demo page
 tests/
 ```
 

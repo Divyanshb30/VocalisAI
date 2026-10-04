@@ -1,6 +1,6 @@
 # ADR 0005: Human handoff by muting and bridging legs
 
-**Status:** accepted
+**Status:** accepted, not built yet. Today the simulated call loop routes the step to a simulated passenger and the agent's context only gets a summary note.
 
 ## Context
 OTPs, payments and identity checks must be done by the passenger, live, without dropping the call.

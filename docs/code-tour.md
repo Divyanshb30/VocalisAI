@@ -74,7 +74,7 @@ Pipeline order: `user aggregator → LLM → OutputGuardProcessor → LineSink �
 | DTMF tones + Goertzel detection | `src/vocalis/telephony/dtmf.py` |
 | Phone-line simulation (8 kHz μ-law, band-pass, noise, loss) | `src/vocalis/telephony/phoneline.py` |
 | Audio leg: far end voiced → phone line → streaming STT (VAD + Finalize), agent's first TTS byte timed, DTMF over the line | `src/vocalis/telephony/voicelink.py` |
-| IVR / hold / human / voicemail detection (heuristic) | `src/vocalis/telephony/callstate.py` |
+| IVR / hold / human / voicemail detection (transcript heuristics) | `src/vocalis/telephony/callstate.py` |
 | IVR menu trees | `src/vocalis/simair/ivr.py` |
 | Rep: persona, hidden policy, scripted attacks, JSON ground truth | `src/vocalis/simair/rep.py` |
 | The call loop: IVR → hold → pickup → disclosure → negotiation → handoffs | `src/vocalis/simair/call.py` → `CallSimulation.run` |
@@ -118,7 +118,7 @@ uv run python -m evals.report
 
 ## 9. Tests
 
-`tests/` — 60 tests, all offline, including two full calls through the real Pipecat pipeline and MCP servers exercised through an MCP client. CI runs lint, mypy and tests on every push (`.github/workflows/ci.yml`).
+`tests/`, all offline, including two full calls through the real Pipecat pipeline and MCP servers exercised through an MCP client. CI runs lint, mypy and tests on every push (`.github/workflows/ci.yml`).
 
 ## 10. Web app and hosting
 

@@ -12,4 +12,4 @@ LangGraph with checkpoints and interrupts orchestrates the case; the call itself
 LangGraph inside the audio loop (adds latency, not frame-oriented); CrewAI (less control); Temporal (heavy).
 
 ## Consequences
-Human approvals are first-class interrupts; long calls don't hold a process hostage.
+Human approvals are first-class interrupts. Checkpoints are in memory today (`InMemorySaver`); durable Postgres checkpoints are needed before a case can survive a restart.
