@@ -233,7 +233,12 @@ class CallSimulation:
                 return
             probe = CallSimulation.hour_probe  # read off the class so it isn't bound as a method
             if probe is not None and now - CallSimulation._last_probe > self.PROBE_EVERY_S:
-                CallSimulation._last_probe = now
+                # the probe is a request too: it needs room in this minute and counts against it
+                rpm = self.PACING[provider][1]
+                while sum(e[2] for e in self._tpm_log if time.monotonic() - e[0] < 60) + 3 > rpm:
+                    await asyncio.sleep(5)
+                CallSimulation._last_probe = time.monotonic()
+                self._tpm_log.append((time.monotonic(), 0, 1))
                 used = await probe()
                 if used is not None:
                     log[:] = log[len(log) - used :] if used <= len(log) else [now] * (used - len(log)) + log

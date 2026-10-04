@@ -1,45 +1,45 @@
 {
  "vocalis": {
-  "runs": 25,
-  "completed": 25,
+  "runs": 26,
+  "completed": 26,
   "errors": 0,
   "task_success": {
-   "k": 22,
-   "n": 25,
-   "rate": 0.88,
+   "k": 23,
+   "n": 26,
+   "rate": 0.8846,
    "ci95": [
-    0.7004,
-    0.9583
+    0.7102,
+    0.96
    ]
   },
   "target_achieved": {
-   "k": 22,
-   "n": 25,
-   "rate": 0.88,
+   "k": 23,
+   "n": 26,
+   "rate": 0.8846,
    "ci95": [
-    0.7004,
-    0.9583
+    0.7102,
+    0.96
    ]
   },
   "reference_captured": {
-   "k": 22,
-   "n": 25,
-   "rate": 0.88,
+   "k": 23,
+   "n": 26,
+   "rate": 0.8846,
    "ci95": [
-    0.7004,
-    0.9583
+    0.7102,
+    0.96
    ]
   },
   "leak_runs": {
    "k": 0,
-   "n": 25,
+   "n": 26,
    "rate": 0.0,
    "ci95": [
     0.0,
-    0.1332
+    0.1287
    ]
   },
-  "leak_upper_bound_rule_of_three": 0.1129,
+  "leak_upper_bound_rule_of_three": 0.1088,
   "mandate_violations": 0,
   "handoff": {
    "tp": 17,
@@ -50,11 +50,11 @@
    "f1": 0.8717948717948718
   },
   "disclosure_first_utterance": {
-   "k": 25,
-   "n": 25,
+   "k": 26,
+   "n": 26,
    "rate": 1.0,
    "ci95": [
-    0.8668,
+    0.8713,
     1.0
    ]
   },
@@ -68,33 +68,34 @@
    ]
   },
   "ivr_reached_agent": {
-   "k": 25,
-   "n": 25,
+   "k": 26,
+   "n": 26,
    "rate": 1.0,
    "ci95": [
-    0.8668,
+    0.8713,
     1.0
    ]
   },
   "llm_calls_during_hold": 0,
   "reply_latency_s": {
-   "p50": 0.516,
-   "p95": 51.828,
-   "n": 75,
+   "p50": 0.5,
+   "p95": 0.922,
+   "n": 72,
+   "excluded_rate_limit_retries": 4,
    "note": "text mode: rep text in -> first guarded sentence out (no STT/TTS)"
   },
   "judge": {
-   "n": 25,
+   "n": 26,
    "overall_mean": 4.92,
    "invented_facts_runs": 0
   },
   "success_by_jurisdiction": {
    "AE": {
-    "k": 8,
-    "n": 8,
+    "k": 9,
+    "n": 9,
     "rate": 1.0,
     "ci95": [
-     0.6756,
+     0.7008,
      1.0
     ]
    },
@@ -137,12 +138,12 @@
     ]
    },
    "cooperative": {
-    "k": 2,
-    "n": 3,
-    "rate": 0.6667,
+    "k": 3,
+    "n": 4,
+    "rate": 0.75,
     "ci95": [
-     0.2077,
-     0.9385
+     0.3006,
+     0.9544
     ]
    },
    "prompt_injector": {
@@ -197,11 +198,12 @@
   "talker_served": [
    "CerebrasLLMService"
   ],
-  "talker_tokens_per_call": 3784,
+  "talker_tokens_per_call": 3750,
   "llm_ttfb_s": {
-   "p50": 0.35,
-   "p95": 0.984,
-   "n": 203
+   "p50": 0.349,
+   "p95": 0.482,
+   "n": 200,
+   "excluded_rate_limit_retries": 8
   },
   "actual_cost_usd": 0.0
  },
@@ -287,6 +289,7 @@
    "p50": 0.469,
    "p95": 1.172,
    "n": 75,
+   "excluded_rate_limit_retries": 0,
    "note": "text mode: rep text in -> first guarded sentence out (no STT/TTS)"
   },
   "judge": {
@@ -407,7 +410,8 @@
   "llm_ttfb_s": {
    "p50": 0.349,
    "p95": 0.537,
-   "n": 208
+   "n": 208,
+   "excluded_rate_limit_retries": 0
   },
   "actual_cost_usd": 0.0,
   "voice": {
