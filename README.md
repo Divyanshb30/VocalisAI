@@ -181,28 +181,32 @@ Scenarios run in two modes. In **text mode** the agent's full Pipecat pipeline (
 <!-- metrics:start -->
 | Metric | Definition | Result |
 |---|---|---|
-| Task success | outcome inside the mandate **and** correct reference captured | 89% (34/38, 95% CI 76%–96%) |
-| Sensitive-data leak rate | runs where any unauthorised value or canary was spoken | 0% (0/38, 95% CI 0%–9%); 95% upper bound 8% |
-| Handoff accuracy | precision / recall / F1 on events that need the passenger | P 86% · R 96% · F1 91% |
-| AI disclosure | discloses in the first utterance | 100% (38/38, 95% CI 91%–100%); honest when asked: 100% (7/7, 95% CI 65%–100%) |
-| IVR navigation | reached a human through the phone menu | 100% (38/38, 95% CI 91%–100%) |
-| Reply latency (text mode) | rep turn in → first guarded sentence out, p50 / p95 | 0.50s / 0.94s (n=97; 6 turns that waited out a free-tier rate-limit retry excluded) |
-| Talker first-token latency | LLM time to first token per turn, p50 / p95 | 0.35s / 0.50s (n=289; 11 turns that waited out a free-tier rate-limit retry excluded) |
-| Cost per call | talker tokens per call; out-of-pocket cost | 3,580 tokens; $0 (free-tier credits + local rep model) |
-| Voice-to-voice latency (audio loopback) | end of the rep's speech → agent's first audio byte, over a simulated 8 kHz phone line, p50 / p95 | 1.77s / 2.42s (n=75 turns; p50 stages: STT endpoint 0.64s, LLM + guard 0.47s, TTS first byte 0.66s); test machine is 0.28s round trip from Deepgram, inside both STT and TTS |
-| Speech recognition on phone audio | word error rate of streaming STT on the IVR and rep, 8 kHz μ-law, Whisper-style normalisation | 3.9% WER (4,038 words, Deepgram nova-3) |
-| Reference codes over audio | every booking or resolution reference the rep read out, recognised exactly by STT | 72% (33/46, 95% CI 57%–83%) |
+| Task success | outcome inside the mandate **and** correct reference captured | 91% (68/75, 95% CI 82%–95%) |
+| Sensitive-data leak rate | runs where any unauthorised value or canary was spoken | 0% (0/75, 95% CI 0%–5%); 95% upper bound 4% |
+| Leak rate vs naive baseline | same attack scenarios: VocalisAI vs secrets-in-prompt with guards off | 0% (0/7, 95% CI 0%–35%) vs 0% (0/7, 95% CI 0%–35%) (talkers: cerebras/qwen-3.8-27b vs cerebras/qwen-3.8-27b) |
+| Task success vs naive baseline | same attack scenarios; baseline has no deterministic handoff or output guard | 100% (7/7, 95% CI 65%–100%) vs 86% (6/7, 95% CI 49%–97%) |
+| Handoff accuracy | precision / recall / F1 on events that need the passenger | P 72% · R 100% · F1 84%; 24 of the 26 false positives come from one call where the simulated rep kept repeating a request and the agent handed over each time |
+| AI disclosure | discloses in the first utterance | 100% (75/75, 95% CI 95%–100%); honest when asked: 100% (15/15, 95% CI 80%–100%) |
+| IVR navigation | reached a human through the phone menu | 100% (75/75, 95% CI 95%–100%) |
+| Reply latency (text mode) | rep turn in → first guarded sentence out, p50 / p95 | 0.64s / 1.50s (n=313) |
+| Talker first-token latency | LLM time to first token per turn, p50 / p95 | 0.41s / 0.54s (n=662) |
+| Cost per call | talker tokens per call; out-of-pocket cost | 6,767 tokens; $0 (free-tier credits + local rep model) |
+| Voice-to-voice latency (audio loopback) | end of the rep's speech → agent's first audio byte, over a simulated 8 kHz phone line, p50 / p95 | 1.86s / 2.70s (n=122 turns; p50 stages: STT endpoint 0.64s, LLM + guard 0.59s, TTS first byte 0.61s); test machine is 0.28s round trip from Deepgram, inside both STT and TTS |
+| Speech recognition on phone audio | word error rate of streaming STT on the IVR and rep, 8 kHz μ-law, Whisper-style normalisation | 4.6% WER (4,803 words, Deepgram nova-3) |
+| Reference codes over audio | every booking or resolution reference the rep read out, recognised exactly by STT | 63% (33/52, 95% CI 50%–75%) |
 | Keypresses over the line | in-band DTMF tones decoded by the IVR (Goertzel) | 100% (70/70, 95% CI 95%–100%) |
-| Task success over audio | as above, with the agent hearing STT output | 64% (16/25, 95% CI 45%–80%) |
+| Task success over audio | as above, with the agent hearing STT output | 68% (17/25, 95% CI 48%–83%) |
+| Reference read-back (audio) | agent reads the reference back phonetically and the rep corrects a mishearing: before → after, same talker | task success 56% → 68%; reference captured 64% → 72% (25 calls each) |
 | Document extraction | field accuracy, vision only → with barcode cross-check | 100% → 100% (20 synthetic docs, gemini-flash-lite-latest) |
+| Regulation retrieval | hand-written passenger questions over EU261/UK261 article paragraphs; top-1 / top-5 / MRR@10 | hybrid 70% / 88% / 0.76 vs BM25 50% / 70% / 0.59 vs dense 60% / 88% / 0.70 (40 questions, 68 passages) |
 
-_38 completed simulated calls (25 scenarios, seeds 0, 1), plus 25 over audio; talker: cerebras/gpt-oss-120b._
+_75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio; talker: cerebras/qwen-3.8-27b._
 
-**Talker model comparison** (same agent, harness and scenarios; only the model behind the agent's replies differs)
+**Talker model comparison** (same agent code, harness and scenarios, before the read-back fix; only the model behind the agent's replies differs)
 
 | Talker | Task success | Leaks | Handoff F1 | Reply latency p50 / p95 | First token p50 | Over audio: success; voice-to-voice p50 / p95 |
 |---|---|---|---|---|---|---|
-| cerebras/gpt-oss-120b | 89% (34/38, 95% CI 76%–96%) | 0/38 | 91% | 0.50s / 0.94s | 0.35s | 64% (16/25); 1.77s / 2.42s |
+| cerebras/gpt-oss-120b | 86% (43/50, 95% CI 74%–93%) | 0/50 | 88% | 0.50s / 0.94s | 0.35s | 64% (16/25); 1.77s / 2.42s |
 | cerebras/qwen-3.8-27b | 84% (63/75, 95% CI 74%–91%) | 0/75 | 98% | 0.66s / 1.34s | 0.39s | 56% (14/25); 1.91s / 2.83s |
 <!-- metrics:end -->
 

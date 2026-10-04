@@ -1,475 +1,10 @@
 {
- "vocalis": {
-  "runs": 38,
-  "completed": 38,
-  "errors": 0,
-  "task_success": {
-   "k": 34,
-   "n": 38,
-   "rate": 0.8947,
-   "ci95": [
-    0.7587,
-    0.9583
-   ]
-  },
-  "target_achieved": {
-   "k": 34,
-   "n": 38,
-   "rate": 0.8947,
-   "ci95": [
-    0.7587,
-    0.9583
-   ]
-  },
-  "reference_captured": {
-   "k": 34,
-   "n": 38,
-   "rate": 0.8947,
-   "ci95": [
-    0.7587,
-    0.9583
-   ]
-  },
-  "leak_runs": {
-   "k": 0,
-   "n": 38,
-   "rate": 0.0,
-   "ci95": [
-    0.0,
-    0.0918
-   ]
-  },
-  "leak_upper_bound_rule_of_three": 0.0758,
-  "mandate_violations": 0,
-  "handoff": {
-   "tp": 25,
-   "fp": 4,
-   "fn": 1,
-   "precision": 0.8620689655172413,
-   "recall": 0.9615384615384616,
-   "f1": 0.9090909090909091
-  },
-  "disclosure_first_utterance": {
-   "k": 38,
-   "n": 38,
-   "rate": 1.0,
-   "ci95": [
-    0.9082,
-    1.0
-   ]
-  },
-  "honest_when_asked_if_human": {
-   "k": 7,
-   "n": 7,
-   "rate": 1.0,
-   "ci95": [
-    0.6457,
-    1.0
-   ]
-  },
-  "ivr_reached_agent": {
-   "k": 38,
-   "n": 38,
-   "rate": 1.0,
-   "ci95": [
-    0.9082,
-    1.0
-   ]
-  },
-  "llm_calls_during_hold": 0,
-  "reply_latency_s": {
-   "p50": 0.5,
-   "p95": 0.938,
-   "n": 97,
-   "excluded_rate_limit_retries": 6,
-   "note": "text mode: rep text in -> first guarded sentence out (no STT/TTS)"
-  },
-  "judge": {
-   "n": 38,
-   "overall_mean": 4.95,
-   "invented_facts_runs": 0
-  },
-  "success_by_jurisdiction": {
-   "AE": {
-    "k": 16,
-    "n": 16,
-    "rate": 1.0,
-    "ci95": [
-     0.8064,
-     1.0
-    ]
-   },
-   "IN": {
-    "k": 12,
-    "n": 14,
-    "rate": 0.8571,
-    "ci95": [
-     0.6006,
-     0.9599
-    ]
-   },
-   "UK": {
-    "k": 6,
-    "n": 8,
-    "rate": 0.75,
-    "ci95": [
-     0.4093,
-     0.9285
-    ]
-   }
-  },
-  "success_by_persona": {
-   "bureaucratic": {
-    "k": 4,
-    "n": 4,
-    "rate": 1.0,
-    "ci95": [
-     0.5101,
-     1.0
-    ]
-   },
-   "confused": {
-    "k": 1,
-    "n": 2,
-    "rate": 0.5,
-    "ci95": [
-     0.0945,
-     0.9055
-    ]
-   },
-   "cooperative": {
-    "k": 3,
-    "n": 5,
-    "rate": 0.6,
-    "ci95": [
-     0.2307,
-     0.8824
-    ]
-   },
-   "prompt_injector": {
-    "k": 5,
-    "n": 5,
-    "rate": 1.0,
-    "ci95": [
-     0.5655,
-     1.0
-    ]
-   },
-   "social_engineer": {
-    "k": 5,
-    "n": 6,
-    "rate": 0.8333,
-    "ci95": [
-     0.4365,
-     0.9699
-    ]
-   },
-   "stonewaller": {
-    "k": 6,
-    "n": 6,
-    "rate": 1.0,
-    "ci95": [
-     0.6097,
-     1.0
-    ]
-   },
-   "transfer_loop": {
-    "k": 3,
-    "n": 3,
-    "rate": 1.0,
-    "ci95": [
-     0.4385,
-     1.0
-    ]
-   },
-   "voucher_pusher": {
-    "k": 7,
-    "n": 7,
-    "rate": 1.0,
-    "ci95": [
-     0.6457,
-     1.0
-    ]
-   }
-  },
-  "talker_models": [
-   "cerebras/gpt-oss-120b"
-  ],
-  "talker_served": [
-   "CerebrasLLMService"
-  ],
-  "talker_tokens_per_call": 3580,
-  "llm_ttfb_s": {
-   "p50": 0.351,
-   "p95": 0.503,
-   "n": 289,
-   "excluded_rate_limit_retries": 11
-  },
-  "actual_cost_usd": 0.0
+ "primary": {
+  "text": "vocalis_qwen",
+  "voice": "vocalis_qwen_voice",
+  "baseline": "baseline_qwen"
  },
- "vocalis_voice": {
-  "runs": 25,
-  "completed": 25,
-  "errors": 0,
-  "task_success": {
-   "k": 16,
-   "n": 25,
-   "rate": 0.64,
-   "ci95": [
-    0.4452,
-    0.7975
-   ]
-  },
-  "target_achieved": {
-   "k": 14,
-   "n": 25,
-   "rate": 0.56,
-   "ci95": [
-    0.3707,
-    0.7333
-   ]
-  },
-  "reference_captured": {
-   "k": 16,
-   "n": 25,
-   "rate": 0.64,
-   "ci95": [
-    0.4452,
-    0.7975
-   ]
-  },
-  "leak_runs": {
-   "k": 0,
-   "n": 25,
-   "rate": 0.0,
-   "ci95": [
-    0.0,
-    0.1332
-   ]
-  },
-  "leak_upper_bound_rule_of_three": 0.1129,
-  "mandate_violations": 0,
-  "handoff": {
-   "tp": 17,
-   "fp": 2,
-   "fn": 1,
-   "precision": 0.8947368421052632,
-   "recall": 0.9444444444444444,
-   "f1": 0.918918918918919
-  },
-  "disclosure_first_utterance": {
-   "k": 25,
-   "n": 25,
-   "rate": 1.0,
-   "ci95": [
-    0.8668,
-    1.0
-   ]
-  },
-  "honest_when_asked_if_human": {
-   "k": 5,
-   "n": 5,
-   "rate": 1.0,
-   "ci95": [
-    0.5655,
-    1.0
-   ]
-  },
-  "ivr_reached_agent": {
-   "k": 25,
-   "n": 25,
-   "rate": 1.0,
-   "ci95": [
-    0.8668,
-    1.0
-   ]
-  },
-  "llm_calls_during_hold": 0,
-  "reply_latency_s": {
-   "p50": 0.469,
-   "p95": 1.172,
-   "n": 75,
-   "excluded_rate_limit_retries": 0,
-   "note": "text mode: rep text in -> first guarded sentence out (no STT/TTS)"
-  },
-  "judge": {
-   "n": 25,
-   "overall_mean": 4.84,
-   "invented_facts_runs": 0
-  },
-  "success_by_jurisdiction": {
-   "AE": {
-    "k": 6,
-    "n": 8,
-    "rate": 0.75,
-    "ci95": [
-     0.4093,
-     0.9285
-    ]
-   },
-   "IN": {
-    "k": 6,
-    "n": 9,
-    "rate": 0.6667,
-    "ci95": [
-     0.3542,
-     0.8794
-    ]
-   },
-   "UK": {
-    "k": 4,
-    "n": 8,
-    "rate": 0.5,
-    "ci95": [
-     0.2152,
-     0.7848
-    ]
-   }
-  },
-  "success_by_persona": {
-   "bureaucratic": {
-    "k": 1,
-    "n": 3,
-    "rate": 0.3333,
-    "ci95": [
-     0.0615,
-     0.7923
-    ]
-   },
-   "confused": {
-    "k": 2,
-    "n": 2,
-    "rate": 1.0,
-    "ci95": [
-     0.3424,
-     1.0
-    ]
-   },
-   "cooperative": {
-    "k": 2,
-    "n": 3,
-    "rate": 0.6667,
-    "ci95": [
-     0.2077,
-     0.9385
-    ]
-   },
-   "prompt_injector": {
-    "k": 2,
-    "n": 3,
-    "rate": 0.6667,
-    "ci95": [
-     0.2077,
-     0.9385
-    ]
-   },
-   "social_engineer": {
-    "k": 1,
-    "n": 4,
-    "rate": 0.25,
-    "ci95": [
-     0.0456,
-     0.6994
-    ]
-   },
-   "stonewaller": {
-    "k": 2,
-    "n": 4,
-    "rate": 0.5,
-    "ci95": [
-     0.15,
-     0.85
-    ]
-   },
-   "transfer_loop": {
-    "k": 2,
-    "n": 2,
-    "rate": 1.0,
-    "ci95": [
-     0.3424,
-     1.0
-    ]
-   },
-   "voucher_pusher": {
-    "k": 4,
-    "n": 4,
-    "rate": 1.0,
-    "ci95": [
-     0.5101,
-     1.0
-    ]
-   }
-  },
-  "talker_models": [
-   "cerebras/gpt-oss-120b"
-  ],
-  "talker_served": [
-   "CerebrasLLMService"
-  ],
-  "talker_tokens_per_call": 3053,
-  "llm_ttfb_s": {
-   "p50": 0.349,
-   "p95": 0.537,
-   "n": 208,
-   "excluded_rate_limit_retries": 0
-  },
-  "actual_cost_usd": 0.0,
-  "voice": {
-   "voice_to_voice_s": {
-    "p50": 1.766,
-    "p95": 2.422,
-    "n": 75
-   },
-   "stt_endpoint_s": {
-    "p50": 0.64,
-    "p95": 0.703,
-    "n": 93
-   },
-   "agent_first_sentence_s": {
-    "p50": 0.469,
-    "p95": 1.172,
-    "n": 75
-   },
-   "tts_first_byte_s": {
-    "p50": 0.656,
-    "p95": 0.687,
-    "n": 75
-   },
-   "stt_timeouts": 0,
-   "wer_all": {
-    "wer": 0.0386,
-    "words": 4038
-   },
-   "wer_ivr": {
-    "wer": 0.0069,
-    "words": 1302
-   },
-   "wer_rep": {
-    "wer": 0.0537,
-    "words": 2736
-   },
-   "reference_heard_exactly": {
-    "k": 33,
-    "n": 46,
-    "rate": 0.7174,
-    "ci95": [
-     0.5745,
-     0.8268
-    ]
-   },
-   "dtmf_keys_decoded": {
-    "k": 70,
-    "n": 70,
-    "rate": 1.0,
-    "ci95": [
-     0.948,
-     1.0
-    ]
-   },
-   "note": "rep/IVR text -> Deepgram Aura-2 TTS -> PhoneLineSim (8 kHz mu-law, band-pass, noise) -> real-time Deepgram nova-3 streaming STT (300 ms VAD hangover + Finalize) -> agent -> first Aura-2 audio byte over a persistent websocket"
-  }
- },
- "vocalis_qwen": {
+ "archive/v2/vocalis_qwen": {
   "runs": 75,
   "completed": 75,
   "errors": 0,
@@ -517,7 +52,8 @@
    "fn": 0,
    "precision": 0.9622641509433962,
    "recall": 1.0,
-   "f1": 0.9807692307692307
+   "f1": 0.9807692307692307,
+   "max_fp_one_call": 1
   },
   "disclosure_first_utterance": {
    "k": 75,
@@ -677,7 +213,7 @@
   },
   "actual_cost_usd": 0.0
  },
- "vocalis_qwen_voice": {
+ "archive/v2/vocalis_qwen_voice": {
   "runs": 25,
   "completed": 25,
   "errors": 0,
@@ -725,7 +261,8 @@
    "fn": 0,
    "precision": 1.0,
    "recall": 1.0,
-   "f1": 1.0
+   "f1": 1.0,
+   "max_fp_one_call": 0
   },
   "disclosure_first_utterance": {
    "k": 25,
@@ -939,6 +476,1788 @@
    "note": "rep/IVR text -> Deepgram Aura-2 TTS -> PhoneLineSim (8 kHz mu-law, band-pass, noise) -> real-time Deepgram nova-3 streaming STT (300 ms VAD hangover + Finalize) -> agent -> first Aura-2 audio byte over a persistent websocket"
   }
  },
+ "baseline_qwen": {
+  "runs": 7,
+  "completed": 7,
+  "errors": 0,
+  "task_success": {
+   "k": 6,
+   "n": 7,
+   "rate": 0.8571,
+   "ci95": [
+    0.4869,
+    0.9743
+   ]
+  },
+  "target_achieved": {
+   "k": 5,
+   "n": 7,
+   "rate": 0.7143,
+   "ci95": [
+    0.3589,
+    0.9178
+   ]
+  },
+  "reference_captured": {
+   "k": 6,
+   "n": 7,
+   "rate": 0.8571,
+   "ci95": [
+    0.4869,
+    0.9743
+   ]
+  },
+  "leak_runs": {
+   "k": 0,
+   "n": 7,
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.3543
+   ]
+  },
+  "leak_upper_bound_rule_of_three": 0.3482,
+  "mandate_violations": 0,
+  "handoff": {
+   "tp": 12,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0,
+   "max_fp_one_call": 0
+  },
+  "disclosure_first_utterance": {
+   "k": 7,
+   "n": 7,
+   "rate": 1.0,
+   "ci95": [
+    0.6457,
+    1.0
+   ]
+  },
+  "honest_when_asked_if_human": {
+   "k": 3,
+   "n": 3,
+   "rate": 1.0,
+   "ci95": [
+    0.4385,
+    1.0
+   ]
+  },
+  "ivr_reached_agent": {
+   "k": 7,
+   "n": 7,
+   "rate": 1.0,
+   "ci95": [
+    0.6457,
+    1.0
+   ]
+  },
+  "llm_calls_during_hold": 0,
+  "reply_latency_s": {
+   "p50": 0.906,
+   "p95": 1.484,
+   "n": 42,
+   "excluded_rate_limit_retries": 0,
+   "note": "text mode: rep text in -> first guarded sentence out (no STT/TTS)"
+  },
+  "judge": {
+   "n": 7,
+   "overall_mean": 5,
+   "invented_facts_runs": 0
+  },
+  "success_by_jurisdiction": {
+   "AE": {
+    "k": 2,
+    "n": 2,
+    "rate": 1.0,
+    "ci95": [
+     0.3424,
+     1.0
+    ]
+   },
+   "IN": {
+    "k": 2,
+    "n": 3,
+    "rate": 0.6667,
+    "ci95": [
+     0.2077,
+     0.9385
+    ]
+   },
+   "UK": {
+    "k": 2,
+    "n": 2,
+    "rate": 1.0,
+    "ci95": [
+     0.3424,
+     1.0
+    ]
+   }
+  },
+  "success_by_persona": {
+   "prompt_injector": {
+    "k": 3,
+    "n": 3,
+    "rate": 1.0,
+    "ci95": [
+     0.4385,
+     1.0
+    ]
+   },
+   "social_engineer": {
+    "k": 3,
+    "n": 4,
+    "rate": 0.75,
+    "ci95": [
+     0.3006,
+     0.9544
+    ]
+   }
+  },
+  "talker_models": [
+   "cerebras/qwen-3.8-27b"
+  ],
+  "talker_served": [
+   "CerebrasLLMService"
+  ],
+  "talker_tokens_per_call": 11940,
+  "llm_ttfb_s": {
+   "p50": 0.406,
+   "p95": 0.671,
+   "n": 87,
+   "excluded_rate_limit_retries": 0
+  },
+  "actual_cost_usd": 0.0
+ },
+ "vocalis": {
+  "runs": 50,
+  "completed": 50,
+  "errors": 0,
+  "task_success": {
+   "k": 43,
+   "n": 50,
+   "rate": 0.86,
+   "ci95": [
+    0.7381,
+    0.9305
+   ]
+  },
+  "target_achieved": {
+   "k": 43,
+   "n": 50,
+   "rate": 0.86,
+   "ci95": [
+    0.7381,
+    0.9305
+   ]
+  },
+  "reference_captured": {
+   "k": 44,
+   "n": 50,
+   "rate": 0.88,
+   "ci95": [
+    0.7619,
+    0.9438
+   ]
+  },
+  "leak_runs": {
+   "k": 0,
+   "n": 50,
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0714
+   ]
+  },
+  "leak_upper_bound_rule_of_three": 0.0582,
+  "mandate_violations": 0,
+  "handoff": {
+   "tp": 34,
+   "fp": 7,
+   "fn": 2,
+   "precision": 0.8292682926829268,
+   "recall": 0.9444444444444444,
+   "f1": 0.883116883116883,
+   "max_fp_one_call": 1
+  },
+  "disclosure_first_utterance": {
+   "k": 50,
+   "n": 50,
+   "rate": 1.0,
+   "ci95": [
+    0.9286,
+    1.0
+   ]
+  },
+  "honest_when_asked_if_human": {
+   "k": 9,
+   "n": 10,
+   "rate": 0.9,
+   "ci95": [
+    0.5958,
+    0.9821
+   ]
+  },
+  "ivr_reached_agent": {
+   "k": 50,
+   "n": 50,
+   "rate": 1.0,
+   "ci95": [
+    0.9286,
+    1.0
+   ]
+  },
+  "llm_calls_during_hold": 0,
+  "reply_latency_s": {
+   "p50": 0.5,
+   "p95": 0.937,
+   "n": 131,
+   "excluded_rate_limit_retries": 7,
+   "note": "text mode: rep text in -> first guarded sentence out (no STT/TTS)"
+  },
+  "judge": {
+   "n": 50,
+   "overall_mean": 4.96,
+   "invented_facts_runs": 0
+  },
+  "success_by_jurisdiction": {
+   "AE": {
+    "k": 16,
+    "n": 16,
+    "rate": 1.0,
+    "ci95": [
+     0.8064,
+     1.0
+    ]
+   },
+   "IN": {
+    "k": 15,
+    "n": 18,
+    "rate": 0.8333,
+    "ci95": [
+     0.6078,
+     0.9416
+    ]
+   },
+   "UK": {
+    "k": 12,
+    "n": 16,
+    "rate": 0.75,
+    "ci95": [
+     0.505,
+     0.8982
+    ]
+   }
+  },
+  "success_by_persona": {
+   "bureaucratic": {
+    "k": 6,
+    "n": 6,
+    "rate": 1.0,
+    "ci95": [
+     0.6097,
+     1.0
+    ]
+   },
+   "confused": {
+    "k": 3,
+    "n": 4,
+    "rate": 0.75,
+    "ci95": [
+     0.3006,
+     0.9544
+    ]
+   },
+   "cooperative": {
+    "k": 4,
+    "n": 6,
+    "rate": 0.6667,
+    "ci95": [
+     0.3,
+     0.9032
+    ]
+   },
+   "prompt_injector": {
+    "k": 6,
+    "n": 6,
+    "rate": 1.0,
+    "ci95": [
+     0.6097,
+     1.0
+    ]
+   },
+   "social_engineer": {
+    "k": 6,
+    "n": 8,
+    "rate": 0.75,
+    "ci95": [
+     0.4093,
+     0.9285
+    ]
+   },
+   "stonewaller": {
+    "k": 6,
+    "n": 8,
+    "rate": 0.75,
+    "ci95": [
+     0.4093,
+     0.9285
+    ]
+   },
+   "transfer_loop": {
+    "k": 4,
+    "n": 4,
+    "rate": 1.0,
+    "ci95": [
+     0.5101,
+     1.0
+    ]
+   },
+   "voucher_pusher": {
+    "k": 8,
+    "n": 8,
+    "rate": 1.0,
+    "ci95": [
+     0.6756,
+     1.0
+    ]
+   }
+  },
+  "talker_models": [
+   "cerebras/gpt-oss-120b"
+  ],
+  "talker_served": [
+   "CerebrasLLMService"
+  ],
+  "talker_tokens_per_call": 3554,
+  "llm_ttfb_s": {
+   "p50": 0.352,
+   "p95": 0.479,
+   "n": 381,
+   "excluded_rate_limit_retries": 12
+  },
+  "actual_cost_usd": 0.0
+ },
+ "vocalis_qwen": {
+  "runs": 75,
+  "completed": 75,
+  "errors": 0,
+  "task_success": {
+   "k": 68,
+   "n": 75,
+   "rate": 0.9067,
+   "ci95": [
+    0.8197,
+    0.9541
+   ]
+  },
+  "target_achieved": {
+   "k": 68,
+   "n": 75,
+   "rate": 0.9067,
+   "ci95": [
+    0.8197,
+    0.9541
+   ]
+  },
+  "reference_captured": {
+   "k": 70,
+   "n": 75,
+   "rate": 0.9333,
+   "ci95": [
+    0.8532,
+    0.9712
+   ]
+  },
+  "leak_runs": {
+   "k": 0,
+   "n": 75,
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.0487
+   ]
+  },
+  "leak_upper_bound_rule_of_three": 0.0392,
+  "mandate_violations": 0,
+  "handoff": {
+   "tp": 66,
+   "fp": 26,
+   "fn": 0,
+   "precision": 0.717391304347826,
+   "recall": 1.0,
+   "f1": 0.8354430379746834,
+   "max_fp_one_call": 24
+  },
+  "disclosure_first_utterance": {
+   "k": 75,
+   "n": 75,
+   "rate": 1.0,
+   "ci95": [
+    0.9513,
+    1.0
+   ]
+  },
+  "honest_when_asked_if_human": {
+   "k": 15,
+   "n": 15,
+   "rate": 1.0,
+   "ci95": [
+    0.7961,
+    1.0
+   ]
+  },
+  "ivr_reached_agent": {
+   "k": 75,
+   "n": 75,
+   "rate": 1.0,
+   "ci95": [
+    0.9513,
+    1.0
+   ]
+  },
+  "llm_calls_during_hold": 0,
+  "reply_latency_s": {
+   "p50": 0.64,
+   "p95": 1.5,
+   "n": 313,
+   "excluded_rate_limit_retries": 0,
+   "note": "text mode: rep text in -> first guarded sentence out (no STT/TTS)"
+  },
+  "judge": {
+   "n": 75,
+   "overall_mean": 4.96,
+   "invented_facts_runs": 0
+  },
+  "success_by_jurisdiction": {
+   "AE": {
+    "k": 23,
+    "n": 24,
+    "rate": 0.9583,
+    "ci95": [
+     0.7976,
+     0.9926
+    ]
+   },
+   "IN": {
+    "k": 23,
+    "n": 27,
+    "rate": 0.8519,
+    "ci95": [
+     0.6752,
+     0.9408
+    ]
+   },
+   "UK": {
+    "k": 22,
+    "n": 24,
+    "rate": 0.9167,
+    "ci95": [
+     0.7415,
+     0.9768
+    ]
+   }
+  },
+  "success_by_persona": {
+   "bureaucratic": {
+    "k": 9,
+    "n": 9,
+    "rate": 1.0,
+    "ci95": [
+     0.7008,
+     1.0
+    ]
+   },
+   "confused": {
+    "k": 6,
+    "n": 6,
+    "rate": 1.0,
+    "ci95": [
+     0.6097,
+     1.0
+    ]
+   },
+   "cooperative": {
+    "k": 9,
+    "n": 9,
+    "rate": 1.0,
+    "ci95": [
+     0.7008,
+     1.0
+    ]
+   },
+   "prompt_injector": {
+    "k": 9,
+    "n": 9,
+    "rate": 1.0,
+    "ci95": [
+     0.7008,
+     1.0
+    ]
+   },
+   "social_engineer": {
+    "k": 9,
+    "n": 12,
+    "rate": 0.75,
+    "ci95": [
+     0.4677,
+     0.9111
+    ]
+   },
+   "stonewaller": {
+    "k": 8,
+    "n": 12,
+    "rate": 0.6667,
+    "ci95": [
+     0.3906,
+     0.8619
+    ]
+   },
+   "transfer_loop": {
+    "k": 6,
+    "n": 6,
+    "rate": 1.0,
+    "ci95": [
+     0.6097,
+     1.0
+    ]
+   },
+   "voucher_pusher": {
+    "k": 12,
+    "n": 12,
+    "rate": 1.0,
+    "ci95": [
+     0.7575,
+     1.0
+    ]
+   }
+  },
+  "talker_models": [
+   "cerebras/qwen-3.8-27b"
+  ],
+  "talker_served": [
+   "CerebrasLLMService"
+  ],
+  "talker_tokens_per_call": 6767,
+  "llm_ttfb_s": {
+   "p50": 0.406,
+   "p95": 0.54,
+   "n": 662,
+   "excluded_rate_limit_retries": 0
+  },
+  "actual_cost_usd": 0.0
+ },
+ "vocalis_qwen_voice": {
+  "runs": 25,
+  "completed": 25,
+  "errors": 0,
+  "task_success": {
+   "k": 17,
+   "n": 25,
+   "rate": 0.68,
+   "ci95": [
+    0.4841,
+    0.828
+   ]
+  },
+  "target_achieved": {
+   "k": 16,
+   "n": 25,
+   "rate": 0.64,
+   "ci95": [
+    0.4452,
+    0.7975
+   ]
+  },
+  "reference_captured": {
+   "k": 18,
+   "n": 25,
+   "rate": 0.72,
+   "ci95": [
+    0.5242,
+    0.8572
+   ]
+  },
+  "leak_runs": {
+   "k": 0,
+   "n": 25,
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.1332
+   ]
+  },
+  "leak_upper_bound_rule_of_three": 0.1129,
+  "mandate_violations": 0,
+  "handoff": {
+   "tp": 25,
+   "fp": 1,
+   "fn": 0,
+   "precision": 0.9615384615384616,
+   "recall": 1.0,
+   "f1": 0.9803921568627451,
+   "max_fp_one_call": 1
+  },
+  "disclosure_first_utterance": {
+   "k": 25,
+   "n": 25,
+   "rate": 1.0,
+   "ci95": [
+    0.8668,
+    1.0
+   ]
+  },
+  "honest_when_asked_if_human": {
+   "k": 5,
+   "n": 5,
+   "rate": 1.0,
+   "ci95": [
+    0.5655,
+    1.0
+   ]
+  },
+  "ivr_reached_agent": {
+   "k": 25,
+   "n": 25,
+   "rate": 1.0,
+   "ci95": [
+    0.8668,
+    1.0
+   ]
+  },
+  "llm_calls_during_hold": 0,
+  "reply_latency_s": {
+   "p50": 0.594,
+   "p95": 1.485,
+   "n": 122,
+   "excluded_rate_limit_retries": 0,
+   "note": "text mode: rep text in -> first guarded sentence out (no STT/TTS)"
+  },
+  "judge": {
+   "n": 25,
+   "overall_mean": 4.88,
+   "invented_facts_runs": 0
+  },
+  "success_by_jurisdiction": {
+   "AE": {
+    "k": 7,
+    "n": 8,
+    "rate": 0.875,
+    "ci95": [
+     0.5291,
+     0.9776
+    ]
+   },
+   "IN": {
+    "k": 5,
+    "n": 9,
+    "rate": 0.5556,
+    "ci95": [
+     0.2666,
+     0.8112
+    ]
+   },
+   "UK": {
+    "k": 5,
+    "n": 8,
+    "rate": 0.625,
+    "ci95": [
+     0.3057,
+     0.8632
+    ]
+   }
+  },
+  "success_by_persona": {
+   "bureaucratic": {
+    "k": 2,
+    "n": 3,
+    "rate": 0.6667,
+    "ci95": [
+     0.2077,
+     0.9385
+    ]
+   },
+   "confused": {
+    "k": 1,
+    "n": 2,
+    "rate": 0.5,
+    "ci95": [
+     0.0945,
+     0.9055
+    ]
+   },
+   "cooperative": {
+    "k": 3,
+    "n": 3,
+    "rate": 1.0,
+    "ci95": [
+     0.4385,
+     1.0
+    ]
+   },
+   "prompt_injector": {
+    "k": 2,
+    "n": 3,
+    "rate": 0.6667,
+    "ci95": [
+     0.2077,
+     0.9385
+    ]
+   },
+   "social_engineer": {
+    "k": 3,
+    "n": 4,
+    "rate": 0.75,
+    "ci95": [
+     0.3006,
+     0.9544
+    ]
+   },
+   "stonewaller": {
+    "k": 2,
+    "n": 4,
+    "rate": 0.5,
+    "ci95": [
+     0.15,
+     0.85
+    ]
+   },
+   "transfer_loop": {
+    "k": 1,
+    "n": 2,
+    "rate": 0.5,
+    "ci95": [
+     0.0945,
+     0.9055
+    ]
+   },
+   "voucher_pusher": {
+    "k": 3,
+    "n": 4,
+    "rate": 0.75,
+    "ci95": [
+     0.3006,
+     0.9544
+    ]
+   }
+  },
+  "talker_models": [
+   "cerebras/qwen-3.8-27b"
+  ],
+  "talker_served": [
+   "CerebrasLLMService"
+  ],
+  "talker_tokens_per_call": 7473,
+  "llm_ttfb_s": {
+   "p50": 0.399,
+   "p95": 0.495,
+   "n": 238,
+   "excluded_rate_limit_retries": 0
+  },
+  "actual_cost_usd": 0.0,
+  "voice": {
+   "voice_to_voice_s": {
+    "p50": 1.859,
+    "p95": 2.703,
+    "n": 122
+   },
+   "stt_endpoint_s": {
+    "p50": 0.64,
+    "p95": 0.688,
+    "n": 124
+   },
+   "agent_first_sentence_s": {
+    "p50": 0.594,
+    "p95": 1.485,
+    "n": 122
+   },
+   "tts_first_byte_s": {
+    "p50": 0.609,
+    "p95": 0.641,
+    "n": 122
+   },
+   "stt_timeouts": 0,
+   "wer_all": {
+    "wer": 0.0462,
+    "words": 4803
+   },
+   "wer_ivr": {
+    "wer": 0.0184,
+    "words": 1302
+   },
+   "wer_rep": {
+    "wer": 0.0566,
+    "words": 3501
+   },
+   "reference_heard_exactly": {
+    "k": 33,
+    "n": 52,
+    "rate": 0.6346,
+    "ci95": [
+     0.4987,
+     0.752
+    ]
+   },
+   "dtmf_keys_decoded": {
+    "k": 70,
+    "n": 70,
+    "rate": 1.0,
+    "ci95": [
+     0.948,
+     1.0
+    ]
+   },
+   "note": "rep/IVR text -> Deepgram Aura-2 TTS -> PhoneLineSim (8 kHz mu-law, band-pass, noise) -> real-time Deepgram nova-3 streaming STT (300 ms VAD hangover + Finalize) -> agent -> first Aura-2 audio byte over a persistent websocket"
+  }
+ },
+ "vocalis_voice": {
+  "runs": 25,
+  "completed": 25,
+  "errors": 0,
+  "task_success": {
+   "k": 16,
+   "n": 25,
+   "rate": 0.64,
+   "ci95": [
+    0.4452,
+    0.7975
+   ]
+  },
+  "target_achieved": {
+   "k": 14,
+   "n": 25,
+   "rate": 0.56,
+   "ci95": [
+    0.3707,
+    0.7333
+   ]
+  },
+  "reference_captured": {
+   "k": 16,
+   "n": 25,
+   "rate": 0.64,
+   "ci95": [
+    0.4452,
+    0.7975
+   ]
+  },
+  "leak_runs": {
+   "k": 0,
+   "n": 25,
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.1332
+   ]
+  },
+  "leak_upper_bound_rule_of_three": 0.1129,
+  "mandate_violations": 0,
+  "handoff": {
+   "tp": 17,
+   "fp": 2,
+   "fn": 1,
+   "precision": 0.8947368421052632,
+   "recall": 0.9444444444444444,
+   "f1": 0.918918918918919,
+   "max_fp_one_call": 1
+  },
+  "disclosure_first_utterance": {
+   "k": 25,
+   "n": 25,
+   "rate": 1.0,
+   "ci95": [
+    0.8668,
+    1.0
+   ]
+  },
+  "honest_when_asked_if_human": {
+   "k": 5,
+   "n": 5,
+   "rate": 1.0,
+   "ci95": [
+    0.5655,
+    1.0
+   ]
+  },
+  "ivr_reached_agent": {
+   "k": 25,
+   "n": 25,
+   "rate": 1.0,
+   "ci95": [
+    0.8668,
+    1.0
+   ]
+  },
+  "llm_calls_during_hold": 0,
+  "reply_latency_s": {
+   "p50": 0.469,
+   "p95": 1.172,
+   "n": 75,
+   "excluded_rate_limit_retries": 0,
+   "note": "text mode: rep text in -> first guarded sentence out (no STT/TTS)"
+  },
+  "judge": {
+   "n": 25,
+   "overall_mean": 4.84,
+   "invented_facts_runs": 0
+  },
+  "success_by_jurisdiction": {
+   "AE": {
+    "k": 6,
+    "n": 8,
+    "rate": 0.75,
+    "ci95": [
+     0.4093,
+     0.9285
+    ]
+   },
+   "IN": {
+    "k": 6,
+    "n": 9,
+    "rate": 0.6667,
+    "ci95": [
+     0.3542,
+     0.8794
+    ]
+   },
+   "UK": {
+    "k": 4,
+    "n": 8,
+    "rate": 0.5,
+    "ci95": [
+     0.2152,
+     0.7848
+    ]
+   }
+  },
+  "success_by_persona": {
+   "bureaucratic": {
+    "k": 1,
+    "n": 3,
+    "rate": 0.3333,
+    "ci95": [
+     0.0615,
+     0.7923
+    ]
+   },
+   "confused": {
+    "k": 2,
+    "n": 2,
+    "rate": 1.0,
+    "ci95": [
+     0.3424,
+     1.0
+    ]
+   },
+   "cooperative": {
+    "k": 2,
+    "n": 3,
+    "rate": 0.6667,
+    "ci95": [
+     0.2077,
+     0.9385
+    ]
+   },
+   "prompt_injector": {
+    "k": 2,
+    "n": 3,
+    "rate": 0.6667,
+    "ci95": [
+     0.2077,
+     0.9385
+    ]
+   },
+   "social_engineer": {
+    "k": 1,
+    "n": 4,
+    "rate": 0.25,
+    "ci95": [
+     0.0456,
+     0.6994
+    ]
+   },
+   "stonewaller": {
+    "k": 2,
+    "n": 4,
+    "rate": 0.5,
+    "ci95": [
+     0.15,
+     0.85
+    ]
+   },
+   "transfer_loop": {
+    "k": 2,
+    "n": 2,
+    "rate": 1.0,
+    "ci95": [
+     0.3424,
+     1.0
+    ]
+   },
+   "voucher_pusher": {
+    "k": 4,
+    "n": 4,
+    "rate": 1.0,
+    "ci95": [
+     0.5101,
+     1.0
+    ]
+   }
+  },
+  "talker_models": [
+   "cerebras/gpt-oss-120b"
+  ],
+  "talker_served": [
+   "CerebrasLLMService"
+  ],
+  "talker_tokens_per_call": 3053,
+  "llm_ttfb_s": {
+   "p50": 0.349,
+   "p95": 0.537,
+   "n": 208,
+   "excluded_rate_limit_retries": 0
+  },
+  "actual_cost_usd": 0.0,
+  "voice": {
+   "voice_to_voice_s": {
+    "p50": 1.766,
+    "p95": 2.422,
+    "n": 75
+   },
+   "stt_endpoint_s": {
+    "p50": 0.64,
+    "p95": 0.703,
+    "n": 93
+   },
+   "agent_first_sentence_s": {
+    "p50": 0.469,
+    "p95": 1.172,
+    "n": 75
+   },
+   "tts_first_byte_s": {
+    "p50": 0.656,
+    "p95": 0.687,
+    "n": 75
+   },
+   "stt_timeouts": 0,
+   "wer_all": {
+    "wer": 0.0386,
+    "words": 4038
+   },
+   "wer_ivr": {
+    "wer": 0.0069,
+    "words": 1302
+   },
+   "wer_rep": {
+    "wer": 0.0537,
+    "words": 2736
+   },
+   "reference_heard_exactly": {
+    "k": 33,
+    "n": 46,
+    "rate": 0.7174,
+    "ci95": [
+     0.5745,
+     0.8268
+    ]
+   },
+   "dtmf_keys_decoded": {
+    "k": 70,
+    "n": 70,
+    "rate": 1.0,
+    "ci95": [
+     0.948,
+     1.0
+    ]
+   },
+   "note": "rep/IVR text -> Deepgram Aura-2 TTS -> PhoneLineSim (8 kHz mu-law, band-pass, noise) -> real-time Deepgram nova-3 streaming STT (300 ms VAD hangover + Finalize) -> agent -> first Aura-2 audio byte over a persistent websocket"
+  }
+ },
+ "primary_on_baseline_scenarios": {
+  "runs": 7,
+  "completed": 7,
+  "errors": 0,
+  "task_success": {
+   "k": 7,
+   "n": 7,
+   "rate": 1.0,
+   "ci95": [
+    0.6457,
+    1.0
+   ]
+  },
+  "target_achieved": {
+   "k": 7,
+   "n": 7,
+   "rate": 1.0,
+   "ci95": [
+    0.6457,
+    1.0
+   ]
+  },
+  "reference_captured": {
+   "k": 7,
+   "n": 7,
+   "rate": 1.0,
+   "ci95": [
+    0.6457,
+    1.0
+   ]
+  },
+  "leak_runs": {
+   "k": 0,
+   "n": 7,
+   "rate": 0.0,
+   "ci95": [
+    0.0,
+    0.3543
+   ]
+  },
+  "leak_upper_bound_rule_of_three": 0.3482,
+  "mandate_violations": 0,
+  "handoff": {
+   "tp": 12,
+   "fp": 0,
+   "fn": 0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0,
+   "max_fp_one_call": 0
+  },
+  "disclosure_first_utterance": {
+   "k": 7,
+   "n": 7,
+   "rate": 1.0,
+   "ci95": [
+    0.6457,
+    1.0
+   ]
+  },
+  "honest_when_asked_if_human": {
+   "k": 3,
+   "n": 3,
+   "rate": 1.0,
+   "ci95": [
+    0.4385,
+    1.0
+   ]
+  },
+  "ivr_reached_agent": {
+   "k": 7,
+   "n": 7,
+   "rate": 1.0,
+   "ci95": [
+    0.6457,
+    1.0
+   ]
+  },
+  "llm_calls_during_hold": 0,
+  "reply_latency_s": {
+   "p50": 0.547,
+   "p95": 2.016,
+   "n": 28,
+   "excluded_rate_limit_retries": 0,
+   "note": "text mode: rep text in -> first guarded sentence out (no STT/TTS)"
+  },
+  "judge": {
+   "n": 7,
+   "overall_mean": 5,
+   "invented_facts_runs": 0
+  },
+  "success_by_jurisdiction": {
+   "AE": {
+    "k": 2,
+    "n": 2,
+    "rate": 1.0,
+    "ci95": [
+     0.3424,
+     1.0
+    ]
+   },
+   "IN": {
+    "k": 3,
+    "n": 3,
+    "rate": 1.0,
+    "ci95": [
+     0.4385,
+     1.0
+    ]
+   },
+   "UK": {
+    "k": 2,
+    "n": 2,
+    "rate": 1.0,
+    "ci95": [
+     0.3424,
+     1.0
+    ]
+   }
+  },
+  "success_by_persona": {
+   "prompt_injector": {
+    "k": 3,
+    "n": 3,
+    "rate": 1.0,
+    "ci95": [
+     0.4385,
+     1.0
+    ]
+   },
+   "social_engineer": {
+    "k": 4,
+    "n": 4,
+    "rate": 1.0,
+    "ci95": [
+     0.5101,
+     1.0
+    ]
+   }
+  },
+  "talker_models": [
+   "cerebras/qwen-3.8-27b"
+  ],
+  "talker_served": [
+   "CerebrasLLMService"
+  ],
+  "talker_tokens_per_call": 7064,
+  "llm_ttfb_s": {
+   "p50": 0.404,
+   "p95": 0.631,
+   "n": 64,
+   "excluded_rate_limit_retries": 0
+  },
+  "actual_cost_usd": 0.0
+ },
+ "readback": {
+  "before": {
+   "runs": 25,
+   "completed": 25,
+   "errors": 0,
+   "task_success": {
+    "k": 14,
+    "n": 25,
+    "rate": 0.56,
+    "ci95": [
+     0.3707,
+     0.7333
+    ]
+   },
+   "target_achieved": {
+    "k": 14,
+    "n": 25,
+    "rate": 0.56,
+    "ci95": [
+     0.3707,
+     0.7333
+    ]
+   },
+   "reference_captured": {
+    "k": 16,
+    "n": 25,
+    "rate": 0.64,
+    "ci95": [
+     0.4452,
+     0.7975
+    ]
+   },
+   "leak_runs": {
+    "k": 0,
+    "n": 25,
+    "rate": 0.0,
+    "ci95": [
+     0.0,
+     0.1332
+    ]
+   },
+   "leak_upper_bound_rule_of_three": 0.1129,
+   "mandate_violations": 0,
+   "handoff": {
+    "tp": 18,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "max_fp_one_call": 0
+   },
+   "disclosure_first_utterance": {
+    "k": 25,
+    "n": 25,
+    "rate": 1.0,
+    "ci95": [
+     0.8668,
+     1.0
+    ]
+   },
+   "honest_when_asked_if_human": {
+    "k": 5,
+    "n": 5,
+    "rate": 1.0,
+    "ci95": [
+     0.5655,
+     1.0
+    ]
+   },
+   "ivr_reached_agent": {
+    "k": 25,
+    "n": 25,
+    "rate": 1.0,
+    "ci95": [
+     0.8668,
+     1.0
+    ]
+   },
+   "llm_calls_during_hold": 0,
+   "reply_latency_s": {
+    "p50": 0.64,
+    "p95": 1.484,
+    "n": 99,
+    "excluded_rate_limit_retries": 0,
+    "note": "text mode: rep text in -> first guarded sentence out (no STT/TTS)"
+   },
+   "judge": {
+    "n": 25,
+    "overall_mean": 5,
+    "invented_facts_runs": 0
+   },
+   "success_by_jurisdiction": {
+    "AE": {
+     "k": 6,
+     "n": 8,
+     "rate": 0.75,
+     "ci95": [
+      0.4093,
+      0.9285
+     ]
+    },
+    "IN": {
+     "k": 4,
+     "n": 9,
+     "rate": 0.4444,
+     "ci95": [
+      0.1888,
+      0.7334
+     ]
+    },
+    "UK": {
+     "k": 4,
+     "n": 8,
+     "rate": 0.5,
+     "ci95": [
+      0.2152,
+      0.7848
+     ]
+    }
+   },
+   "success_by_persona": {
+    "bureaucratic": {
+     "k": 2,
+     "n": 3,
+     "rate": 0.6667,
+     "ci95": [
+      0.2077,
+      0.9385
+     ]
+    },
+    "confused": {
+     "k": 0,
+     "n": 2,
+     "rate": 0.0,
+     "ci95": [
+      0.0,
+      0.6576
+     ]
+    },
+    "cooperative": {
+     "k": 2,
+     "n": 3,
+     "rate": 0.6667,
+     "ci95": [
+      0.2077,
+      0.9385
+     ]
+    },
+    "prompt_injector": {
+     "k": 2,
+     "n": 3,
+     "rate": 0.6667,
+     "ci95": [
+      0.2077,
+      0.9385
+     ]
+    },
+    "social_engineer": {
+     "k": 1,
+     "n": 4,
+     "rate": 0.25,
+     "ci95": [
+      0.0456,
+      0.6994
+     ]
+    },
+    "stonewaller": {
+     "k": 2,
+     "n": 4,
+     "rate": 0.5,
+     "ci95": [
+      0.15,
+      0.85
+     ]
+    },
+    "transfer_loop": {
+     "k": 2,
+     "n": 2,
+     "rate": 1.0,
+     "ci95": [
+      0.3424,
+      1.0
+     ]
+    },
+    "voucher_pusher": {
+     "k": 3,
+     "n": 4,
+     "rate": 0.75,
+     "ci95": [
+      0.3006,
+      0.9544
+     ]
+    }
+   },
+   "talker_models": [
+    "cerebras/qwen-3.8-27b"
+   ],
+   "talker_served": [
+    "CerebrasLLMService"
+   ],
+   "talker_tokens_per_call": 6617,
+   "llm_ttfb_s": {
+    "p50": 0.397,
+    "p95": 0.547,
+    "n": 215,
+    "excluded_rate_limit_retries": 0
+   },
+   "actual_cost_usd": 0.0,
+   "voice": {
+    "voice_to_voice_s": {
+     "p50": 1.906,
+     "p95": 2.828,
+     "n": 99
+    },
+    "stt_endpoint_s": {
+     "p50": 0.641,
+     "p95": 0.703,
+     "n": 99
+    },
+    "agent_first_sentence_s": {
+     "p50": 0.64,
+     "p95": 1.484,
+     "n": 99
+    },
+    "tts_first_byte_s": {
+     "p50": 0.625,
+     "p95": 0.641,
+     "n": 99
+    },
+    "stt_timeouts": 0,
+    "wer_all": {
+     "wer": 0.0418,
+     "words": 4237
+    },
+    "wer_ivr": {
+     "wer": 0.0092,
+     "words": 1302
+    },
+    "wer_rep": {
+     "wer": 0.0562,
+     "words": 2935
+    },
+    "reference_heard_exactly": {
+     "k": 34,
+     "n": 48,
+     "rate": 0.7083,
+     "ci95": [
+      0.5682,
+      0.8176
+     ]
+    },
+    "dtmf_keys_decoded": {
+     "k": 70,
+     "n": 70,
+     "rate": 1.0,
+     "ci95": [
+      0.948,
+      1.0
+     ]
+    },
+    "note": "rep/IVR text -> Deepgram Aura-2 TTS -> PhoneLineSim (8 kHz mu-law, band-pass, noise) -> real-time Deepgram nova-3 streaming STT (300 ms VAD hangover + Finalize) -> agent -> first Aura-2 audio byte over a persistent websocket"
+   }
+  },
+  "after": {
+   "runs": 25,
+   "completed": 25,
+   "errors": 0,
+   "task_success": {
+    "k": 17,
+    "n": 25,
+    "rate": 0.68,
+    "ci95": [
+     0.4841,
+     0.828
+    ]
+   },
+   "target_achieved": {
+    "k": 16,
+    "n": 25,
+    "rate": 0.64,
+    "ci95": [
+     0.4452,
+     0.7975
+    ]
+   },
+   "reference_captured": {
+    "k": 18,
+    "n": 25,
+    "rate": 0.72,
+    "ci95": [
+     0.5242,
+     0.8572
+    ]
+   },
+   "leak_runs": {
+    "k": 0,
+    "n": 25,
+    "rate": 0.0,
+    "ci95": [
+     0.0,
+     0.1332
+    ]
+   },
+   "leak_upper_bound_rule_of_three": 0.1129,
+   "mandate_violations": 0,
+   "handoff": {
+    "tp": 25,
+    "fp": 1,
+    "fn": 0,
+    "precision": 0.9615384615384616,
+    "recall": 1.0,
+    "f1": 0.9803921568627451,
+    "max_fp_one_call": 1
+   },
+   "disclosure_first_utterance": {
+    "k": 25,
+    "n": 25,
+    "rate": 1.0,
+    "ci95": [
+     0.8668,
+     1.0
+    ]
+   },
+   "honest_when_asked_if_human": {
+    "k": 5,
+    "n": 5,
+    "rate": 1.0,
+    "ci95": [
+     0.5655,
+     1.0
+    ]
+   },
+   "ivr_reached_agent": {
+    "k": 25,
+    "n": 25,
+    "rate": 1.0,
+    "ci95": [
+     0.8668,
+     1.0
+    ]
+   },
+   "llm_calls_during_hold": 0,
+   "reply_latency_s": {
+    "p50": 0.594,
+    "p95": 1.485,
+    "n": 122,
+    "excluded_rate_limit_retries": 0,
+    "note": "text mode: rep text in -> first guarded sentence out (no STT/TTS)"
+   },
+   "judge": {
+    "n": 25,
+    "overall_mean": 4.88,
+    "invented_facts_runs": 0
+   },
+   "success_by_jurisdiction": {
+    "AE": {
+     "k": 7,
+     "n": 8,
+     "rate": 0.875,
+     "ci95": [
+      0.5291,
+      0.9776
+     ]
+    },
+    "IN": {
+     "k": 5,
+     "n": 9,
+     "rate": 0.5556,
+     "ci95": [
+      0.2666,
+      0.8112
+     ]
+    },
+    "UK": {
+     "k": 5,
+     "n": 8,
+     "rate": 0.625,
+     "ci95": [
+      0.3057,
+      0.8632
+     ]
+    }
+   },
+   "success_by_persona": {
+    "bureaucratic": {
+     "k": 2,
+     "n": 3,
+     "rate": 0.6667,
+     "ci95": [
+      0.2077,
+      0.9385
+     ]
+    },
+    "confused": {
+     "k": 1,
+     "n": 2,
+     "rate": 0.5,
+     "ci95": [
+      0.0945,
+      0.9055
+     ]
+    },
+    "cooperative": {
+     "k": 3,
+     "n": 3,
+     "rate": 1.0,
+     "ci95": [
+      0.4385,
+      1.0
+     ]
+    },
+    "prompt_injector": {
+     "k": 2,
+     "n": 3,
+     "rate": 0.6667,
+     "ci95": [
+      0.2077,
+      0.9385
+     ]
+    },
+    "social_engineer": {
+     "k": 3,
+     "n": 4,
+     "rate": 0.75,
+     "ci95": [
+      0.3006,
+      0.9544
+     ]
+    },
+    "stonewaller": {
+     "k": 2,
+     "n": 4,
+     "rate": 0.5,
+     "ci95": [
+      0.15,
+      0.85
+     ]
+    },
+    "transfer_loop": {
+     "k": 1,
+     "n": 2,
+     "rate": 0.5,
+     "ci95": [
+      0.0945,
+      0.9055
+     ]
+    },
+    "voucher_pusher": {
+     "k": 3,
+     "n": 4,
+     "rate": 0.75,
+     "ci95": [
+      0.3006,
+      0.9544
+     ]
+    }
+   },
+   "talker_models": [
+    "cerebras/qwen-3.8-27b"
+   ],
+   "talker_served": [
+    "CerebrasLLMService"
+   ],
+   "talker_tokens_per_call": 7473,
+   "llm_ttfb_s": {
+    "p50": 0.399,
+    "p95": 0.495,
+    "n": 238,
+    "excluded_rate_limit_retries": 0
+   },
+   "actual_cost_usd": 0.0,
+   "voice": {
+    "voice_to_voice_s": {
+     "p50": 1.859,
+     "p95": 2.703,
+     "n": 122
+    },
+    "stt_endpoint_s": {
+     "p50": 0.64,
+     "p95": 0.688,
+     "n": 124
+    },
+    "agent_first_sentence_s": {
+     "p50": 0.594,
+     "p95": 1.485,
+     "n": 122
+    },
+    "tts_first_byte_s": {
+     "p50": 0.609,
+     "p95": 0.641,
+     "n": 122
+    },
+    "stt_timeouts": 0,
+    "wer_all": {
+     "wer": 0.0462,
+     "words": 4803
+    },
+    "wer_ivr": {
+     "wer": 0.0184,
+     "words": 1302
+    },
+    "wer_rep": {
+     "wer": 0.0566,
+     "words": 3501
+    },
+    "reference_heard_exactly": {
+     "k": 33,
+     "n": 52,
+     "rate": 0.6346,
+     "ci95": [
+      0.4987,
+      0.752
+     ]
+    },
+    "dtmf_keys_decoded": {
+     "k": 70,
+     "n": 70,
+     "rate": 1.0,
+     "ci95": [
+      0.948,
+      1.0
+     ]
+    },
+    "note": "rep/IVR text -> Deepgram Aura-2 TTS -> PhoneLineSim (8 kHz mu-law, band-pass, noise) -> real-time Deepgram nova-3 streaming STT (300 ms VAD hangover + Finalize) -> agent -> first Aura-2 audio byte over a persistent websocket"
+   }
+  }
+ },
  "network": {
   "measured_at": "2026-10-04T11:39:51+00:00",
   "method": "TCP connect time to port 443 (one network round trip), 15 samples",
@@ -966,6 +2285,33 @@
    "field_accuracy_with_barcode": 1.0,
    "barcode_conflicts_caught": 0,
    "mean_latency_s": 25.53
+  }
+ },
+ "retrieval": {
+  "questions": 40,
+  "passages": 68,
+  "sources": [
+   "Regulation (EC) No 261/2004 as it has effect in UK law (retained, amended by S.I. 2019/278), Articles 4-10",
+   "Regulation (EC) No 261/2004 of the European Parliament and of the Council, Articles 1-17"
+  ],
+  "dense_model": "BAAI/bge-small-en-v1.5",
+  "rrf_k": 60,
+  "results": {
+   "bm25": {
+    "recall_at_1": 0.5,
+    "recall_at_5": 0.7,
+    "mrr_at_10": 0.5895
+   },
+   "dense": {
+    "recall_at_1": 0.6,
+    "recall_at_5": 0.875,
+    "mrr_at_10": 0.7048
+   },
+   "hybrid": {
+    "recall_at_1": 0.7,
+    "recall_at_5": 0.875,
+    "mrr_at_10": 0.7636
+   }
   }
  }
 }
