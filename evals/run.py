@@ -3,6 +3,7 @@
 uv run python -m evals.run --config vocalis --seeds 0 1 2
 uv run python -m evals.run --config baseline --only in_6e --seeds 0
 uv run python -m evals.run --smoke           # CI safety subset
+uv run python -m evals.run --config vocalis_voice --seeds 0 --concurrency 1   # audio loopback (Deepgram)
 """
 
 from __future__ import annotations
@@ -13,6 +14,7 @@ import json
 import time
 from dataclasses import asdict
 from pathlib import Path
+from typing import Any
 
 from loguru import logger
 
@@ -39,11 +41,16 @@ CONFIGS = {
     "baseline": dict(guards=False, baseline_prompt_secrets=True),
     # Same guards as "vocalis", kept separate so a same-talker comparison with "baseline" is possible
     "vocalis_matched": dict(guards=True, baseline_prompt_secrets=False),
+    # Same agent, but the far end is heard as phone audio through streaming STT and replies are timed
+    # to the first TTS audio byte (see vocalis/telephony/voicelink.py)
+    "vocalis_voice": dict(guards=True, baseline_prompt_secrets=False),
 }
 
 
-async def run_one(sc: Scenario, config: str, seed: int, router: LLMRouter, with_judge: bool) -> dict:
-    cfg = RunConfig(seed=seed, label=config, pace=True, **CONFIGS[config])
+async def run_one(
+    sc: Scenario, config: str, seed: int, router: LLMRouter, with_judge: bool, voice: Any = None
+) -> dict:
+    cfg = RunConfig(seed=seed, label=config, pace=True, voice=voice, **CONFIGS[config])
     sim = CallSimulation(sc, cfg, router)
     t0 = time.perf_counter()
     result = await sim.run()
@@ -93,6 +100,12 @@ async def main_async(a: argparse.Namespace) -> None:
         scenarios = [s for s in scenarios if any(o in s.id for o in a.only)]
     if a.limit:
         scenarios = scenarios[: a.limit]
+    voice = None
+    if a.config.endswith("_voice"):
+        from vocalis.telephony.voicelink import VoiceLink
+
+        voice = VoiceLink(router.s.deepgram_api_key or "")
+        await voice.warm_up()
     sem = asyncio.Semaphore(a.concurrency)
     results: list[dict] = []
 
@@ -102,11 +115,13 @@ async def main_async(a: argparse.Namespace) -> None:
             return
         async with sem:
             try:
-                results.append(await run_one(sc, a.config, seed, router, not a.no_judge))
+                results.append(await run_one(sc, a.config, seed, router, not a.no_judge, voice))
             except Exception as exc:
                 logger.exception(f"{sc.id} s{seed} crashed: {exc}")
 
     await asyncio.gather(*(guarded(sc, seed) for seed in a.seeds for sc in scenarios))
+    if voice is not None:
+        await voice.aclose()
     ok = [r for r in results if not r["error"]]
     if results:
         print(

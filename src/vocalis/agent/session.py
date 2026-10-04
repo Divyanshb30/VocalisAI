@@ -32,7 +32,7 @@ from pipecat.processors.aggregators.llm_response_universal import LLMContextAggr
 from pipecat.services.llm_service import LLMService
 from pipecat.workers.runner import WorkerRunner
 
-from vocalis.agent.briefing import Briefing, nato
+from vocalis.agent.briefing import NATO, Briefing, nato
 from vocalis.agent.processors import GuardEvent, LineSink, OutputGuardProcessor
 from vocalis.agent.prompts import CONFIRM_TASK, IVR_TASK, NEGOTIATE_TASK, role_message
 from vocalis.core.models import OutcomeType
@@ -40,16 +40,43 @@ from vocalis.core.models import OutcomeType
 OUTCOME_VALUES = [o.value for o in OutcomeType]
 
 _REFERENCE = re.compile(
-    r"reference(?: number)?(?: is|:)?\s+((?:[A-Za-z0-9][\s-]?){5,8})(?![A-Za-z0-9])", re.I
+    r"reference(?: number)?(?: is|:)?[\s.,:]+(?!number\b|is\b)((?:[A-Za-z0-9][\s-]?){5,8})(?![A-Za-z0-9])",
+    re.I,
 )
+_TAIL_CHAR = re.compile(r"\s*[.,]\s*([A-Za-z0-9])\s*(?:[.,!?]|$)")
+
+
+_DIGIT_WORDS = dict(
+    zip(
+        ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"],
+        "0123456789",
+        strict=True,
+    )
+)
+_SPOKEN_CHARS = {
+    **_DIGIT_WORDS,
+    **{w.lower(): ch for ch, w in NATO.items()},
+    **{"juliet": "J", "alfa": "A", "xray": "X"},
+}
+
+
+def _spoken_code(text: str) -> str:
+    """Speech-to-text writes codes as words: "r j z eight e a", "Romeo Juliet 8". Map them to characters."""
+    text = re.sub(r"\bx-ray\b", "X", text, flags=re.I)
+    return re.sub(r"[A-Za-z]+", lambda m: _SPOKEN_CHARS.get(m.group(0).lower(), m.group(0)), text)
 
 
 def reference_in(text: str) -> str | None:
-    """A reference number as spoken by the rep ("R 8 Q 4 Z T" or "R8Q4ZT"), if there is one."""
-    m = _REFERENCE.search(text or "")
+    """A reference number as spoken by the rep ("R 8 Q 4 Z T", "R8Q4ZT", "r eight q four z t"), if any."""
+    spoken = _spoken_code(text or "")
+    m = _REFERENCE.search(spoken)
     if not m:
         return None
     ref = re.sub(r"[^A-Za-z0-9]", "", m.group(1)).upper()
+    # STT can cut the last character off into its own "sentence" after a pause: "8 q h 7 8. S."
+    tail = _TAIL_CHAR.match(spoken, m.end())
+    if tail and len(ref) < 8:
+        ref += tail.group(1).upper()
     return ref if 5 <= len(ref) <= 8 else None
 
 

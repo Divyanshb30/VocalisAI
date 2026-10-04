@@ -149,6 +149,42 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def voice_aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Audio-loopback runs: per-turn timings, STT accuracy on phone audio, keypresses over the line."""
+    from vocalis.agent.session import reference_in
+
+    done = [r for r in rows if not r.get("error")]
+    turns = [t for r in done for t in r.get("voice_turns", [])]
+    rep_turns = [t for t in turns if t["stage"] == "rep"]
+
+    def dist(key: str) -> dict[str, Any]:
+        xs = [t[key] for t in rep_turns if key in t]
+        return {"p50": percentile(xs, 0.5), "p95": percentile(xs, 0.95), "n": len(xs)}
+
+    def wer(ts: list[dict[str, Any]]) -> dict[str, Any]:
+        words = sum(t["words"] for t in ts)
+        return {"wer": round(sum(t["word_errors"] for t in ts) / words, 4) if words else None, "words": words}
+
+    refs = [(reference_in(t["truth"]), reference_in(t["heard"])) for t in rep_turns]
+    refs = [(a, b) for a, b in refs if a]
+    dtmf = [d for r in done for d in r.get("dtmf_over_line", [])]
+    return {
+        "voice_to_voice_s": dist("voice_to_voice_s"),
+        "stt_endpoint_s": dist("stt_endpoint_s"),
+        "agent_first_sentence_s": dist("agent_s"),
+        "tts_first_byte_s": dist("tts_first_byte_s"),
+        "stt_timeouts": sum(t["stt_timed_out"] for t in turns),
+        "wer_all": wer(turns),
+        "wer_ivr": wer([t for t in turns if t["stage"] == "ivr"]),
+        "wer_rep": wer(rep_turns),
+        "reference_heard_exactly": rate(sum(a == b for a, b in refs), len(refs)),
+        "dtmf_keys_decoded": rate(sum(d["sent"] == d["decoded"] for d in dtmf), len(dtmf)),
+        "note": "rep/IVR text -> Deepgram Aura-2 TTS -> PhoneLineSim (8 kHz mu-law, band-pass, noise) -> "
+        "real-time Deepgram nova-3 streaming STT (300 ms VAD hangover + Finalize) -> agent -> "
+        "first Aura-2 audio byte over a persistent websocket",
+    }
+
+
 def _group(rows: list[dict[str, Any]], key: str) -> dict[str, list[dict[str, Any]]]:
     g: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for r in rows:
@@ -235,6 +271,58 @@ def metrics_table(s: dict[str, Any]) -> str:
                     f"{v['talker_tokens_per_call']:,} tokens; $0 (free-tier credits + local rep model)",
                 )
             )
+    vv = s.get("vocalis_voice")
+    if vv and vv["completed"] and vv.get("voice"):
+        vo = vv["voice"]
+        d = vo["voice_to_voice_s"]
+        if d["p50"] is not None:
+            parts = {
+                "STT endpoint": vo["stt_endpoint_s"]["p50"],
+                "LLM + guard": vo["agent_first_sentence_s"]["p50"],
+                "TTS first byte": vo["tts_first_byte_s"]["p50"],
+            }
+            rows.append(
+                (
+                    "Voice-to-voice latency (audio loopback)",
+                    "end of the rep's speech → agent's first audio byte, over a simulated 8 kHz phone line, "
+                    "p50 / p95",
+                    f"{d['p50']:.2f}s / {d['p95']:.2f}s (n={d['n']} turns; p50 stages: "
+                    + ", ".join(f"{k} {v:.2f}s" for k, v in parts.items() if v is not None)
+                    + ")",
+                )
+            )
+        w = vo["wer_all"]
+        if w["wer"] is not None:
+            rows.append(
+                (
+                    "Speech recognition on phone audio",
+                    "word error rate of streaming STT on the IVR and rep, 8 kHz μ-law",
+                    f"{100 * w['wer']:.1f}% WER ({w['words']:,} words, Deepgram nova-3)",
+                )
+            )
+        if vo["reference_heard_exactly"]["n"]:
+            rows.append(
+                (
+                    "Spelled reference over audio",
+                    "booking reference read letter by letter, recognised exactly",
+                    fmt_rate(vo["reference_heard_exactly"]),
+                )
+            )
+        if vo["dtmf_keys_decoded"]["n"]:
+            rows.append(
+                (
+                    "Keypresses over the line",
+                    "in-band DTMF tones decoded by the IVR (Goertzel)",
+                    fmt_rate(vo["dtmf_keys_decoded"]),
+                )
+            )
+        rows.append(
+            (
+                "Task success over audio",
+                "as above, with the agent hearing STT output",
+                fmt_rate(vv["task_success"]),
+            )
+        )
     if doc:
         ds = doc["summary"]
         if ds.get("documents"):
@@ -252,23 +340,28 @@ def metrics_table(s: dict[str, Any]) -> str:
     out += [f"| {a} | {b_} | {c} |" for a, b_, c in rows]
     if v and v["completed"]:
         out.append("")
-        out.append(
-            f"_{v['completed']} completed simulated calls; talker: {', '.join(v['talker_models']) or 'n/a'}._"
-        )
+        seeds = len({r_.get("seed") for r_ in load("vocalis")})
+        note = f"_{v['completed']} completed simulated calls ({seeds} seed{'s' if seeds > 1 else ''} × 25 scenarios)"
+        if vv and vv["completed"]:
+            note += f", plus {vv['completed']} over audio"
+        out.append(f"{note}; talker: {', '.join(v['talker_models']) or 'n/a'}._")
     return "\n".join(out)
 
 
 def main() -> None:
     summary: dict[str, Any] = {}
-    for config in ("vocalis", "baseline"):
+    for config in ("vocalis", "baseline", "vocalis_voice"):
         rows = load(config)
         if rows:
             summary[config] = aggregate(rows)
-    base_ids = {r["scenario"] for r in load("baseline")}
+    voice_rows = load("vocalis_voice")
+    if voice_rows:
+        summary["vocalis_voice"]["voice"] = voice_aggregate(voice_rows)
+    base_ids = {(r["scenario"], r["seed"]) for r in load("baseline")}
     if base_ids:
-        # Prefer runs made with the same talker as the baseline (vocalis_matched), if they exist.
-        matched = [r for r in load("vocalis_matched") if r["scenario"] in base_ids] or [
-            r for r in load("vocalis") if r["scenario"] in base_ids
+        # Same scenarios and seeds as the baseline; prefer runs with the baseline's talker (vocalis_matched).
+        matched = [r for r in load("vocalis_matched") if (r["scenario"], r["seed"]) in base_ids] or [
+            r for r in load("vocalis") if (r["scenario"], r["seed"]) in base_ids
         ]
         if matched:
             summary["vocalis_on_baseline_scenarios"] = aggregate(matched)

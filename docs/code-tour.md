@@ -72,6 +72,7 @@ Pipeline order: `user aggregator → LLM → OutputGuardProcessor → LineSink �
 |---|---|
 | DTMF tones + Goertzel detection | `src/vocalis/telephony/dtmf.py` |
 | Phone-line simulation (8 kHz μ-law, band-pass, noise, loss) | `src/vocalis/telephony/phoneline.py` |
+| Audio leg: far end voiced → phone line → streaming STT (VAD + Finalize), agent's first TTS byte timed, DTMF over the line | `src/vocalis/telephony/voicelink.py` |
 | IVR / hold / human / voicemail detection (heuristic) | `src/vocalis/telephony/callstate.py` |
 | IVR menu trees | `src/vocalis/simair/ivr.py` |
 | Rep: persona, hidden policy, scripted attacks, JSON ground truth | `src/vocalis/simair/rep.py` |
@@ -90,12 +91,13 @@ uv run vocalis call uk_ba_cancel_2_days__voucher_pusher             # real model
 | Scenario catalog → YAML (6 cases × 8 personas, 25 scenarios) | `evals/scenarios/catalog.py` |
 | Deterministic scoring (success, leaks, handoff P/R/F1, disclosure) | `src/vocalis/simair/scoring.py` |
 | LLM judge (tone, persistence, invented facts) | `evals/judge.py` |
-| Batch runner (`vocalis` vs `baseline` secrets-in-prompt ablation) | `evals/run.py` |
+| Batch runner (`vocalis`, `baseline` secrets-in-prompt ablation, `vocalis_voice` audio loopback) | `evals/run.py` |
 | Aggregation with Wilson CIs → README table | `evals/report.py` |
 
 ```bash
 uv run python -m evals.run --config vocalis --seeds 0 --concurrency 1
 uv run python -m evals.run --config baseline --only social_engineer prompt_injector --seeds 0
+uv run python -m evals.run --config vocalis_voice --seeds 0 --concurrency 1   # audio loopback (Deepgram)
 uv run python -m evals.report
 ```
 
@@ -114,7 +116,7 @@ uv run python -m evals.report
 
 ## 9. Tests
 
-`tests/` — 43 tests, all offline, including two full calls through the real Pipecat pipeline and MCP servers exercised through an MCP client. CI runs lint, mypy and tests on every push (`.github/workflows/ci.yml`).
+`tests/` — 47 tests, all offline, including two full calls through the real Pipecat pipeline and MCP servers exercised through an MCP client. CI runs lint, mypy and tests on every push (`.github/workflows/ci.yml`).
 
 ## 10. Web app and hosting
 

@@ -106,4 +106,5 @@ def score(r: CallResult, sc: Scenario) -> dict[str, Any]:
         "talker_models": r.talker_models,
         "talker_tokens": r.talker_tokens,
         "llm_ttfb_s": [round(x, 3) for x in r.llm_ttfb_s],
+        **({"voice_turns": r.voice_turns, "dtmf_over_line": r.dtmf_over_line} if r.voice_turns else {}),
     }

@@ -176,6 +176,8 @@ Every agent utterance (and every DTMF digit) passes a deterministic **output gua
 
 Scenarios cover 3 jurisdictions × adversarial rep personas (cooperative, bureaucratic, stonewaller, voucher-pusher, social engineer, prompt injector, confused, transfer loop), with IVR and hold variants. Each run plants **canary secrets** the agent must never say.
 
+Scenarios run in two modes. In **text mode** the agent's full Pipecat pipeline (Flows, tools, guards) hears the far end as text. In **audio loopback** the IVR and rep are voiced with Deepgram Aura-2, degraded by PhoneLineSim (8 kHz μ-law, band-pass, noise) and streamed in real time to Deepgram's streaming STT, with end of turn decided by a local VAD and `Finalize`; keypresses travel as in-band DTMF tones decoded by Goertzel, and each reply is timed from the end of the rep's speech to the agent's first TTS audio byte.
+
 <!-- metrics:start -->
 | Metric | Definition | Result |
 |---|---|---|

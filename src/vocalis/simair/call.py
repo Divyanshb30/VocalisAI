@@ -17,7 +17,7 @@ from loguru import logger
 
 from vocalis.agent.briefing import Briefing
 from vocalis.agent.llm_services import build_talker
-from vocalis.agent.session import AgentSession, SessionHooks
+from vocalis.agent.session import AgentSession, AgentTurn, SessionHooks
 from vocalis.core.geo import carrier_name
 from vocalis.core.models import Mandate, OutcomeType
 from vocalis.guards import input_guard
@@ -56,6 +56,7 @@ class RunConfig:
     llm_factory: Any = None  # () -> (LLMService, model ids); tests inject a scripted LLM
     on_line: Any = None  # (Line) -> None; the web UI streams the call live through this
     pace: bool = False  # evals: stay under free-tier per-minute caps (live demo relies on failover)
+    voice: Any = None  # VoiceLink: audio leg; the agent hears streaming STT of the far end, not its text
 
 
 @dataclass
@@ -91,6 +92,8 @@ class CallResult:
     llm_ttfb_s: list[float] = field(default_factory=list)
     error: str | None = None
     duration_s: float = 0.0
+    voice_turns: list[dict[str, Any]] = field(default_factory=list)
+    dtmf_over_line: list[dict[str, str]] = field(default_factory=list)
 
 
 class CallSimulation:
@@ -117,6 +120,9 @@ class CallSimulation:
         self._rpm_seen = 0
         self._tpm_seen = 0
         self._last_rep_event: EventAction | None = None
+        self.voice_turns: list[dict[str, Any]] = []
+        self.dtmf_log: list[dict[str, str]] = []
+        self._heard: Any = None
         rep_models = config.rep_models or self.router.s.rep_models
         self.rep = SimRep(scenario, self.router, rep_models)
 
@@ -196,7 +202,61 @@ class CallSimulation:
 
     async def _on_dtmf(self, digits: str) -> None:
         self.log("agent", f"[DTMF {digits}]", dtmf=digits)
+        if self.cfg.voice is not None:  # tones down the line, decoded by the IVR's Goertzel detector
+            decoded = self.cfg.voice.dtmf_over_line(digits)
+            self.dtmf_log.append({"sent": digits, "decoded": decoded})
+            digits = decoded
         self._ivr_step = self.ivr.press(digits)
+
+    async def _ear(self, text: str, speaker: str) -> str:
+        """What the agent hears: the text itself, or in voice mode streaming STT of it over the line."""
+        if self.cfg.voice is None:
+            return text
+        from vocalis.web.tts import VOICES, voice_key
+
+        self._heard = await self.cfg.voice.listen(text, VOICES[voice_key(speaker, self.sc.rep.name)])
+        return str(self._heard.text) or "(inaudible)"
+
+    async def _agent_hears(self, text: str, stage: str) -> AgentTurn:
+        """session.hear, plus in voice mode the agent's first sentence goes to streaming TTS and the
+        turn is timed from the end of the far end's speech to the agent's first audio byte."""
+        if self.cfg.voice is None:
+            return await self.session.hear(text)
+        from vocalis.telephony.voicelink import word_errors
+
+        heard, sink, voice = self._heard, self.session.sink, self.cfg.voice
+
+        async def mouth() -> tuple[float, float]:
+            while not sink.spoken:
+                await asyncio.sleep(0.005)
+            ready = sink.first_text_at or time.monotonic()
+            return ready, await voice.first_audio_byte(sink.spoken[0])
+
+        task = asyncio.create_task(mouth())
+        errs, words = word_errors(heard.truth, heard.text)
+        rec: dict[str, Any] = {
+            "turn": self.turn,
+            "stage": stage,
+            "truth": heard.truth,
+            "heard": heard.text,
+            "word_errors": errs,
+            "words": words,
+            "speech_s": round(heard.speech_s, 3),
+            "stt_endpoint_s": round(heard.endpoint_s, 3),
+            "stt_timed_out": heard.timed_out,
+        }
+        try:
+            turn = await self.session.hear(text)
+            if turn.spoken:
+                ready, first_audio = await task
+                rec["agent_s"] = round(ready - heard.final_at, 3)
+                rec["tts_first_byte_s"] = round(first_audio - ready, 3)
+                rec["voice_to_voice_s"] = round(first_audio - heard.speech_end, 3)
+            return turn
+        finally:
+            if not task.done():
+                task.cancel()
+            self.voice_turns.append(rec)
 
     # --------------------------------------------------------------------- run
     async def run(self) -> CallResult:
@@ -231,7 +291,8 @@ class CallSimulation:
                     break
                 self._ivr_step = None
                 await self._pace_talker(talker_models)
-                turn = await self.session.hear(prompt)
+                heard = await self._ear(prompt, "ivr")
+                turn = await self._agent_hears(heard, "ivr")
                 if turn.text:
                     self.log("agent", turn.text, to="ivr")
                     if self._ivr_step is None:
@@ -285,7 +346,10 @@ class CallSimulation:
                 self._last_rep_event = rep_turn.event
                 if rep_turn.event is EventAction.TRANSFER:
                     self.log("hold", HOLD_LINES[0])
-                flags = input_guard.scan(rep_turn.say)
+                if self.cfg.voice is not None:  # pace before the audio so waiting isn't timed
+                    await self._pace_talker(talker_models)
+                heard = await self._ear(rep_turn.say, "rep")
+                flags = input_guard.scan(heard)
                 deterministic = self.cfg.guards and not self.cfg.baseline_prompt_secrets
                 if deterministic and input_guard.requires_handoff(flags, sorted(self.allow)):
                     note = await self._do_handoff("guard", ",".join(sorted(flags)))
@@ -304,10 +368,14 @@ class CallSimulation:
                     if rep_turn.event:  # a scripted attack can land right after a handoff too
                         self.events_fired.append((self.turn, rep_turn.event.value))
                     self._last_rep_event = rep_turn.event
+                    if self.cfg.voice is not None:
+                        await self._pace_talker(talker_models)
+                    heard = await self._ear(rep_turn.say, "rep")
                 if rep_turn.action == "end_call":
                     break
-                await self._pace_talker(talker_models)
-                turn = await self.session.hear(rep_turn.say)
+                if self.cfg.voice is None:
+                    await self._pace_talker(talker_models)
+                turn = await self._agent_hears(heard, "rep")
                 if turn.latency_s is not None:
                     self.latencies.append(turn.latency_s)
                 agent_text = turn.text or "(silence)"
@@ -358,6 +426,8 @@ class CallSimulation:
             llm_ttfb_s=list(sink.llm_ttfb_s),
             error=error,
             duration_s=round(time.monotonic() - self.t0, 2),
+            voice_turns=self.voice_turns,
+            dtmf_over_line=self.dtmf_log,
         )
 
 
