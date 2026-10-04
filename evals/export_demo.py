@@ -14,7 +14,7 @@ from pathlib import Path
 from vocalis.simair.scenario import load_scenarios
 from vocalis.web.server import case_view
 
-RUNS = Path("evals/results/runs/vocalis")
+RUNS = Path("evals/results/runs/vocalis_qwen")  # the main talker's recorded calls
 OUT = Path("web/demo")
 
 

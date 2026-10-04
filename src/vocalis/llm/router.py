@@ -25,7 +25,10 @@ from vocalis.core.settings import Settings, get_settings
 litellm.suppress_debug_info = True
 
 # Conservative daily token budgets for free tiers (leave headroom below the published caps).
+# Cerebras limits each model separately: gpt-oss-120b 1M uncached tokens/day, qwen-3.8-27b 216M.
 DAILY_TOKEN_BUDGET = {
+    "cerebras/gpt-oss-120b": 900_000,
+    "cerebras/qwen-3.8-27b": 200_000_000,
     "cerebras": 900_000,
     "groq": 190_000,  # uncached tokens only; Groq free tier is 200K/day per model
     "gemini": 2_000_000,
@@ -77,15 +80,20 @@ class QuotaLedger:
     def _today(self) -> dict[str, int]:
         return self._data.setdefault(date.today().isoformat(), {})
 
+    @staticmethod
+    def _key(model: str) -> str:
+        """Per model where the provider limits per model, otherwise per provider."""
+        return model if model in DAILY_TOKEN_BUDGET else provider_of(model)
+
     def used(self, model: str) -> int:
-        return self._today().get(provider_of(model), 0)
+        return self._today().get(self._key(model), 0)
 
     def remaining(self, model: str) -> int:
-        return DAILY_TOKEN_BUDGET.get(provider_of(model), 10**9) - self.used(model)
+        return DAILY_TOKEN_BUDGET.get(self._key(model), 10**9) - self.used(model)
 
     def add(self, model: str, tokens: int) -> None:
         today = self._today()
-        today[provider_of(model)] = today.get(provider_of(model), 0) + tokens
+        today[self._key(model)] = today.get(self._key(model), 0) + tokens
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.path.write_text(json.dumps(self._data, indent=1))
 

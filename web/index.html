@@ -240,7 +240,7 @@ $("#theme").onclick=()=>{const cur=document.documentElement.dataset.theme||(matc
 
 // ------------------------------------------------------------------ pipeline diagram
 const NODES={phone:[80,125,"Phone line","8 kHz line sim"],inguard:[215,125,"Input guard","scans the rep"],flows:[350,125,"Flows","state: none"],
- llm:[485,125,"LLM talker","gpt-oss-120b"],vault:[620,125,"Vault","late-bound secrets"],outguard:[755,125,"Output guard","Luhn, OTP, canaries"],voice:[900,125,"Voice","TTS"],
+ llm:[485,125,"LLM talker","qwen-3.8-27b"],vault:[620,125,"Vault","late-bound secrets"],outguard:[755,125,"Output guard","Luhn, OTP, canaries"],voice:[900,125,"Voice","TTS"],
  keypad:[215,35,"Keypad / IVR","in-band DTMF"],hold:[80,35,"Call state","IVR, hold, human"],rights:[485,35,"Rights engine","DGCA, UK261, GCAA"],tools:[620,35,"Tools","offer, resolution"],
  handoff:[350,215,"Handoff","passenger joins"],passenger:[520,215,"Passenger","OTP, card, ID"]};
 const EDGES=[["phone","inguard"],["inguard","flows"],["flows","llm"],["llm","vault"],["vault","outguard"],["outguard","voice"],["voice","phone",true],
@@ -334,14 +334,15 @@ function renderReport(r){if(!r){$("#report").innerHTML='<div class="note">The ou
   <div class="line"><span>Disclosed it is an AI</span><b>${r.disclosed_as_ai?"yes":"no"}</b></div><div class="line"><span>Task success</span><b class="${r.success?"good":"badc"}">${r.success?"yes":"no"}</b></div>
   ${r.talker?`<div class="note">Talker model: ${esc(r.talker)}</div>`:""}`;}
 const pct=x=>Math.round(100*x)+"%";
-function renderFigures(s){const v=s&&s.vocalis;if(!v){$("#figures").innerHTML="";return;}
-  const vo=s.vocalis_voice&&s.vocalis_voice.voice&&s.vocalis_voice.voice.voice_to_voice_s,t=v.llm_ttfb_s||{};
+const prim=s=>(s&&s.primary)||{text:"vocalis",voice:"vocalis_voice",baseline:"baseline"};
+function renderFigures(s){const P=prim(s),v=s&&s[P.text];if(!v){$("#figures").innerHTML="";return;}
+  const vv=s[P.voice],vo=vv&&vv.voice&&vv.voice.voice_to_voice_s,t=v.llm_ttfb_s||{};
   const lat=vo&&vo.p50!=null?[`${vo.p50.toFixed(2)} s`,"voice-to-voice reply, median"]:t.p50!=null?[`${t.p50.toFixed(2)} s`,"LLM first token, median"]:null;
   $("#figures").innerHTML=`<div class="fig"><b>${pct(v.task_success.rate)}</b><span>calls ending in the passenger's target outcome</span></div>
   <div class="fig"><b>${v.leak_runs.k}</b><span>sensitive values leaked in ${v.leak_runs.n} calls</span></div>
   ${lat?`<div class="fig"><b>${lat[0]}</b><span>${lat[1]}</span></div>`:""}
   <div class="figures-note">From ${v.completed} adversarial simulated calls across India, the UK and the UAE.</div>`;}
-function renderMetrics(s){const v=s&&s.vocalis;renderFigures(s);if(!v){$("#metrics").innerHTML='<div class="note">No evaluation results.</div>';return;}const t=v.llm_ttfb_s||{},b=s.baseline,m=s.vocalis_on_baseline_scenarios;
+function renderMetrics(s){const P=prim(s),v=s&&s[P.text];renderFigures(s);if(!v){$("#metrics").innerHTML='<div class="note">No evaluation results.</div>';return;}const t=v.llm_ttfb_s||{},b=s[P.baseline],m=s.primary_on_baseline_scenarios||s.vocalis_on_baseline_scenarios;
   $("#metrics").innerHTML=`<div class="stats"><div class="stat"><b>${pct(v.task_success.rate)}</b><span>task success, ${v.task_success.k} of ${v.task_success.n}</span></div>
   <div class="stat"><b>${v.leak_runs.k}</b><span>leaks in ${v.leak_runs.n} calls</span></div><div class="stat"><b>${v.handoff.recall!=null?pct(v.handoff.recall):"n/a"}</b><span>handoff recall</span></div>
   <div class="stat"><b>${t.p50!=null?t.p50.toFixed(2)+" s":"n/a"}</b><span>LLM first token, median</span></div></div>

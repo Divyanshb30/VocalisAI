@@ -75,8 +75,10 @@ def _honesty_from_transcript(transcript: list[dict[str, Any]]) -> tuple[int, int
 
 
 def load(config: str) -> list[dict[str, Any]]:
+    """Runs of a config; "archive/<version>/<config>" reads an archived set."""
+    base = RUNS.parent / config if config.startswith("archive/") else RUNS / config
     rows = []
-    for p in sorted((RUNS / config).glob("*.json")):
+    for p in sorted(base.glob("*.json")):
         data = json.loads(p.read_text(encoding="utf-8"))
         score = data["score"]
         score["asked_if_human"], score["honest_if_human"] = _honesty_from_transcript(
@@ -214,8 +216,9 @@ def _excluded(d: dict[str, Any]) -> str:
 
 def metrics_table(s: dict[str, Any]) -> str:
     """Only rows that have a real measured value; nothing is shown for metrics not yet run."""
-    v = s.get("vocalis")
-    b = s.get("baseline")
+    p = s.get("primary", PRIMARY)
+    v = s.get(p["text"])
+    b = s.get(p["baseline"])
     doc = s.get("docbench")
     rows: list[tuple[str, str, str]] = []
     if v and v["completed"]:
@@ -234,7 +237,7 @@ def metrics_table(s: dict[str, Any]) -> str:
         rows.append(
             ("Sensitive-data leak rate", "runs where any unauthorised value or canary was spoken", leak)
         )
-        m = s.get("vocalis_on_baseline_scenarios")
+        m = s.get("primary_on_baseline_scenarios")
         if b and b["completed"] and m:
             rows.append(
                 (
@@ -291,7 +294,7 @@ def metrics_table(s: dict[str, Any]) -> str:
                     f"{v['talker_tokens_per_call']:,} tokens; $0 (free-tier credits + local rep model)",
                 )
             )
-    vv = s.get("vocalis_voice")
+    vv = s.get(p["voice"])
     if vv and vv["completed"] and vv.get("voice"):
         vo = vv["voice"]
         d = vo["voice_to_voice_s"]
@@ -349,6 +352,19 @@ def metrics_table(s: dict[str, Any]) -> str:
                 fmt_rate(vv["task_success"]),
             )
         )
+        rb = s.get("readback")
+        if rb:
+            bt, at = rb["before"], rb["after"]
+            rows.append(
+                (
+                    "Reference read-back (audio)",
+                    "agent reads the reference back phonetically and the rep corrects a mishearing: "
+                    "before → after, same talker",
+                    f"task success {pct(bt['task_success']['rate'])} → {pct(at['task_success']['rate'])}; "
+                    f"reference captured {pct(bt['reference_captured']['rate'])} → "
+                    f"{pct(at['reference_captured']['rate'])} ({at['completed']} calls each)",
+                )
+            )
     if doc:
         ds = doc["summary"]
         if ds.get("documents"):
@@ -378,7 +394,7 @@ def metrics_table(s: dict[str, Any]) -> str:
     out += [f"| {a} | {b_} | {c} |" for a, b_, c in rows]
     if v and v["completed"]:
         out.append("")
-        seeds = sorted({r_.get("seed") for r_ in load("vocalis")})
+        seeds = sorted({r_.get("seed") for r_ in load(p["text"])})
         note = (
             f"_{v['completed']} completed simulated calls "
             f"(25 scenarios, seed{'s' if len(seeds) > 1 else ''} {', '.join(map(str, seeds))})"
@@ -392,7 +408,11 @@ def metrics_table(s: dict[str, Any]) -> str:
     return "\n".join(out)
 
 
-TALKERS = (("vocalis", "vocalis_voice"), ("vocalis_qwen", "vocalis_qwen_voice"))
+# The shipping configuration, and the model comparison (both talkers on the same code: the runs made
+# before the reference read-back fix, kept under archive/v2 for qwen).
+PRIMARY = {"text": "vocalis_qwen", "voice": "vocalis_qwen_voice", "baseline": "baseline_qwen"}
+TALKERS = (("vocalis", "vocalis_voice"), ("archive/v2/vocalis_qwen", "archive/v2/vocalis_qwen_voice"))
+READBACK = ("archive/v2/vocalis_qwen_voice", "vocalis_qwen_voice")
 
 
 def talker_comparison(s: dict[str, Any]) -> str:
@@ -422,8 +442,8 @@ def talker_comparison(s: dict[str, Any]) -> str:
     )
     return "\n".join(
         [
-            "**Talker model comparison** (same agent, harness and scenarios; only the model behind "
-            "the agent's replies differs)",
+            "**Talker model comparison** (same agent code, harness and scenarios, before the read-back fix; "
+            "only the model behind the agent's replies differs)",
             "",
             head,
             "|---|---|---|---|---|---|---|",
@@ -433,24 +453,29 @@ def talker_comparison(s: dict[str, Any]) -> str:
 
 
 def main() -> None:
-    summary: dict[str, Any] = {}
-    for config in ("vocalis", "baseline", "vocalis_voice", "vocalis_qwen", "vocalis_qwen_voice"):
+    summary: dict[str, Any] = {"primary": PRIMARY}
+    configs = {
+        *PRIMARY.values(),
+        "vocalis",
+        "baseline",
+        "vocalis_voice",
+        *(c for pair in TALKERS for c in pair),
+    }
+    for config in sorted(configs):
         rows = load(config)
         if rows:
             summary[config] = aggregate(rows)
-    for config in ("vocalis_voice", "vocalis_qwen_voice"):
-        rows = load(config)
-        if rows:
-            summary[config]["voice"] = voice_aggregate(rows)
-    voice_rows = load("vocalis_voice")
-    base_ids = {(r["scenario"], r["seed"]) for r in load("baseline")}
-    if base_ids:
-        # Same scenarios and seeds as the baseline; prefer runs with the baseline's talker (vocalis_matched).
-        matched = [r for r in load("vocalis_matched") if (r["scenario"], r["seed"]) in base_ids] or [
-            r for r in load("vocalis") if (r["scenario"], r["seed"]) in base_ids
-        ]
-        if matched:
-            summary["vocalis_on_baseline_scenarios"] = aggregate(matched)
+            if any(r.get("voice_turns") for r in rows):
+                summary[config]["voice"] = voice_aggregate(rows)
+    # the agent on the same scenarios and seeds as the naive baseline, same talker
+    base_ids = {(r["scenario"], r["seed"]) for r in load(PRIMARY["baseline"])}
+    matched = [r for r in load(PRIMARY["text"]) if (r["scenario"], r["seed"]) in base_ids]
+    if matched:
+        summary["primary_on_baseline_scenarios"] = aggregate(matched)
+    before, after = (summary.get(c) for c in READBACK)
+    if before and after and after["completed"]:
+        summary["readback"] = {"before": before, "after": after}
+    voice_rows = load(PRIMARY["voice"])
     if NETWORK.exists() and voice_rows:
         summary["network"] = json.loads(NETWORK.read_text(encoding="utf-8"))
     if DOCBENCH.exists():
