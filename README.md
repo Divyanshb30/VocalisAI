@@ -191,9 +191,14 @@ Scenarios run in two modes. In **text mode** the agent's full Pipecat pipeline (
 | Reply latency (text mode) | rep turn in → first guarded sentence out, p50 / p95 | 0.47s / 1.61s (n=159) |
 | Talker first-token latency | LLM time to first token per turn, p50 / p95 | 0.35s / 0.80s (n=423) |
 | Cost per call | talker tokens per call; out-of-pocket cost | 3,597 tokens; $0 (free-tier credits + local rep model) |
+| Voice-to-voice latency (audio loopback) | end of the rep's speech → agent's first audio byte, over a simulated 8 kHz phone line, p50 / p95 | 1.77s / 2.42s (n=75 turns; p50 stages: STT endpoint 0.64s, LLM + guard 0.47s, TTS first byte 0.66s); test machine is 0.28s round trip from Deepgram, inside both STT and TTS |
+| Speech recognition on phone audio | word error rate of streaming STT on the IVR and rep, 8 kHz μ-law, Whisper-style normalisation | 3.9% WER (4,038 words, Deepgram nova-3) |
+| Reference codes over audio | every booking or resolution reference the rep read out, recognised exactly by STT | 72% (33/46, 95% CI 57%–83%) |
+| Keypresses over the line | in-band DTMF tones decoded by the IVR (Goertzel) | 100% (70/70, 95% CI 95%–100%) |
+| Task success over audio | as above, with the agent hearing STT output | 64% (16/25, 95% CI 45%–80%) |
 | Document extraction | field accuracy, vision only → with barcode cross-check | 100% → 100% (20 synthetic docs, gemini-flash-lite-latest) |
 
-_50 completed simulated calls (2 seeds × 25 scenarios); talker: cerebras/gpt-oss-120b._
+_50 completed simulated calls (2 seeds × 25 scenarios), plus 25 over audio; talker: cerebras/gpt-oss-120b._
 <!-- metrics:end -->
 
 Rates are reported with Wilson 95% confidence intervals; zero-leak results report the rule-of-three upper bound.

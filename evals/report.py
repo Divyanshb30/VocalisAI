@@ -155,6 +155,7 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
 def voice_aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
     """Audio-loopback runs: per-turn timings, STT accuracy on phone audio, keypresses over the line."""
     from vocalis.agent.session import reference_in
+    from vocalis.telephony.voicelink import word_errors
 
     done = [r for r in rows if not r.get("error")]
     turns = [t for r in done for t in r.get("voice_turns", [])]
@@ -165,8 +166,10 @@ def voice_aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
         return {"p50": percentile(xs, 0.5), "p95": percentile(xs, 0.95), "n": len(xs)}
 
     def wer(ts: list[dict[str, Any]]) -> dict[str, Any]:
-        words = sum(t["words"] for t in ts)
-        return {"wer": round(sum(t["word_errors"] for t in ts) / words, 4) if words else None, "words": words}
+        # recomputed from the stored text, so every run is scored with the current normaliser
+        counts = [word_errors(t["truth"], t["heard"]) for t in ts]
+        words = sum(n for _, n in counts)
+        return {"wer": round(sum(e for e, _ in counts) / words, 4) if words else None, "words": words}
 
     refs = [(reference_in(t["truth"]), reference_in(t["heard"])) for t in rep_turns]
     refs = [(a, b) for a, b in refs if a]
@@ -305,15 +308,15 @@ def metrics_table(s: dict[str, Any]) -> str:
             rows.append(
                 (
                     "Speech recognition on phone audio",
-                    "word error rate of streaming STT on the IVR and rep, 8 kHz μ-law",
+                    "word error rate of streaming STT on the IVR and rep, 8 kHz μ-law, Whisper-style normalisation",
                     f"{100 * w['wer']:.1f}% WER ({w['words']:,} words, Deepgram nova-3)",
                 )
             )
         if vo["reference_heard_exactly"]["n"]:
             rows.append(
                 (
-                    "Spelled reference over audio",
-                    "booking reference read letter by letter, recognised exactly",
+                    "Reference codes over audio",
+                    "every booking or resolution reference the rep read out, recognised exactly by STT",
                     fmt_rate(vo["reference_heard_exactly"]),
                 )
             )

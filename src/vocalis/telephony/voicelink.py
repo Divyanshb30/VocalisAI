@@ -267,28 +267,92 @@ def spelled_for_tts(text: str) -> str:
 _CURRENCY = {"£": "pounds", "€": "euros", "₹": "rupees", "$": "dollars"}
 
 
+_CONTRACTIONS = [
+    (r"n't\b", " not"),
+    (r"'ve\b", " have"),
+    (r"'re\b", " are"),
+    (r"'m\b", " am"),
+    (r"'ll\b", " will"),
+    (r"'d\b", " would"),
+    (r"'s\b", ""),
+]
+_TITLES = {"mr": "mister", "mrs": "missus", "ms": "miss", "dr": "doctor"}
+# British -> American spelling, folded the same way on both sides
+_SPELLING = [
+    (r"isation$", "ization"),
+    (r"is(e|ed|es|ing)$", r"iz\1"),
+    (r"ll(ed|ing)$", r"l\1"),
+    (r"our$", "or"),
+]
+_ONES = [
+    "zero",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+    "thirteen",
+    "fourteen",
+    "fifteen",
+    "sixteen",
+    "seventeen",
+    "eighteen",
+    "nineteen",
+]
+_TENS = ["_", "_", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]
+
+
+def _num_words(n: int) -> list[str]:
+    if n < 20:
+        return [_ONES[n]]
+    if n < 100:
+        return [_TENS[n // 10]] + ([_ONES[n % 10]] if n % 10 else [])
+    for size, name in ((10**9, "billion"), (10**6, "million"), (1000, "thousand"), (100, "hundred")):
+        if n >= size:
+            rest = n % size
+            return _num_words(n // size) + [name] + (_num_words(rest) if rest else [])
+    return [str(n)]
+
+
 def normalise_words(text: str) -> list[str]:
-    """Lower-case words for WER: currency symbols spelled out, digit grouping and punctuation dropped,
-    and spelled-out codes ("r 8 q 4") joined into one token."""
-    t = text.lower()
+    """Whisper-style normalisation for WER, applied identically to reference and hypothesis: case,
+    punctuation, currency symbols, contractions, titles, British/American spelling, numbers as words,
+    and codes split into letters and digits ("AI504", "R8Q4ZT" and "R 8 Q 4 Z T" all agree)."""
+    t = text.lower().replace("’", "'")
     for sym, word in _CURRENCY.items():
         t = re.sub(rf"{re.escape(sym)}\s*([\d,.]+)", rf"\1 {word}", t)
     t = re.sub(r"(?<=\d),(?=\d)", "", t)
-    t = re.sub(r"[^a-z0-9.]+", " ", t)
-    t = re.sub(r"(?<!\d)\.|\.(?!\d)", " ", t)
-    joined: list[str] = []
-    run = ""
+    t = t.replace("%", " percent")
+    t = re.sub(r"(\d+)(st|nd|rd|th)\b", r"\1", t)
+    for pat, rep in _CONTRACTIONS:
+        t = re.sub(pat, rep, t)
+    t = re.sub(r"[^a-z0-9]+", " ", t)
+    out: list[str] = []
     for tok in t.split():
-        if len(tok) == 1 and tok not in ("a", "i"):
-            run += tok
-            continue
-        if run:
-            joined.append(run)
-            run = ""
-        joined.append(tok)
-    if run:
-        joined.append(run)
-    return joined
+        mixed = bool(re.search(r"\d", tok)) and bool(re.search(r"[a-z]", tok))
+        parts = list(tok) if mixed else [tok]  # codes are read one character at a time
+        for p in parts:
+            if p.isdigit():
+                out += [_ONES[int(d)] for d in p] if mixed or p.startswith("0") else _num_words(int(p))
+                continue
+            p = _TITLES.get(p, p)
+            for pat, rep in _SPELLING:
+                p = re.sub(pat, rep, p)
+            out.append(p)
+    # "five hundred and twenty" == "five hundred twenty"
+    numeric = {*_ONES, *_TENS[2:], "hundred", "thousand", "million", "billion"}
+    return [
+        w
+        for i, w in enumerate(out)
+        if not (w == "and" and 0 < i < len(out) - 1 and out[i - 1] in numeric and out[i + 1] in numeric)
+    ]
 
 
 def word_errors(truth: str, heard: str) -> tuple[int, int]:

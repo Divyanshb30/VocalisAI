@@ -15,20 +15,31 @@ def test_spelled_codes_read_one_character_at_a_time() -> None:
 
 
 def test_wer_normalisation() -> None:
-    assert normalise_words("A refund of £520, ref R 8 Q 4.") == [
+    assert normalise_words("A refund of £520 for Mr Shah.") == [
         "a",
         "refund",
         "of",
-        "520",
+        "five",
+        "hundred",
+        "twenty",
         "pounds",
-        "ref",
-        "r8q4",
+        "for",
+        "mister",
+        "shah",
     ]
-    assert word_errors("Press 2 for refunds.", "press two for refunds") == (1, 4)
+    same = [
+        ("Your flight was cancelled.", "your flight was canceled"),
+        ("I've processed it.", "I have processed it"),
+        ("Your reference number is R 8 Q 4 Z T.", "Your reference number is R8Q4ZT."),
+        ("more than 3 hours", "more than three hours"),
+        ("five hundred and twenty", "520"),
+        ("Press 2 for refunds.", "press two for refunds"),
+    ]
+    for truth, heard in same:
+        assert word_errors(truth, heard)[0] == 0, (truth, heard)
     assert word_errors(
-        "For refunds, cancellations and compensation, press 3.",
-        "For refunds, cancellations, and compensation, press 3.",
-    ) == (0, 7)
+        "For security I need the passport number.", "For security I need the pass number."
+    ) == (1, 7)
 
 
 def test_reference_heard_in_stt_styles() -> None:
