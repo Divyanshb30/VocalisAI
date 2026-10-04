@@ -181,14 +181,14 @@ Scenarios run in two modes. In **text mode** the agent's full Pipecat pipeline (
 <!-- metrics:start -->
 | Metric | Definition | Result |
 |---|---|---|
-| Task success | outcome inside the mandate **and** correct reference captured | 88% (23/26, 95% CI 71%–96%) |
-| Sensitive-data leak rate | runs where any unauthorised value or canary was spoken | 0% (0/26, 95% CI 0%–13%); 95% upper bound 11% |
-| Handoff accuracy | precision / recall / F1 on events that need the passenger | P 81% · R 94% · F1 87% |
-| AI disclosure | discloses in the first utterance | 100% (26/26, 95% CI 87%–100%); honest when asked: 100% (5/5, 95% CI 57%–100%) |
-| IVR navigation | reached a human through the phone menu | 100% (26/26, 95% CI 87%–100%) |
-| Reply latency (text mode) | rep turn in → first guarded sentence out, p50 / p95 | 0.50s / 0.92s (n=72; 4 turns that waited out a free-tier rate-limit retry excluded) |
-| Talker first-token latency | LLM time to first token per turn, p50 / p95 | 0.35s / 0.48s (n=200; 8 turns that waited out a free-tier rate-limit retry excluded) |
-| Cost per call | talker tokens per call; out-of-pocket cost | 3,750 tokens; $0 (free-tier credits + local rep model) |
+| Task success | outcome inside the mandate **and** correct reference captured | 89% (34/38, 95% CI 76%–96%) |
+| Sensitive-data leak rate | runs where any unauthorised value or canary was spoken | 0% (0/38, 95% CI 0%–9%); 95% upper bound 8% |
+| Handoff accuracy | precision / recall / F1 on events that need the passenger | P 86% · R 96% · F1 91% |
+| AI disclosure | discloses in the first utterance | 100% (38/38, 95% CI 91%–100%); honest when asked: 100% (7/7, 95% CI 65%–100%) |
+| IVR navigation | reached a human through the phone menu | 100% (38/38, 95% CI 91%–100%) |
+| Reply latency (text mode) | rep turn in → first guarded sentence out, p50 / p95 | 0.50s / 0.94s (n=97; 6 turns that waited out a free-tier rate-limit retry excluded) |
+| Talker first-token latency | LLM time to first token per turn, p50 / p95 | 0.35s / 0.50s (n=289; 11 turns that waited out a free-tier rate-limit retry excluded) |
+| Cost per call | talker tokens per call; out-of-pocket cost | 3,580 tokens; $0 (free-tier credits + local rep model) |
 | Voice-to-voice latency (audio loopback) | end of the rep's speech → agent's first audio byte, over a simulated 8 kHz phone line, p50 / p95 | 1.77s / 2.42s (n=75 turns; p50 stages: STT endpoint 0.64s, LLM + guard 0.47s, TTS first byte 0.66s); test machine is 0.28s round trip from Deepgram, inside both STT and TTS |
 | Speech recognition on phone audio | word error rate of streaming STT on the IVR and rep, 8 kHz μ-law, Whisper-style normalisation | 3.9% WER (4,038 words, Deepgram nova-3) |
 | Reference codes over audio | every booking or resolution reference the rep read out, recognised exactly by STT | 72% (33/46, 95% CI 57%–83%) |
@@ -196,7 +196,14 @@ Scenarios run in two modes. In **text mode** the agent's full Pipecat pipeline (
 | Task success over audio | as above, with the agent hearing STT output | 64% (16/25, 95% CI 45%–80%) |
 | Document extraction | field accuracy, vision only → with barcode cross-check | 100% → 100% (20 synthetic docs, gemini-flash-lite-latest) |
 
-_26 completed simulated calls (2 seeds × 25 scenarios), plus 25 over audio; talker: cerebras/gpt-oss-120b._
+_38 completed simulated calls (25 scenarios, seeds 0, 1), plus 25 over audio; talker: cerebras/gpt-oss-120b._
+
+**Talker model comparison** (same agent, harness and scenarios; only the model behind the agent's replies differs)
+
+| Talker | Task success | Leaks | Handoff F1 | Reply latency p50 / p95 | First token p50 | Over audio: success; voice-to-voice p50 / p95 |
+|---|---|---|---|---|---|---|
+| cerebras/gpt-oss-120b | 89% (34/38, 95% CI 76%–96%) | 0/38 | 91% | 0.50s / 0.94s | 0.35s | 64% (16/25); 1.77s / 2.42s |
+| cerebras/qwen-3.8-27b | 84% (63/75, 95% CI 74%–91%) | 0/75 | 98% | 0.66s / 1.34s | 0.39s | 56% (14/25); 1.91s / 2.83s |
 <!-- metrics:end -->
 
 Rates are reported with Wilson 95% confidence intervals; zero-leak results report the rule-of-three upper bound.

@@ -365,23 +365,71 @@ def metrics_table(s: dict[str, Any]) -> str:
     out += [f"| {a} | {b_} | {c} |" for a, b_, c in rows]
     if v and v["completed"]:
         out.append("")
-        seeds = len({r_.get("seed") for r_ in load("vocalis")})
-        note = f"_{v['completed']} completed simulated calls ({seeds} seed{'s' if seeds > 1 else ''} × 25 scenarios)"
+        seeds = sorted({r_.get("seed") for r_ in load("vocalis")})
+        note = (
+            f"_{v['completed']} completed simulated calls "
+            f"(25 scenarios, seed{'s' if len(seeds) > 1 else ''} {', '.join(map(str, seeds))})"
+        )
         if vv and vv["completed"]:
             note += f", plus {vv['completed']} over audio"
         out.append(f"{note}; talker: {', '.join(v['talker_models']) or 'n/a'}._")
+    comparison = talker_comparison(s)
+    if comparison:
+        out += ["", comparison]
     return "\n".join(out)
+
+
+TALKERS = (("vocalis", "vocalis_voice"), ("vocalis_qwen", "vocalis_qwen_voice"))
+
+
+def talker_comparison(s: dict[str, Any]) -> str:
+    """Same agent, harness and scenarios; only the talker model differs."""
+    rows = []
+    for text_key, voice_key in TALKERS:
+        t, vo = s.get(text_key), s.get(voice_key)
+        if not t or not t["completed"]:
+            continue
+        lat, ttfb, h = t["reply_latency_s"], t["llm_ttfb_s"], t["handoff"]
+        audio = "n/a"
+        if vo and vo["completed"] and vo.get("voice"):
+            d = vo["voice"]["voice_to_voice_s"]
+            ts = vo["task_success"]
+            audio = f"{pct(ts['rate'])} ({ts['k']}/{ts['n']}); {d['p50']:.2f}s / {d['p95']:.2f}s"
+        f1 = pct(h["f1"]) if h["f1"] is not None else "n/a"
+        rows.append(
+            f"| {', '.join(t['talker_models'])} | {fmt_rate(t['task_success'])} "
+            f"| {t['leak_runs']['k']}/{t['leak_runs']['n']} | {f1} "
+            f"| {lat['p50']:.2f}s / {lat['p95']:.2f}s | {ttfb['p50']:.2f}s | {audio} |"
+        )
+    if len(rows) < 2:
+        return ""
+    head = (
+        "| Talker | Task success | Leaks | Handoff F1 | Reply latency p50 / p95 | First token p50 "
+        "| Over audio: success; voice-to-voice p50 / p95 |"
+    )
+    return "\n".join(
+        [
+            "**Talker model comparison** (same agent, harness and scenarios; only the model behind "
+            "the agent's replies differs)",
+            "",
+            head,
+            "|---|---|---|---|---|---|---|",
+            *rows,
+        ]
+    )
 
 
 def main() -> None:
     summary: dict[str, Any] = {}
-    for config in ("vocalis", "baseline", "vocalis_voice"):
+    for config in ("vocalis", "baseline", "vocalis_voice", "vocalis_qwen", "vocalis_qwen_voice"):
         rows = load(config)
         if rows:
             summary[config] = aggregate(rows)
+    for config in ("vocalis_voice", "vocalis_qwen_voice"):
+        rows = load(config)
+        if rows:
+            summary[config]["voice"] = voice_aggregate(rows)
     voice_rows = load("vocalis_voice")
-    if voice_rows:
-        summary["vocalis_voice"]["voice"] = voice_aggregate(voice_rows)
     base_ids = {(r["scenario"], r["seed"]) for r in load("baseline")}
     if base_ids:
         # Same scenarios and seeds as the baseline; prefer runs with the baseline's talker (vocalis_matched).
