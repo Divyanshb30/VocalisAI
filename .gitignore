@@ -48,3 +48,6 @@ evals/docbench/data/
 # eval run logs
 evals/results/*.log
 !web/demo/audio/**/*.mp3
+
+# property-test example cache
+.hypothesis/

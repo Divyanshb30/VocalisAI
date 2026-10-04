@@ -105,7 +105,7 @@ def _is_number_word(tokens: list[str], j: int, started: bool) -> bool:
         return True
     if t in _ORD_UNITS:  # "one second" is time, "second of March" is a date
         prev = tokens[j - 2] if j >= 2 and tokens[j - 1] == "-" else tokens[j - 1] if j else ""
-        return t != "second" or nxt == "of" or nxt in _MONTH_WORDS or prev in _TENS
+        return t != "second" or nxt == "of" or nxt in _MONTH_WORDS or prev in _TENS or prev == "the"
     if t in ("oh", "o"):
         return started
     if t in _MULT:
