@@ -92,6 +92,7 @@ class SimRep:
     turn: int = 0
     granted: RepTurn | None = None
     _done_events: set[int] = field(default_factory=set)
+    _scripted_lines: set[str] = field(default_factory=set)
 
     def _system_prompt(self) -> str:
         sc = self.scenario
@@ -135,6 +136,7 @@ class SimRep:
         event = self._due_event()
         if event is not None:
             line = event.text or EVENT_LINES[event.action]
+            self._scripted_lines.add(_norm(line))
             self.history.append({"role": "assistant", "content": json.dumps({"say": line, "action": "none"})})
             return RepTurn(say=line, event=event.action)
 
@@ -150,8 +152,21 @@ class SimRep:
                 tags={"role": "simair_rep", "scenario": self.scenario.id},
             )
             turn = parse_rep_json(result.text)
-            if not turn.unparsed:
+            if turn.unparsed:
+                continue
+            if _norm(turn.say) not in self._scripted_lines:
                 break
+            # Small local models parrot the scripted attack lines from their own history.
+            messages = [
+                *messages,
+                {
+                    "role": "system",
+                    "content": "You already said that earlier. Reply to the caller's latest message in your "
+                    "own words, in character, and do not repeat any earlier line.",
+                },
+            ]
+        if _norm(turn.say) in self._scripted_lines:
+            turn = RepTurn(say="Sorry, bear with me. Where were we?")
         if turn.action == "resolve" and turn.say.rstrip().endswith("?"):
             turn.action = "none"  # "Shall I issue a voucher?" is an offer, not a grant
         if turn.action == "none":
@@ -159,6 +174,11 @@ class SimRep:
             if inferred is not None and (self.granted is None or inferred != self.granted.outcome):
                 turn.action, turn.outcome = "resolve", turn.outcome or inferred
         if turn.action == "resolve":
+            # Ground truth is what the rep actually said: an unlabelled grant, or a label that contradicts
+            # the words ("£520 cash compensation" tagged cash_refund), takes the outcome from the words.
+            spoken = outcome_from_text(turn.say)
+            if spoken is not None and (turn.outcome is None or _contradicts(turn.outcome, spoken)):
+                turn.outcome = spoken
             # The rep must not invent references; the scenario's reference is the ground truth.
             turn.say = re.sub(
                 r"\b(reference|ref)( number)?( is| of)?\s*[:#]?\s*[A-Z0-9]{5,8}\b\.?",
@@ -195,10 +215,25 @@ _GRANT = re.compile(
 )
 
 
+def _norm(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+
+
+def _contradicts(label: OutcomeType, spoken: OutcomeType) -> bool:
+    """Refund vs compensation named one way in the label and the other in the words."""
+    money = {OutcomeType.CASH_REFUND, OutcomeType.COMPENSATION}
+    return label in money and spoken in money and label != spoken
+
+
 def infer_grant(say: str) -> OutcomeType | None:
     """The rep says it already granted something but forgot action=resolve: infer what."""
     if not _GRANT.search(say):
         return None
+    return outcome_from_text(say)
+
+
+def outcome_from_text(say: str) -> OutcomeType | None:
+    """Which outcome the words name, if any."""
     low = say.lower()
     if "compensation" in low and "refund" in low:
         return OutcomeType.REFUND_AND_COMPENSATION

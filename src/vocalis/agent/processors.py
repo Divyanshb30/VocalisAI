@@ -25,6 +25,24 @@ from vocalis.guards.vault import Vault
 _SENTENCE_END = re.compile(r"([.!?])(\s+|$)")
 
 
+def without_json(text: str) -> str:
+    """Drop complete ``{...}`` blocks: a model sometimes writes its tool call as text, which must never be
+    spoken. An object still streaming in is kept, so the caller can hold it back until it closes."""
+    out: list[str] = []
+    depth = start = 0
+    for i, ch in enumerate(text):
+        if ch == "{":
+            if depth == 0:
+                out.append(text[start:i])
+                start = i
+            depth += 1
+        elif ch == "}" and depth:
+            depth -= 1
+            if depth == 0:
+                start = i + 1
+    return "".join(out) + text[start:]
+
+
 @dataclass
 class GuardEvent:
     original: str
@@ -84,16 +102,21 @@ class OutputGuardProcessor(FrameProcessor):
         await self.push_frame(out)
 
     async def _drain(self, final: bool) -> None:
+        self._buf = without_json(self._buf)
+        hold = self._buf.find("{")  # an unfinished object: speak nothing past it yet
+        if hold >= 0 and final:
+            self._buf, hold = self._buf[:hold], -1  # never closed: machine text, drop it
+        head, tail = (self._buf, "") if hold < 0 else (self._buf[:hold], self._buf[hold:])
         while True:
-            m = _SENTENCE_END.search(self._buf)
+            m = _SENTENCE_END.search(head)
             if not m:
                 break
-            end = m.end()
-            sentence, self._buf = self._buf[:end], self._buf[end:]
+            sentence, head = head[: m.end()], head[m.end() :]
             await self._emit(sentence)
-        if final and self._buf.strip():
-            sentence, self._buf = self._buf, ""
-            await self._emit(sentence)
+        if final and head.strip():
+            await self._emit(head)
+            head = ""
+        self._buf = head + tail
 
     async def process_frame(self, frame: Frame, direction: FrameDirection) -> None:
         await super().process_frame(frame, direction)
