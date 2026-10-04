@@ -136,7 +136,9 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
         },
         "success_by_jurisdiction": by("jurisdiction"),
         "success_by_persona": by("persona"),
-        "talker_models": sorted({m for r in done for m in r.get("talker_models", [])}),
+        # primary talker per run; the rest of each list is failover that only serves if the primary fails
+        "talker_models": sorted({r["talker_models"][0] for r in done if r.get("talker_models")}),
+        "talker_served": sorted({m for r in done for m in r.get("talker_served", [])}),
         "talker_tokens_per_call": round(statistics.mean(r.get("talker_tokens", 0) for r in done))
         if done
         else None,

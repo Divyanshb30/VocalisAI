@@ -92,6 +92,7 @@ class CallResult:
     llm_ttfb_s: list[float] = field(default_factory=list)
     error: str | None = None
     duration_s: float = 0.0
+    talker_served: list[str] = field(default_factory=list)  # LLM services that produced replies
     voice_turns: list[dict[str, Any]] = field(default_factory=list)
     dtmf_over_line: list[dict[str, str]] = field(default_factory=list)
 
@@ -426,6 +427,7 @@ class CallSimulation:
             llm_ttfb_s=list(sink.llm_ttfb_s),
             error=error,
             duration_s=round(time.monotonic() - self.t0, 2),
+            talker_served=sorted(sink.llm_services),
             voice_turns=self.voice_turns,
             dtmf_over_line=self.dtmf_log,
         )
