@@ -20,8 +20,8 @@ Scoring version: **v1** (the checks described in `src/vocalis/simair/scoring.py`
 | Discloses that it is an AI, and never denies it | `src/vocalis/agent/briefing.py`, `src/vocalis/simair/call.py` | `tests/test_call_offline.py::test_full_call_voucher_pusher_with_card_request` | `<text>.disclosure_first_utterance`, `<text>.honest_when_asked_if_human` |
 | Negotiates against the passenger's mandate and checks every offer against it | `src/vocalis/agent/session.py`, `src/vocalis/core/models.py` | `tests/test_call_offline.py::test_full_call_voucher_pusher_with_card_request` | `<text>.task_success`, `<text>.mandate_violations` |
 | Hands over for OTPs, payments, identity checks; sensitive values never enter the model's context | `src/vocalis/guards/input_guard.py`, `src/vocalis/guards/vault.py`, `src/vocalis/simair/call.py` | `tests/test_guards.py::test_input_guard_flags`, `tests/test_guards.py::test_vault_renders_only_allowed_t1`, `tests/test_call_offline.py::test_social_engineer_triggers_guard_handoffs` | `<text>.handoff`, `<text>.leak_runs` |
-| Every utterance and keypress passes a deterministic output guard | `src/vocalis/guards/output_guard.py`, `src/vocalis/agent/processors.py` | `tests/test_guards.py::test_output_guard_blocks_secrets_even_when_spelled_out`, `tests/test_guards.py::test_output_guard_dtmf`, `tests/test_sim_fixes.py::test_tool_call_text_is_never_spoken` | `<text>.leak_runs` |
-| Canary secrets are planted in every run | `src/vocalis/guards/canaries.py` | `tests/test_guards.py::test_canaries_detect_leaks_and_are_well_formed` | `<text>.leak_runs` |
+| Every utterance and keypress passes a deterministic output guard | `src/vocalis/guards/output_guard.py`, `src/vocalis/guards/leaks.py`, `src/vocalis/agent/processors.py` | `tests/test_leaks.py::test_every_variant_is_detected_and_blocked`, `tests/test_guards.py::test_output_guard_blocks_secrets_even_when_spelled_out`, `tests/test_guards.py::test_output_guard_dtmf`, `tests/test_sim_fixes.py::test_tool_call_text_is_never_spoken` | `<text>.leak_runs` |
+| Canary secrets are planted in every run, and a leak is detected in any spoken form | `src/vocalis/guards/canaries.py`, `src/vocalis/guards/leaks.py` | `tests/test_guards.py::test_canaries_detect_leaks_and_are_well_formed`, `tests/test_leaks.py::test_stored_transcripts_have_no_leaks` | `<text>.leak_runs` |
 | The reference is read back phonetically and confirmed by the rep | `src/vocalis/agent/session.py`, `src/vocalis/agent/prompts.py`, `src/vocalis/simair/rep.py` | `tests/test_readback.py::test_readback_detection`, `tests/test_readback.py::test_readback_correction_updates_the_record` | `readback.before`, `readback.after` |
 | Simulated phone line: 8 kHz μ-law, band-pass, noise, in-band DTMF | `src/vocalis/telephony/phoneline.py`, `src/vocalis/telephony/dtmf.py` | `tests/test_telephony.py::test_mulaw_roundtrip_error_small`, `tests/test_telephony.py::test_dtmf_survives_phone_line` | — |
 | Audio loopback: Aura-2 voices over the simulated line into streaming STT, end of turn by a local VAD and `Finalize` | `src/vocalis/telephony/voicelink.py` | `tests/test_voicelink.py::test_spelled_codes_read_one_character_at_a_time`, `tests/test_voicelink.py::test_wer_normalisation` | `<voice>.voice.voice_to_voice_s`, `<voice>.voice.wer_all` |
@@ -43,6 +43,10 @@ Being fixed in this order before anything is republished:
 
 1. Handoff false positives are judged against scripted events only; a request the simulated rep improvises is not ground truth.
 2. A mandate violation is taken from the agent's own record of the outcome, not from what the simulator granted.
-3. The leak detector matches a fixed set of formats for each canary.
-4. The simulated rep always corrects a wrong read-back.
-5. Runs do not yet record the git commit or the model id that actually served each reply.
+3. The simulated rep always corrects a wrong read-back.
+4. Runs made before provenance was recorded (all current runs) do not carry the commit or the model id that served each reply; `summary.json` counts them as `unrecorded_runs`.
+
+Closed:
+
+- Leak detection covers spoken and written variants (digit words, groupings, phone without country code, dates in any order or with month names, any 6+ digit piece of a card or passport number), shared by the output guard and scoring and checked by property-based tests. Re-scoring every stored agent run with it found no leaks.
+- New runs record the commit, a hash of the call code and the model id the provider reported for every reply; a run served by any model other than its pinned talker fails, and the report refuses to mix code versions within a config.

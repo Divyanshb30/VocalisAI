@@ -9,6 +9,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
+from vocalis.guards.leaks import find_leaks
 from vocalis.guards.normalize import compact, digit_runs, spoken_digits_to_numerals
 
 SAFE_FALLBACK = "I'm sorry, I'm not able to share that detail. The passenger can provide it directly."
@@ -59,6 +60,8 @@ class OutputGuard:
             v = compact(value)
             if len(v) >= 3 and v in flat:
                 reasons.append(f"secret:{key}")
+        # the same detector scoring uses: digit words, groupings, dates in any form, partial numbers
+        reasons += [f"secret:{key}" for key in find_leaks(text, self.secrets)]
 
         for run in re.findall(r"\d+", norm):
             if run in self.allowed_numbers or len(run) <= self.max_free_digits:

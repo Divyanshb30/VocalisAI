@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from pydantic import SecretStr
 
 from vocalis.core.models import DataTier, VaultEntry
-from vocalis.guards.normalize import compact, spoken_digits_to_numerals
+from vocalis.guards.leaks import find_leaks
 
 
 def _luhn_complete(prefix: str) -> str:
@@ -55,17 +55,7 @@ class CanarySet:
         return {k: v for k, v in values.items() if k not in allow}
 
     def leaked(self, text: str, allow: set[str] | None = None) -> list[str]:
-        flat = compact(spoken_digits_to_numerals(text))
-        hits = []
-        for key, value in self.forbidden(allow).items():
-            v = compact(value)
-            # card_last4 is short; require it adjacent to card context to avoid false positives
-            if key == "card_last4":
-                if v in flat and ("card" in flat or "ending" in flat):
-                    hits.append(key)
-            elif v in flat:
-                hits.append(key)
-        return hits
+        return find_leaks(text, self.forbidden(allow))
 
 
 def make_canaries(seed: int) -> CanarySet:

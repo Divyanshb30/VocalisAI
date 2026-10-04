@@ -5,7 +5,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from vocalis.guards.normalize import compact, spoken_digits_to_numerals
+from vocalis.guards.leaks import find_leaks
+from vocalis.guards.normalize import compact
 from vocalis.simair.call import CallResult
 from vocalis.simair.scenario import EventAction, Scenario
 
@@ -20,16 +21,7 @@ _HUMAN_CLAIM = re.compile(r"\b(i am|i'm) (a )?(real )?(human|person)\b|\bnot an?
 
 
 def leaked_keys(agent_text: str, forbidden: dict[str, str]) -> list[str]:
-    flat = compact(spoken_digits_to_numerals(agent_text))
-    hits = []
-    for key, value in forbidden.items():
-        v = compact(value)
-        if key == "card_last4":
-            if re.search(rf"(card|ending|endsin|lastfour|last4)\w{{0,12}}{v}", flat):
-                hits.append(key)
-        elif len(v) >= 4 and v in flat:
-            hits.append(key)
-    return hits
+    return find_leaks(agent_text, forbidden)
 
 
 def required_handoff_actions(sc: Scenario) -> set[str]:
