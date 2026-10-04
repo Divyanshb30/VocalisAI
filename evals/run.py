@@ -21,11 +21,12 @@ from loguru import logger
 
 from evals.judge import judge
 from vocalis.agent.briefing import Briefing
+from vocalis.core.provenance import snapshot
 from vocalis.llm.router import LLMRouter, enable_opik_tracing
 from vocalis.rights.engine import assess
 from vocalis.simair.call import CallSimulation, RunConfig
 from vocalis.simair.scenario import Scenario, load_scenarios
-from vocalis.simair.scoring import score
+from vocalis.simair.scoring import SCORING_VERSION, score
 
 RESULTS = Path("evals/results/runs")
 SMOKE = {
@@ -55,10 +56,13 @@ CONFIGS: dict[str, dict[str, Any]] = {
 }
 
 
+PROVENANCE: dict[str, Any] = {}  # taken once per process, before any call runs
+
+
 async def run_one(
     sc: Scenario, config: str, seed: int, router: LLMRouter, with_judge: bool, voice: Any = None
 ) -> dict:
-    cfg = RunConfig(seed=seed, label=config, pace=True, voice=voice, **CONFIGS[config])
+    cfg = RunConfig(seed=seed, label=config, pace=True, voice=voice, strict_talker=True, **CONFIGS[config])
     sim = CallSimulation(sc, cfg, router)
     t0 = time.perf_counter()
     result = await sim.run()
@@ -79,6 +83,16 @@ async def run_one(
         "agent_resolution": result.agent_resolution,
         "offers": result.offers,
         "guard_blocks": result.guard_blocks,
+        "provenance": {
+            **PROVENANCE,
+            "scoring_version": SCORING_VERSION,
+            "talker_pinned": cfg.talker_models,
+            "talker_built": result.talker_models,
+            "talker_served": result.talker_served_models,
+            "rep_served": result.rep_served_models,
+            "judge_models": router.s.judge_models if with_judge else [],
+            **({"stt": voice.stt_model, "tts": voice.agent_voice} if voice is not None else {}),
+        },
     }
     out.write_text(json.dumps(payload, indent=1, default=str), encoding="utf-8")
     logger.info(
@@ -120,6 +134,12 @@ async def watch_hourly_budget(router: LLMRouter, talker: str) -> None:
 
 
 async def main_async(a: argparse.Namespace) -> None:
+    PROVENANCE.update(snapshot())
+    if PROVENANCE["dirty"] and not a.allow_dirty:
+        raise SystemExit(
+            "call code has uncommitted changes; commit first (or pass --allow-dirty for a trial run)"
+        )
+    logger.info(f"provenance: {PROVENANCE}")
     enable_opik_tracing()
     router = LLMRouter()
     try:  # load the local rep model into memory before timing anything
@@ -181,6 +201,9 @@ def main() -> None:
     ap.add_argument("--concurrency", type=int, default=2)
     ap.add_argument("--no-judge", action="store_true")
     ap.add_argument("--resume", action="store_true", help="skip runs that already have results")
+    ap.add_argument(
+        "--allow-dirty", action="store_true", help="run with uncommitted call code (not for reporting)"
+    )
     asyncio.run(main_async(ap.parse_args()))
 
 

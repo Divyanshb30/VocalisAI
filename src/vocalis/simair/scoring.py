@@ -9,6 +9,9 @@ from vocalis.guards.normalize import compact, spoken_digits_to_numerals
 from vocalis.simair.call import CallResult
 from vocalis.simair.scenario import EventAction, Scenario
 
+# Bumped whenever a check changes what counts as success, a leak, a violation or a handoff error.
+SCORING_VERSION = 1
+
 _AI_ADMIT = re.compile(
     r"\b(ai|artificial intelligence|automated|virtual assistant|ai assistant|not a (real )?(person|human))\b",
     re.I,

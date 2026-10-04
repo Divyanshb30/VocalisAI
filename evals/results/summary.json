@@ -211,7 +211,17 @@
    "n": 612,
    "excluded_rate_limit_retries": 0
   },
-  "actual_cost_usd": 0.0
+  "actual_cost_usd": 0.0,
+  "provenance": {
+   "recorded_runs": 0,
+   "unrecorded_runs": 75,
+   "code_hash": [],
+   "git_sha": [],
+   "dirty_runs": 0,
+   "scoring_version": [
+    1
+   ]
+  }
  },
  "archive/v2/vocalis_qwen_voice": {
   "runs": 25,
@@ -421,6 +431,16 @@
    "excluded_rate_limit_retries": 0
   },
   "actual_cost_usd": 0.0,
+  "provenance": {
+   "recorded_runs": 0,
+   "unrecorded_runs": 25,
+   "code_hash": [],
+   "git_sha": [],
+   "dirty_runs": 0,
+   "scoring_version": [
+    1
+   ]
+  },
   "voice": {
    "voice_to_voice_s": {
     "p50": 1.906,
@@ -629,7 +649,17 @@
    "n": 87,
    "excluded_rate_limit_retries": 0
   },
-  "actual_cost_usd": 0.0
+  "actual_cost_usd": 0.0,
+  "provenance": {
+   "recorded_runs": 0,
+   "unrecorded_runs": 7,
+   "code_hash": [],
+   "git_sha": [],
+   "dirty_runs": 0,
+   "scoring_version": [
+    1
+   ]
+  }
  },
  "vocalis": {
   "runs": 50,
@@ -838,7 +868,17 @@
    "n": 381,
    "excluded_rate_limit_retries": 12
   },
-  "actual_cost_usd": 0.0
+  "actual_cost_usd": 0.0,
+  "provenance": {
+   "recorded_runs": 0,
+   "unrecorded_runs": 50,
+   "code_hash": [],
+   "git_sha": [],
+   "dirty_runs": 0,
+   "scoring_version": [
+    1
+   ]
+  }
  },
  "vocalis_qwen": {
   "runs": 75,
@@ -1047,7 +1087,17 @@
    "n": 662,
    "excluded_rate_limit_retries": 0
   },
-  "actual_cost_usd": 0.0
+  "actual_cost_usd": 0.0,
+  "provenance": {
+   "recorded_runs": 0,
+   "unrecorded_runs": 75,
+   "code_hash": [],
+   "git_sha": [],
+   "dirty_runs": 0,
+   "scoring_version": [
+    1
+   ]
+  }
  },
  "vocalis_qwen_voice": {
   "runs": 25,
@@ -1257,6 +1307,16 @@
    "excluded_rate_limit_retries": 0
   },
   "actual_cost_usd": 0.0,
+  "provenance": {
+   "recorded_runs": 0,
+   "unrecorded_runs": 25,
+   "code_hash": [],
+   "git_sha": [],
+   "dirty_runs": 0,
+   "scoring_version": [
+    1
+   ]
+  },
   "voice": {
    "voice_to_voice_s": {
     "p50": 1.859,
@@ -1520,6 +1580,16 @@
    "excluded_rate_limit_retries": 0
   },
   "actual_cost_usd": 0.0,
+  "provenance": {
+   "recorded_runs": 0,
+   "unrecorded_runs": 25,
+   "code_hash": [],
+   "git_sha": [],
+   "dirty_runs": 0,
+   "scoring_version": [
+    1
+   ]
+  },
   "voice": {
    "voice_to_voice_s": {
     "p50": 1.766,
@@ -1728,7 +1798,17 @@
    "n": 64,
    "excluded_rate_limit_retries": 0
   },
-  "actual_cost_usd": 0.0
+  "actual_cost_usd": 0.0,
+  "provenance": {
+   "recorded_runs": 0,
+   "unrecorded_runs": 7,
+   "code_hash": [],
+   "git_sha": [],
+   "dirty_runs": 0,
+   "scoring_version": [
+    1
+   ]
+  }
  },
  "readback": {
   "before": {
@@ -1939,6 +2019,16 @@
     "excluded_rate_limit_retries": 0
    },
    "actual_cost_usd": 0.0,
+   "provenance": {
+    "recorded_runs": 0,
+    "unrecorded_runs": 25,
+    "code_hash": [],
+    "git_sha": [],
+    "dirty_runs": 0,
+    "scoring_version": [
+     1
+    ]
+   },
    "voice": {
     "voice_to_voice_s": {
      "p50": 1.906,
@@ -2202,6 +2292,16 @@
     "excluded_rate_limit_retries": 0
    },
    "actual_cost_usd": 0.0,
+   "provenance": {
+    "recorded_runs": 0,
+    "unrecorded_runs": 25,
+    "code_hash": [],
+    "git_sha": [],
+    "dirty_runs": 0,
+    "scoring_version": [
+     1
+    ]
+   },
    "voice": {
     "voice_to_voice_s": {
      "p50": 1.859,

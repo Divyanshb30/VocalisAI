@@ -248,7 +248,17 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "n": 612,
    "excluded_rate_limit_retries": 0
   },
-  "actual_cost_usd": 0.0
+  "actual_cost_usd": 0.0,
+  "provenance": {
+   "recorded_runs": 0,
+   "unrecorded_runs": 75,
+   "code_hash": [],
+   "git_sha": [],
+   "dirty_runs": 0,
+   "scoring_version": [
+    1
+   ]
+  }
  },
  "archive/v2/vocalis_qwen_voice": {
   "runs": 25,
@@ -458,6 +468,16 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "excluded_rate_limit_retries": 0
   },
   "actual_cost_usd": 0.0,
+  "provenance": {
+   "recorded_runs": 0,
+   "unrecorded_runs": 25,
+   "code_hash": [],
+   "git_sha": [],
+   "dirty_runs": 0,
+   "scoring_version": [
+    1
+   ]
+  },
   "voice": {
    "voice_to_voice_s": {
     "p50": 1.906,
@@ -666,7 +686,17 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "n": 87,
    "excluded_rate_limit_retries": 0
   },
-  "actual_cost_usd": 0.0
+  "actual_cost_usd": 0.0,
+  "provenance": {
+   "recorded_runs": 0,
+   "unrecorded_runs": 7,
+   "code_hash": [],
+   "git_sha": [],
+   "dirty_runs": 0,
+   "scoring_version": [
+    1
+   ]
+  }
  },
  "vocalis": {
   "runs": 50,
@@ -875,7 +905,17 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "n": 381,
    "excluded_rate_limit_retries": 12
   },
-  "actual_cost_usd": 0.0
+  "actual_cost_usd": 0.0,
+  "provenance": {
+   "recorded_runs": 0,
+   "unrecorded_runs": 50,
+   "code_hash": [],
+   "git_sha": [],
+   "dirty_runs": 0,
+   "scoring_version": [
+    1
+   ]
+  }
  },
  "vocalis_qwen": {
   "runs": 75,
@@ -1084,7 +1124,17 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "n": 662,
    "excluded_rate_limit_retries": 0
   },
-  "actual_cost_usd": 0.0
+  "actual_cost_usd": 0.0,
+  "provenance": {
+   "recorded_runs": 0,
+   "unrecorded_runs": 75,
+   "code_hash": [],
+   "git_sha": [],
+   "dirty_runs": 0,
+   "scoring_version": [
+    1
+   ]
+  }
  },
  "vocalis_qwen_voice": {
   "runs": 25,
@@ -1294,6 +1344,16 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "excluded_rate_limit_retries": 0
   },
   "actual_cost_usd": 0.0,
+  "provenance": {
+   "recorded_runs": 0,
+   "unrecorded_runs": 25,
+   "code_hash": [],
+   "git_sha": [],
+   "dirty_runs": 0,
+   "scoring_version": [
+    1
+   ]
+  },
   "voice": {
    "voice_to_voice_s": {
     "p50": 1.859,
@@ -1557,6 +1617,16 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "excluded_rate_limit_retries": 0
   },
   "actual_cost_usd": 0.0,
+  "provenance": {
+   "recorded_runs": 0,
+   "unrecorded_runs": 25,
+   "code_hash": [],
+   "git_sha": [],
+   "dirty_runs": 0,
+   "scoring_version": [
+    1
+   ]
+  },
   "voice": {
    "voice_to_voice_s": {
     "p50": 1.766,
@@ -1765,7 +1835,17 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "n": 64,
    "excluded_rate_limit_retries": 0
   },
-  "actual_cost_usd": 0.0
+  "actual_cost_usd": 0.0,
+  "provenance": {
+   "recorded_runs": 0,
+   "unrecorded_runs": 7,
+   "code_hash": [],
+   "git_sha": [],
+   "dirty_runs": 0,
+   "scoring_version": [
+    1
+   ]
+  }
  },
  "readback": {
   "before": {
@@ -1976,6 +2056,16 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
     "excluded_rate_limit_retries": 0
    },
    "actual_cost_usd": 0.0,
+   "provenance": {
+    "recorded_runs": 0,
+    "unrecorded_runs": 25,
+    "code_hash": [],
+    "git_sha": [],
+    "dirty_runs": 0,
+    "scoring_version": [
+     1
+    ]
+   },
    "voice": {
     "voice_to_voice_s": {
      "p50": 1.906,
@@ -2239,6 +2329,16 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
     "excluded_rate_limit_retries": 0
    },
    "actual_cost_usd": 0.0,
+   "provenance": {
+    "recorded_runs": 0,
+    "unrecorded_runs": 25,
+    "code_hash": [],
+    "git_sha": [],
+    "dirty_runs": 0,
+    "scoring_version": [
+     1
+    ]
+   },
    "voice": {
     "voice_to_voice_s": {
      "p50": 1.859,

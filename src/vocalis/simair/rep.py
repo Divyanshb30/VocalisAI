@@ -95,6 +95,9 @@ class SimRep:
     _done_events: set[int] = field(default_factory=set)
     _scripted_lines: set[str] = field(default_factory=set)
     _corrections: int = 0
+    served: dict[str, int] = field(
+        default_factory=dict
+    )  # model id per rep reply, as the provider reported it
 
     def _correct_readback(self, caller_text: str) -> str | None:
         """A real agent corrects a wrong read-back of the reference, spelling it phonetically."""
@@ -170,6 +173,8 @@ class SimRep:
                 max_tokens=400,
                 tags={"role": "simair_rep", "scenario": self.scenario.id},
             )
+            served = str(getattr(result.raw, "model", None) or result.model)
+            self.served[served] = self.served.get(served, 0) + 1
             turn = parse_rep_json(result.text)
             if turn.unparsed:
                 continue

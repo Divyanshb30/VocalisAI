@@ -1,6 +1,7 @@
 """Aggregate run results into summary.json, docs/evals.md and the README metrics table.
 
-uv run python -m evals.report
+uv run python -m evals.report                  # refuses configs whose runs mix code versions
+uv run python -m evals.report --allow-mixed    # inspection only
 """
 
 from __future__ import annotations
@@ -84,8 +85,42 @@ def load(config: str) -> list[dict[str, Any]]:
         score["asked_if_human"], score["honest_if_human"] = _honesty_from_transcript(
             data.get("transcript", [])
         )
+        score["provenance"] = data.get("provenance")
         rows.append(score)
     return rows
+
+
+def provenance(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Which code produced a config's runs. Runs from before provenance was recorded are counted."""
+    rec = [r["provenance"] for r in rows if r.get("provenance")]
+    return {
+        "recorded_runs": len(rec),
+        "unrecorded_runs": len(rows) - len(rec),
+        "code_hash": sorted({p["code_hash"] for p in rec}),
+        "git_sha": sorted({p["git_sha"] for p in rec if p.get("git_sha")}),
+        "dirty_runs": sum(bool(p.get("dirty")) for p in rec),
+        "scoring_version": sorted({p.get("scoring_version", 1) for p in rec}) or [1],
+    }
+
+
+def check_provenance(config: str, rows: list[dict[str, Any]]) -> list[str]:
+    """Reasons a config's runs must not be aggregated: mixed code versions, or a reply served by a
+    model other than the pinned talker."""
+    from vocalis.simair.call import same_model
+
+    problems = []
+    prov = provenance(rows)
+    if len(prov["code_hash"]) > 1:
+        problems.append(f"{config}: runs from {len(prov['code_hash'])} code versions {prov['code_hash']}")
+    for r in rows:
+        p = r.get("provenance") or {}
+        pinned = (p.get("talker_pinned") or [None])[0]
+        wrong = [
+            m for m in p.get("talker_served", {}) if pinned and m != "unknown" and not same_model(pinned, m)
+        ]
+        if wrong and not r.get("error"):
+            problems.append(f"{config}/{r['scenario']} s{r['seed']}: pinned {pinned}, served {wrong}")
+    return problems
 
 
 def _legacy_neutral(r: dict[str, Any]) -> int:
@@ -169,6 +204,7 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "excluded_rate_limit_retries": len(ttfb_all) - len(ttfb),
         },
         "actual_cost_usd": 0.0,
+        "provenance": provenance(rows),
     }
 
 
@@ -468,6 +504,7 @@ def talker_comparison(s: dict[str, Any]) -> str:
 
 
 def main() -> None:
+    allow_mixed = "--allow-mixed" in sys.argv
     summary: dict[str, Any] = {"primary": PRIMARY}
     configs = {
         *PRIMARY.values(),
@@ -478,6 +515,9 @@ def main() -> None:
     }
     for config in sorted(configs):
         rows = load(config)
+        problems = check_provenance(config, rows)
+        if problems and not allow_mixed:
+            raise SystemExit("refusing to aggregate:\n  " + "\n  ".join(problems))
         if rows:
             summary[config] = aggregate(rows)
             if any(r.get("voice_turns") for r in rows):

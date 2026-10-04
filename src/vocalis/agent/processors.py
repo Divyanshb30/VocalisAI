@@ -149,6 +149,7 @@ class LineSink(FrameProcessor):
         self.llm_services: set[str] = (
             set()
         )  # which provider actually answered (failover is invisible otherwise)
+        self.served_models: dict[str, int] = {}  # model id the provider reported, per response
 
     def reset_turn(self) -> None:
         self.spoken = []
@@ -168,6 +169,8 @@ class LineSink(FrameProcessor):
                 elif isinstance(d, TTFBMetricsData) and "LLM" in (d.processor or "") and d.value > 0:
                     self.llm_ttfb_s.append(d.value)
                     self.llm_services.add((d.processor or "").split("#")[0])
+                    model = d.model or "unknown"
+                    self.served_models[model] = self.served_models.get(model, 0) + 1
         if isinstance(frame, LLMFullResponseStartFrame):
             self._active = True
         elif isinstance(frame, LLMFullResponseEndFrame):

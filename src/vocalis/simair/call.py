@@ -57,6 +57,7 @@ class RunConfig:
     on_line: Any = None  # (Line) -> None; the web UI streams the call live through this
     pace: bool = False  # evals: stay under free-tier per-minute caps (live demo relies on failover)
     voice: Any = None  # VoiceLink: audio leg; the agent hears streaming STT of the far end, not its text
+    strict_talker: bool = False  # evals: the run fails unless every reply came from the pinned talker
 
 
 @dataclass
@@ -95,6 +96,24 @@ class CallResult:
     talker_served: list[str] = field(default_factory=list)  # LLM services that produced replies
     voice_turns: list[dict[str, Any]] = field(default_factory=list)
     dtmf_over_line: list[dict[str, str]] = field(default_factory=list)
+    talker_served_models: dict[str, int] = field(default_factory=dict)  # provider-reported, per reply
+    rep_served_models: dict[str, int] = field(default_factory=dict)
+
+
+def same_model(pinned: str, served: str) -> bool:
+    """'cerebras/qwen-3.8-27b' was served if the provider reports 'qwen-3.8-27b' (or a dated variant)."""
+    name = pinned.split("/", 1)[-1]
+    return served == pinned or served.startswith(name)
+
+
+def talker_mismatch(pinned: list[str] | None, built: list[str], served: dict[str, int]) -> str | None:
+    """Why a run did not use the talker its config pins, or None."""
+    if not pinned:
+        return None
+    if not built or built[0] != pinned[0]:
+        return f"talker mismatch: pinned {pinned[0]}, built {built[:1]}"
+    wrong = sorted(m for m in served if m != "unknown" and not same_model(pinned[0], m))
+    return f"talker mismatch: pinned {pinned[0]}, served {wrong}" if wrong else None
 
 
 class CallSimulation:
@@ -444,6 +463,8 @@ class CallSimulation:
         self.session.finalize()
         rec = self.session.record
         sink = self.session.sink
+        if self.cfg.strict_talker and error is None:
+            error = talker_mismatch(self.cfg.talker_models, talker_models, sink.served_models)
         talker_tokens = max(0, sink.prompt_tokens - sink.cached_tokens) + sink.completion_tokens
         if (
             talker_tokens
@@ -481,6 +502,8 @@ class CallSimulation:
             talker_served=sorted(sink.llm_services),
             voice_turns=self.voice_turns,
             dtmf_over_line=self.dtmf_log,
+            talker_served_models=dict(sink.served_models),
+            rep_served_models=dict(self.rep.served),
         )
 
 
