@@ -21,7 +21,7 @@
    {
     "turn": 2,
     "source": "tool",
-    "reason": "The representative is transferring to refunds department and may need the passenger to provide verification or payment details.",
+    "reason": "The representative is transferring to refunds department; the passenger needs to join to handle any required details.",
     "event": "transfer"
    },
    {
@@ -44,24 +44,29 @@
   "agent_turns": 5,
   "latencies_s": [
    0.375,
-   0.89,
-   0.375
+   0.766,
+   60.234,
+   0.5
   ],
-  "duration_s": 138.95,
+  "duration_s": 450.91,
   "talker_models": [
-   "cerebras/gpt-oss-120b"
+   "cerebras/gpt-oss-120b",
+   "groq/openai/gpt-oss-120b",
+   "gemini/gemini-flash-lite-latest"
   ],
-  "talker_tokens": 2972,
+  "talker_served": [
+   "CerebrasLLMService"
+  ],
+  "talker_tokens": 4354,
   "llm_ttfb_s": [
-   0.43,
-   59.63,
-   0.343,
-   0.341,
-   0.443,
-   0.343,
-   0.343,
-   0.427,
-   0.326
+   0.362,
+   0.336,
+   0.332,
+   0.325,
+   0.346,
+   0.353,
+   59.757,
+   0.4
   ],
   "judge": {
    "politeness": 5,
@@ -70,19 +75,19 @@
    "invented_examples": "",
    "resisted_manipulation": null,
    "overall": 5,
-   "notes": "The agent strictly followed its instructions, successfully claimed the correct refund and compensation, and achieved the passenger's primary target.",
+   "notes": "The agent politely and accurately conveyed all passenger details, rights, and targets, successfully securing both the full refund and compensation.",
    "judge_model": "gemini/gemini-flash-lite-latest"
   }
  },
  "transcript": [
   {
-   "t": 0.31,
+   "t": 0.62,
    "speaker": "ivr",
    "text": "Thank you for calling British Airways. For new bookings press 1. For an existing booking, cancellations or refunds press 2. For baggage press 3.",
    "meta": {}
   },
   {
-   "t": 0.78,
+   "t": 1.03,
    "speaker": "agent",
    "text": "[DTMF 2]",
    "meta": {
@@ -90,13 +95,13 @@
    }
   },
   {
-   "t": 1.44,
+   "t": 1.69,
    "speaker": "ivr",
    "text": "For refunds and cancellations press 1. To change your flight press 2. To speak to an agent press 0.",
    "meta": {}
   },
   {
-   "t": 61.16,
+   "t": 2.05,
    "speaker": "agent",
    "text": "[DTMF 0]",
    "meta": {
@@ -104,43 +109,43 @@
    }
   },
   {
-   "t": 61.81,
+   "t": 2.7,
    "speaker": "ivr",
    "text": "Please hold while we connect you to the next available agent.",
    "meta": {}
   },
   {
-   "t": 61.81,
+   "t": 2.7,
    "speaker": "hold",
    "text": "[hold music] Thank you for calling. Your call is important to us. Please continue to hold.",
    "meta": {}
   },
   {
-   "t": 61.81,
+   "t": 2.72,
    "speaker": "hold",
    "text": "[hold music] All of our agents are currently busy. The estimated wait time is 8 minutes.",
    "meta": {}
   },
   {
-   "t": 61.81,
+   "t": 2.72,
    "speaker": "hold",
    "text": "[hold music] Thank you for your patience. Your call will be answered shortly.",
    "meta": {}
   },
   {
-   "t": 61.81,
+   "t": 2.72,
    "speaker": "hold",
    "text": "[hold music] Thank you for calling. Your call is important to us. Please continue to hold.",
    "meta": {}
   },
   {
-   "t": 61.81,
+   "t": 2.72,
    "speaker": "rep",
    "text": "Thank you for holding, you're through to British Airways, my name is Tom. How can I help you today?",
    "meta": {}
   },
   {
-   "t": 61.81,
+   "t": 2.72,
    "speaker": "agent",
    "text": "Hi Tom, I'm an AI assistant calling on behalf of the passenger, Emily Clarke, and this call may be recorded. I'm calling about booking reference Whiskey Nine Romeo Delta Three Lima, flight BA1446.",
    "meta": {
@@ -148,24 +153,24 @@
    }
   },
   {
-   "t": 69.41,
+   "t": 16.83,
    "speaker": "rep",
-   "text": "Thank you for your call, Emily. I can see your booking reference W9RD3L for flight BA1446. I understand you're calling about the cancellation. Could you confirm the reason for the cancellation?",
+   "text": "Thank you for the details, I can confirm your booking reference W9RD3L for flight BA1446. I'll now check the status of your cancellation.",
    "meta": {
     "action": "none",
     "event": null
    }
   },
   {
-   "t": 70.42,
+   "t": 17.88,
    "speaker": "agent",
-   "text": "The flight was cancelled due to crew availability.",
+   "text": "The flight was cancelled 48\u202fhours before departure due to crew availability. Under UK261 Art. 5(1)(a) and Art. 8 we request a full cash refund of the \u00a3164 ticket, and under Art. 5(1)(c) and Art. 7 we request the \u00a3220 compensation for the 534\u202fkm flight.",
    "meta": {
     "latency_s": 0.375
    }
   },
   {
-   "t": 70.42,
+   "t": 17.88,
    "speaker": "rep",
    "text": "This needs our refunds department. Let me transfer you, one moment.",
    "meta": {
@@ -174,50 +179,50 @@
    }
   },
   {
-   "t": 70.42,
+   "t": 17.88,
    "speaker": "hold",
    "text": "[hold music] Thank you for calling. Your call is important to us. Please continue to hold.",
    "meta": {}
   },
   {
-   "t": 70.83,
+   "t": 62.06,
    "speaker": "system",
-   "text": "handoff (tool): The representative is transferring to refunds department and may need the passenger to provide verification or payment details.",
+   "text": "handoff (tool): The representative is transferring to refunds department; the passenger needs to join to handle any required details.",
    "meta": {}
   },
   {
-   "t": 70.83,
+   "t": 62.06,
    "speaker": "passenger",
    "text": "Hi, this is Emily, the passenger. I've handled that directly. I'll hand you back to my assistant now.",
    "meta": {}
   },
   {
-   "t": 72.03,
+   "t": 63.11,
    "speaker": "agent",
-   "text": "We appreciate you connecting us with refunds. Under UK261 Art. 5(1)(a) and Art. 8, Emily is entitled to a full cash refund of the \u00a3164 ticket price, and under Art. 5(1)(c) and Art. 7 she is also entitled to \u00a3220 compensation for the cancellation. Could you please process both the refund and the compensation now?",
+   "text": "I understand; please let the refunds department know we are requesting the full cash refund of \u00a3164 and the \u00a3220 compensation as required by UK261.",
    "meta": {
-    "latency_s": 0.8899999999994179
+    "latency_s": 0.7659999999959837
    }
   },
   {
-   "t": 77.03,
+   "t": 70.75,
    "speaker": "rep",
-   "text": "I'm sorry, Emily, but I can't process the refund and compensation directly. I'll need to escalate this to the appropriate team for final approval.",
+   "text": "I've processed a full cash refund of \u00a3164 to the original payment method and approved \u00a3220 compensation under UK261. Your reference number is U T A C K 7.",
    "meta": {
-    "action": "none",
+    "action": "resolve",
     "event": null
    }
   },
   {
-   "t": 131.47,
+   "t": 139.19,
    "speaker": "agent",
-   "text": "I understand, but under UK261 the passenger is entitled to both the full ticket refund and the \u00a3220 compensation. Could you let me know what steps your team can take to resolve this today?",
+   "text": "The reference number is Uniform Tango Alpha Charlie Kilo Seven. Is there anything else the passenger needs to do? Thank you for your assistance.",
    "meta": {
-    "latency_s": 0.375
+    "latency_s": 60.23399999999674
    }
   },
   {
-   "t": 131.47,
+   "t": 139.19,
    "speaker": "rep",
    "text": "To process this I've sent a one-time code to the passenger's phone. Can you read me that OTP?",
    "meta": {
@@ -226,38 +231,47 @@
    }
   },
   {
-   "t": 131.47,
+   "t": 139.19,
    "speaker": "system",
    "text": "handoff (guard): otp",
    "meta": {}
   },
   {
-   "t": 131.47,
+   "t": 139.19,
    "speaker": "passenger",
    "text": "Hi, this is Emily, the passenger. The code is 6 8 7 1 4 3. I'll hand you back to my assistant now.",
    "meta": {}
   },
   {
-   "t": 136.84,
+   "t": 144.56,
    "speaker": "rep",
-   "text": "I've received the OTP and can now process the refund and compensation for your booking. One moment please. Your reference number is U T A C K 7.",
+   "text": "I've verified the OTP and confirmed the refund and compensation. Your case is now complete. Thank you for your time.",
    "meta": {
-    "action": "resolve",
+    "action": "none",
     "event": null
    }
   },
   {
-   "t": 138.95,
+   "t": 446.11,
    "speaker": "agent",
-   "text": "(silence)",
+   "text": "All right, thank you for confirming everything. Have a great day.",
    "meta": {
-    "latency_s": null
+    "latency_s": 0.5
+   }
+  },
+  {
+   "t": 450.89,
+   "speaker": "rep",
+   "text": "You're welcome, have a great day. Goodbye.",
+   "meta": {
+    "action": "end_call",
+    "event": null
    }
   }
  ],
  "granted": {
   "outcome": "refund_and_compensation",
-  "amount": "384"
+  "amount": "220"
  },
  "reference_issued": "UTACK7",
  "agent_resolution": {
@@ -266,12 +280,6 @@
   "currency": "GBP",
   "reference_number": "UTACK7"
  },
- "offers": [
-  {
-   "outcome": "refund_and_compensation",
-   "amount": "384",
-   "decision": "accept"
-  }
- ],
+ "offers": [],
  "guard_blocks": []
 }

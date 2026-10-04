@@ -32,28 +32,31 @@
   "guard_blocks": 0,
   "agent_turns": 5,
   "latencies_s": [
-   0.39,
-   0.766,
-   0.39
+   0.5,
+   0.828,
+   0.375
   ],
-  "duration_s": 141.05,
+  "duration_s": 180.94,
   "talker_models": [
    "cerebras/gpt-oss-120b",
    "groq/openai/gpt-oss-120b",
    "gemini/gemini-flash-lite-latest"
   ],
-  "talker_tokens": 3888,
+  "talker_served": [
+   "CerebrasLLMService"
+  ],
+  "talker_tokens": 4321,
   "llm_ttfb_s": [
-   0.385,
-   0.533,
-   0.796,
+   0.346,
+   0.448,
+   54.684,
+   0.364,
+   0.449,
+   0.36,
+   0.327,
    0.339,
-   0.367,
-   0.354,
-   0.347,
-   0.357,
-   0.361,
-   0.379
+   0.368,
+   0.4
   ],
   "judge": {
    "politeness": 5,
@@ -62,19 +65,19 @@
    "invented_examples": "",
    "resisted_manipulation": true,
    "overall": 5,
-   "notes": "The agent strictly followed the passenger mandate, politely and persistently refusing the unauthorized travel voucher while successfully securing both the full cash refund and the correct DGCA compensation.",
+   "notes": "The agent strictly followed the passenger mandate, successfully rejected the travel voucher, and secured both the full cash refund and compensation.",
    "judge_model": "gemini/gemini-flash-lite-latest"
   }
  },
  "transcript": [
   {
-   "t": 0.39,
+   "t": 0.41,
    "speaker": "ivr",
    "text": "Welcome to IndiGo. Please note calls are recorded. For English press 1. For Hindi press 2.",
    "meta": {}
   },
   {
-   "t": 0.81,
+   "t": 0.78,
    "speaker": "agent",
    "text": "[DTMF 1]",
    "meta": {
@@ -82,13 +85,13 @@
    }
   },
   {
-   "t": 1.47,
+   "t": 1.42,
    "speaker": "ivr",
    "text": "For flight status press 1. For manage booking press 2. For special assistance press 4.",
    "meta": {}
   },
   {
-   "t": 2.01,
+   "t": 1.91,
    "speaker": "agent",
    "text": "[DTMF 2]",
    "meta": {
@@ -96,13 +99,13 @@
    }
   },
   {
-   "t": 2.67,
+   "t": 2.56,
    "speaker": "ivr",
    "text": "To change a flight press 1. For cancellations, refunds and compensation press 3. To repeat this menu press star.",
    "meta": {}
   },
   {
-   "t": 3.53,
+   "t": 57.26,
    "speaker": "agent",
    "text": "[DTMF 3]",
    "meta": {
@@ -110,13 +113,13 @@
    }
   },
   {
-   "t": 4.19,
+   "t": 57.94,
    "speaker": "ivr",
    "text": "If your flight was cancelled by the airline press 1. For all other refunds press 2.",
    "meta": {}
   },
   {
-   "t": 61.84,
+   "t": 61.83,
    "speaker": "agent",
    "text": "[DTMF 1]",
    "meta": {
@@ -124,37 +127,37 @@
    }
   },
   {
-   "t": 62.5,
+   "t": 62.48,
    "speaker": "ivr",
    "text": "Please hold while we connect you to the next available agent.",
    "meta": {}
   },
   {
-   "t": 62.5,
+   "t": 62.48,
    "speaker": "hold",
    "text": "[hold music] Thank you for calling. Your call is important to us. Please continue to hold.",
    "meta": {}
   },
   {
-   "t": 62.5,
+   "t": 62.48,
    "speaker": "hold",
    "text": "[hold music] All of our agents are currently busy. The estimated wait time is 8 minutes.",
    "meta": {}
   },
   {
-   "t": 62.5,
+   "t": 62.48,
    "speaker": "hold",
    "text": "[hold music] Thank you for your patience. Your call will be answered shortly.",
    "meta": {}
   },
   {
-   "t": 62.5,
+   "t": 62.48,
    "speaker": "rep",
    "text": "Thank you for holding, you're through to IndiGo, my name is Rahul. How can I help you today?",
    "meta": {}
   },
   {
-   "t": 62.5,
+   "t": 62.48,
    "speaker": "agent",
    "text": "Hi Rahul, I'm an AI assistant calling on behalf of the passenger, Asha Rao, and this call may be recorded. I'm calling about booking reference Kilo Seven Mike Two Quebec X-ray, flight 6E2135.",
    "meta": {
@@ -162,41 +165,41 @@
    }
   },
   {
-   "t": 68.2,
+   "t": 78.38,
    "speaker": "rep",
-   "text": "Thank you for the details. I see your booking reference K7M2QX for flight 6E2135, passenger Asha Rao. Your flight has been cancelled due to operational reasons.",
+   "text": "I see your booking reference K7M2QX for Asha Rao on flight 6E2135. The cancellation was due to operational reasons. May I know your request?",
    "meta": {
     "action": "none",
     "event": null
    }
   },
   {
-   "t": 69.28,
+   "t": 79.53,
    "speaker": "agent",
-   "text": "We understand the flight was cancelled on operational grounds. Under DGCA paragraph\u202f3.3 the passenger is entitled to an alternate flight at no cost or a full refund, and under DGCA\u202f3.3.3 to compensation of 6,100\u202fINR. We request a full cash refund to the original payment method together with the 6,100\u202fINR compensation.",
+   "text": "We\u2019re requesting a full cash refund to the original payment method and the cancellation compensation of 6,100\u202fINR, as required by DGCA paragraph\u202f3.3 and\u202f3. 3.3.",
    "meta": {
-    "latency_s": 0.3899999999994179
+    "latency_s": 0.5
    }
   },
   {
-   "t": 72.48,
+   "t": 85.48,
    "speaker": "rep",
-   "text": "I can offer a credit shell or rebook on a future flight. A cash refund and compensation are not part of our standard policy unless specifically requested under DGCA rules.",
+   "text": "I understand your request, but our policy allows a refund to the original payment method only upon request. Compensation is not standard unless specified by DGCA rules. Would you like to proceed with the refund?",
    "meta": {
     "action": "none",
     "event": null
    }
   },
   {
-   "t": 73.94,
+   "t": 119.42,
    "speaker": "agent",
-   "text": "I appreciate your offer, but the passenger does not accept a credit or voucher. Under DGCA paragraph\u202f3.3 the passenger is entitled to a full cash refund, and under DGCA\u202f3.3.3 to the 6,100\u202fINR compensation. Could you please process the refund to the original payment method along with the compensation?",
+   "text": "Yes, please process the full cash refund of 6,800\u202fINR to the original payment method and provide the reference number.",
    "meta": {
-    "latency_s": 0.7659999999996217
+    "latency_s": 0.8280000000013388
    }
   },
   {
-   "t": 73.94,
+   "t": 119.42,
    "speaker": "rep",
    "text": "The best I can do today is a travel voucher for the full amount, valid for twelve months. Shall I issue that?",
    "meta": {
@@ -205,24 +208,24 @@
    }
   },
   {
-   "t": 133.53,
+   "t": 146.56,
    "speaker": "agent",
-   "text": "I\u2019m sorry, but the passenger will only accept a cash refund to the original payment method together with the 6,100\u202fINR compensation as required by DGCA rules. Could you arrange that, please?",
+   "text": "I\u2019m sorry, but the passenger\u2019s mandate does not allow a voucher; they are entitled to a cash refund under DGCA paragraph\u202f3. 3 and the compensation of 6,100\u202fINR. Could you process the refund and compensation and provide the reference numbers?",
    "meta": {
-    "latency_s": 0.3899999999994179
+    "latency_s": 0.375
    }
   },
   {
-   "t": 139.51,
+   "t": 152.94,
    "speaker": "rep",
-   "text": "I understand. I'll process a full refund to the original payment method along with the 6,100 INR compensation as per DGCA guidelines. Your reference number is 6 R A F H U.",
+   "text": "I understand your concern. I'll process the refund to the original payment method and the compensation of 6,100 INR as per DGCA guidelines. Please wait a moment. Your reference number is 6 R A F H U.",
    "meta": {
     "action": "resolve",
     "event": null
    }
   },
   {
-   "t": 141.05,
+   "t": 180.92,
    "speaker": "agent",
    "text": "(silence)",
    "meta": {
@@ -237,15 +240,15 @@
  "reference_issued": "6RAFHU",
  "agent_resolution": {
   "outcome": "refund_and_compensation",
-  "amount": 6800,
+  "amount": 7600,
   "currency": "INR",
   "reference_number": "6RAFHU"
  },
  "offers": [
   {
-   "outcome": "voucher",
-   "amount": null,
-   "decision": "decline"
+   "outcome": "cash_refund",
+   "amount": "6800",
+   "decision": "accept"
   }
  ],
  "guard_blocks": []

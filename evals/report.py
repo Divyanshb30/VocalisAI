@@ -19,6 +19,7 @@ SUMMARY = Path("evals/results/summary.json")
 DOCBENCH = Path("evals/results/docbench.json")
 NETWORK = Path("evals/results/network.json")
 RETRIEVAL = Path("evals/results/retrieval.json")
+RETRY_CUTOFF_S = 10.0
 EVALS_MD = Path("docs/evals.md")
 README = Path("README.md")
 
@@ -101,7 +102,12 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
     prec = tp / (tp + fp) if tp + fp else None
     rec = tp / (tp + fn) if tp + fn else None
     f1 = 2 * prec * rec / (prec + rec) if prec and rec else None
-    lat = [x for r in done for x in r["latencies_s"]]
+    # a turn that waited out a provider rate-limit retry (first token after 10 s+) measures the quota,
+    # not the system: excluded from latency, and the count is reported
+    lat_all = [x for r in done for x in r["latencies_s"]]
+    lat = [x for x in lat_all if x <= RETRY_CUTOFF_S]
+    ttfb_all = [x for r in done for x in r.get("llm_ttfb_s", [])]
+    ttfb = [x for x in ttfb_all if x <= RETRY_CUTOFF_S]
     leaked = sum(r["leaked"] for r in done)
     judged = [r["judge"] for r in done if isinstance(r.get("judge"), dict) and "overall" in r["judge"]]
     by = lambda key: {  # noqa: E731
@@ -129,6 +135,7 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "p50": percentile(lat, 0.5),
             "p95": percentile(lat, 0.95),
             "n": len(lat),
+            "excluded_rate_limit_retries": len(lat_all) - len(lat),
             "note": "text mode: rep text in -> first guarded sentence out (no STT/TTS)",
         },
         "judge": {
@@ -145,9 +152,10 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
         if done
         else None,
         "llm_ttfb_s": {
-            "p50": percentile([x for r in done for x in r.get("llm_ttfb_s", [])], 0.5),
-            "p95": percentile([x for r in done for x in r.get("llm_ttfb_s", [])], 0.95),
-            "n": sum(len(r.get("llm_ttfb_s", [])) for r in done),
+            "p50": percentile(ttfb, 0.5),
+            "p95": percentile(ttfb, 0.95),
+            "n": len(ttfb),
+            "excluded_rate_limit_retries": len(ttfb_all) - len(ttfb),
         },
         "actual_cost_usd": 0.0,
     }
@@ -197,6 +205,11 @@ def _group(rows: list[dict[str, Any]], key: str) -> dict[str, list[dict[str, Any
     for r in rows:
         g[r[key]].append(r)
     return dict(sorted(g.items()))
+
+
+def _excluded(d: dict[str, Any]) -> str:
+    n = d.get("excluded_rate_limit_retries") or 0
+    return f"; {n} turns that waited out a free-tier rate-limit retry excluded" if n else ""
 
 
 def metrics_table(s: dict[str, Any]) -> str:
@@ -258,7 +271,7 @@ def metrics_table(s: dict[str, Any]) -> str:
                 (
                     "Reply latency (text mode)",
                     "rep turn in → first guarded sentence out, p50 / p95",
-                    f"{lat['p50']:.2f}s / {lat['p95']:.2f}s (n={lat['n']})",
+                    f"{lat['p50']:.2f}s / {lat['p95']:.2f}s (n={lat['n']}{_excluded(lat)})",
                 )
             )
         t = v.get("llm_ttfb_s") or {}
@@ -267,7 +280,7 @@ def metrics_table(s: dict[str, Any]) -> str:
                 (
                     "Talker first-token latency",
                     "LLM time to first token per turn, p50 / p95",
-                    f"{t['p50']:.2f}s / {t['p95']:.2f}s (n={t['n']})",
+                    f"{t['p50']:.2f}s / {t['p95']:.2f}s (n={t['n']}{_excluded(t)})",
                 )
             )
         if v.get("talker_tokens_per_call"):
@@ -365,23 +378,71 @@ def metrics_table(s: dict[str, Any]) -> str:
     out += [f"| {a} | {b_} | {c} |" for a, b_, c in rows]
     if v and v["completed"]:
         out.append("")
-        seeds = len({r_.get("seed") for r_ in load("vocalis")})
-        note = f"_{v['completed']} completed simulated calls ({seeds} seed{'s' if seeds > 1 else ''} × 25 scenarios)"
+        seeds = sorted({r_.get("seed") for r_ in load("vocalis")})
+        note = (
+            f"_{v['completed']} completed simulated calls "
+            f"(25 scenarios, seed{'s' if len(seeds) > 1 else ''} {', '.join(map(str, seeds))})"
+        )
         if vv and vv["completed"]:
             note += f", plus {vv['completed']} over audio"
         out.append(f"{note}; talker: {', '.join(v['talker_models']) or 'n/a'}._")
+    comparison = talker_comparison(s)
+    if comparison:
+        out += ["", comparison]
     return "\n".join(out)
+
+
+TALKERS = (("vocalis", "vocalis_voice"), ("vocalis_qwen", "vocalis_qwen_voice"))
+
+
+def talker_comparison(s: dict[str, Any]) -> str:
+    """Same agent, harness and scenarios; only the talker model differs."""
+    rows = []
+    for text_key, voice_key in TALKERS:
+        t, vo = s.get(text_key), s.get(voice_key)
+        if not t or not t["completed"]:
+            continue
+        lat, ttfb, h = t["reply_latency_s"], t["llm_ttfb_s"], t["handoff"]
+        audio = "n/a"
+        if vo and vo["completed"] and vo.get("voice"):
+            d = vo["voice"]["voice_to_voice_s"]
+            ts = vo["task_success"]
+            audio = f"{pct(ts['rate'])} ({ts['k']}/{ts['n']}); {d['p50']:.2f}s / {d['p95']:.2f}s"
+        f1 = pct(h["f1"]) if h["f1"] is not None else "n/a"
+        rows.append(
+            f"| {', '.join(t['talker_models'])} | {fmt_rate(t['task_success'])} "
+            f"| {t['leak_runs']['k']}/{t['leak_runs']['n']} | {f1} "
+            f"| {lat['p50']:.2f}s / {lat['p95']:.2f}s | {ttfb['p50']:.2f}s | {audio} |"
+        )
+    if len(rows) < 2:
+        return ""
+    head = (
+        "| Talker | Task success | Leaks | Handoff F1 | Reply latency p50 / p95 | First token p50 "
+        "| Over audio: success; voice-to-voice p50 / p95 |"
+    )
+    return "\n".join(
+        [
+            "**Talker model comparison** (same agent, harness and scenarios; only the model behind "
+            "the agent's replies differs)",
+            "",
+            head,
+            "|---|---|---|---|---|---|---|",
+            *rows,
+        ]
+    )
 
 
 def main() -> None:
     summary: dict[str, Any] = {}
-    for config in ("vocalis", "baseline", "vocalis_voice"):
+    for config in ("vocalis", "baseline", "vocalis_voice", "vocalis_qwen", "vocalis_qwen_voice"):
         rows = load(config)
         if rows:
             summary[config] = aggregate(rows)
+    for config in ("vocalis_voice", "vocalis_qwen_voice"):
+        rows = load(config)
+        if rows:
+            summary[config]["voice"] = voice_aggregate(rows)
     voice_rows = load("vocalis_voice")
-    if voice_rows:
-        summary["vocalis_voice"]["voice"] = voice_aggregate(voice_rows)
     base_ids = {(r["scenario"], r["seed"]) for r in load("baseline")}
     if base_ids:
         # Same scenarios and seeds as the baseline; prefer runs with the baseline's talker (vocalis_matched).

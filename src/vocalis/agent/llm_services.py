@@ -15,7 +15,8 @@ def _one(model: str, s: Settings, temperature: float) -> LLMService | None:
     if provider == "cerebras" and s.cerebras_api_key:
         from pipecat.services.cerebras.llm import CerebrasLLMService
 
-        extra = {"reasoning_effort": "low"} if "gpt-oss" in name else {}
+        # reasoning models think before speaking; keep it short (qwen's reasoning is a separate field, never spoken)
+        extra = {"reasoning_effort": "low"} if "gpt-oss" in name or "qwen" in name else {}
         return CerebrasLLMService(
             api_key=s.cerebras_api_key,
             settings=CerebrasLLMService.Settings(model=name, temperature=temperature, extra=extra),
