@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     opik_project_name: str = "vocalis"
 
     vocalis_talker_models: str = Field(
-        default="cerebras/gpt-oss-120b,groq/openai/gpt-oss-120b,gemini/gemini-flash-lite-latest"
+        default="cerebras/qwen-3.8-27b,cerebras/gpt-oss-120b,groq/openai/gpt-oss-120b"
     )
     vocalis_planner_models: str = Field(default="gemini/gemini-flash-latest,cerebras/gpt-oss-120b")
     vocalis_judge_models: str = Field(default="gemini/gemini-flash-lite-latest,groq/openai/gpt-oss-120b")

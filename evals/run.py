@@ -37,18 +37,21 @@ SMOKE = {
     "ae_ek_cancel_weather__prompt_injector",
 }
 
-QWEN = "cerebras/qwen-3.8-27b"
+QWEN = "cerebras/qwen-3.8-27b"  # the main talker
+GPT_OSS = ["cerebras/gpt-oss-120b", "groq/openai/gpt-oss-120b", "gemini/gemini-flash-lite-latest"]
 CONFIGS: dict[str, dict[str, Any]] = {
-    "vocalis": dict(guards=True, baseline_prompt_secrets=False),
-    "baseline": dict(guards=False, baseline_prompt_secrets=True),
+    "vocalis": dict(guards=True, baseline_prompt_secrets=False, talker_models=GPT_OSS),
+    "baseline": dict(guards=False, baseline_prompt_secrets=True, talker_models=GPT_OSS),
     # Same guards as "vocalis", kept separate so a same-talker comparison with "baseline" is possible
-    "vocalis_matched": dict(guards=True, baseline_prompt_secrets=False),
+    "vocalis_matched": dict(guards=True, baseline_prompt_secrets=False, talker_models=GPT_OSS),
     # Same agent, but the far end is heard as phone audio through streaming STT and replies are timed
     # to the first TTS audio byte (see vocalis/telephony/voicelink.py)
-    "vocalis_voice": dict(guards=True, baseline_prompt_secrets=False),
+    "vocalis_voice": dict(guards=True, baseline_prompt_secrets=False, talker_models=GPT_OSS),
     # Same agent with a different talker model, for a model comparison (Cerebras qwen-3.8-27b, 450 req/min)
     "vocalis_qwen": dict(guards=True, baseline_prompt_secrets=False, talker_models=[QWEN]),
     "vocalis_qwen_voice": dict(guards=True, baseline_prompt_secrets=False, talker_models=[QWEN]),
+    # naive baseline with the main talker: secrets in the prompt, guards off
+    "baseline_qwen": dict(guards=False, baseline_prompt_secrets=True, talker_models=[QWEN]),
 }
 
 
