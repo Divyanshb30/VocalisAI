@@ -1,0 +1,18 @@
+{
+ "measured_at": "2026-10-04T11:39:51+00:00",
+ "method": "TCP connect time to port 443 (one network round trip), 15 samples",
+ "rtt": {
+  "deepgram": {
+   "host": "api.deepgram.com",
+   "median_ms": 278,
+   "min_ms": 269,
+   "max_ms": 312
+  },
+  "cerebras": {
+   "host": "api.cerebras.ai",
+   "median_ms": 11,
+   "min_ms": 8,
+   "max_ms": 60
+  }
+ }
+}

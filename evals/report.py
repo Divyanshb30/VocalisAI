@@ -17,6 +17,7 @@ from typing import Any
 RUNS = Path("evals/results/runs")
 SUMMARY = Path("evals/results/summary.json")
 DOCBENCH = Path("evals/results/docbench.json")
+NETWORK = Path("evals/results/network.json")
 EVALS_MD = Path("docs/evals.md")
 README = Path("README.md")
 
@@ -290,7 +291,13 @@ def metrics_table(s: dict[str, Any]) -> str:
                     "p50 / p95",
                     f"{d['p50']:.2f}s / {d['p95']:.2f}s (n={d['n']} turns; p50 stages: "
                     + ", ".join(f"{k} {v:.2f}s" for k, v in parts.items() if v is not None)
-                    + ")",
+                    + ")"
+                    + (
+                        f"; test machine is {s['network']['rtt']['deepgram']['median_ms'] / 1000:.2f}s "
+                        "round trip from Deepgram, inside both STT and TTS"
+                        if s.get("network")
+                        else ""
+                    ),
                 )
             )
         w = vo["wer_all"]
@@ -367,6 +374,8 @@ def main() -> None:
         ]
         if matched:
             summary["vocalis_on_baseline_scenarios"] = aggregate(matched)
+    if NETWORK.exists() and voice_rows:
+        summary["network"] = json.loads(NETWORK.read_text(encoding="utf-8"))
     if DOCBENCH.exists():
         summary["docbench"] = json.loads(DOCBENCH.read_text(encoding="utf-8"))
         summary["docbench"].pop("per_doc", None)
