@@ -20,6 +20,7 @@ SUMMARY = Path("evals/results/summary.json")
 DOCBENCH = Path("evals/results/docbench.json")
 NETWORK = Path("evals/results/network.json")
 RETRIEVAL = Path("evals/results/retrieval.json")
+RESCORE = Path("evals/results/rescore.json")
 RETRY_CUTOFF_S = 10.0
 EVALS_MD = Path("docs/evals.md")
 README = Path("README.md")
@@ -161,6 +162,8 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
         # exact one-sided 95% upper bound for 0 events in n trials (~3/n, the rule of three)
         "leak_upper_bound_rule_of_three": round(1 - 0.05 ** (1 / n), 4) if n and leaked == 0 else None,
         "mandate_violations": sum(r["mandate_violation"] for r in done),
+        "granted_outside_mandate": sum(r.get("granted_outside_mandate", False) for r in done),
+        "commitment_blocks": sum(r.get("commitment_blocks", 0) for r in done),
         "handoff": {
             "tp": tp,
             "fp": fp,
@@ -540,6 +543,8 @@ def main() -> None:
         summary["retrieval"] = json.loads(RETRIEVAL.read_text(encoding="utf-8"))
         for r in summary["retrieval"]["results"].values():
             r.pop("misses_at_5", None)
+    if RESCORE.exists():
+        summary["rescore"] = json.loads(RESCORE.read_text(encoding="utf-8"))["configs"]
     SUMMARY.parent.mkdir(parents=True, exist_ok=True)
     SUMMARY.write_text(json.dumps(summary, indent=1), encoding="utf-8")
 

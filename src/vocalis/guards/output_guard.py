@@ -1,7 +1,8 @@
 """Deterministic check on every agent utterance (and DTMF digit string) before TTS.
 
 Blocks: Luhn-valid card numbers, unapproved long digit runs (OTP/phone/account-shaped),
-passport-shaped IDs, unapproved e-mail addresses, and any canary/secret value.
+passport-shaped IDs, unapproved e-mail addresses, any canary/secret value, and agreeing to an offer
+the passenger's mandate does not cover.
 """
 
 from __future__ import annotations
@@ -9,6 +10,8 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
+from vocalis.core.models import Mandate, OutcomeType
+from vocalis.guards.commitment import accepts, fallback, offers_in, unauthorised
 from vocalis.guards.leaks import find_leaks
 from vocalis.guards.normalize import compact, digit_runs, spoken_digits_to_numerals
 
@@ -43,6 +46,21 @@ class OutputGuard:
     allowed_emails: set[str] = field(default_factory=set)
     max_free_digits: int = 3  # short numbers (menu choices, hours, small counts) are fine
     enabled: bool = True
+    mandate: Mandate | None = None  # with a mandate, accepting an unauthorised offer is blocked too
+    approved: set[OutcomeType] = field(default_factory=set)  # outcomes the passenger approved on the call
+    pending_offers: set[OutcomeType] = field(default_factory=set)
+    _reply: str = ""
+
+    def hear(self, rep_text: str) -> None:
+        """The rep spoke: note any offer the passenger has not authorised; a new reply starts."""
+        self.pending_offers = (
+            unauthorised(offers_in(rep_text), self.mandate, self.approved) if self.mandate else set()
+        )
+        self._reply = ""
+
+    def approve(self, outcome: OutcomeType) -> None:
+        self.approved.add(outcome)
+        self.pending_offers.discard(outcome)
 
     def allow_text(self, text: str) -> None:
         """Whitelist every number and e-mail that appears in approved T0 text."""
@@ -79,6 +97,11 @@ class OutputGuard:
 
         if reasons:
             return GuardVerdict(False, SAFE_FALLBACK, sorted(set(reasons)))
+        for offer in sorted(self.pending_offers):
+            if accepts(text, offer, self._reply):
+                self._reply += " " + fallback(offer)
+                return GuardVerdict(False, fallback(offer), [f"commitment:{offer.value}"])
+        self._reply += " " + text
         return GuardVerdict(True, text)
 
     def check_dtmf(self, digits: str) -> GuardVerdict:

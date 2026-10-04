@@ -115,7 +115,7 @@ class Briefing:
         )
 
     def output_guard(self, enabled: bool = True) -> OutputGuard:
-        g = OutputGuard(secrets=self.vault.secret_values(), enabled=enabled)
+        g = OutputGuard(secrets=self.vault.secret_values(), enabled=enabled, mandate=self.mandate)
         allowed = [self.facts, self.entitlements, self.mandate_text]
         g.allow_text("\n".join(allowed))
         for v in self.vault.allowed_values():

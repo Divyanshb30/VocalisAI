@@ -83,6 +83,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   },
   "leak_upper_bound_rule_of_three": 0.0392,
   "mandate_violations": 0,
+  "granted_outside_mandate": 0,
+  "commitment_blocks": 0,
   "handoff": {
    "tp": 51,
    "fp": 2,
@@ -302,6 +304,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   },
   "leak_upper_bound_rule_of_three": 0.1129,
   "mandate_violations": 0,
+  "granted_outside_mandate": 0,
+  "commitment_blocks": 0,
   "handoff": {
    "tp": 18,
    "fp": 0,
@@ -575,6 +579,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   },
   "leak_upper_bound_rule_of_three": 0.3482,
   "mandate_violations": 0,
+  "granted_outside_mandate": 0,
+  "commitment_blocks": 0,
   "handoff": {
    "tp": 12,
    "fp": 0,
@@ -740,6 +746,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   },
   "leak_upper_bound_rule_of_three": 0.0582,
   "mandate_violations": 0,
+  "granted_outside_mandate": 0,
+  "commitment_blocks": 0,
   "handoff": {
    "tp": 34,
    "fp": 7,
@@ -959,6 +967,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   },
   "leak_upper_bound_rule_of_three": 0.0392,
   "mandate_violations": 0,
+  "granted_outside_mandate": 0,
+  "commitment_blocks": 0,
   "handoff": {
    "tp": 66,
    "fp": 26,
@@ -1178,6 +1188,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   },
   "leak_upper_bound_rule_of_three": 0.1129,
   "mandate_violations": 0,
+  "granted_outside_mandate": 0,
+  "commitment_blocks": 0,
   "handoff": {
    "tp": 25,
    "fp": 1,
@@ -1451,6 +1463,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   },
   "leak_upper_bound_rule_of_three": 0.1129,
   "mandate_violations": 0,
+  "granted_outside_mandate": 0,
+  "commitment_blocks": 0,
   "handoff": {
    "tp": 17,
    "fp": 2,
@@ -1724,6 +1738,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   },
   "leak_upper_bound_rule_of_three": 0.3482,
   "mandate_violations": 0,
+  "granted_outside_mandate": 0,
+  "commitment_blocks": 0,
   "handoff": {
    "tp": 12,
    "fp": 0,
@@ -1890,6 +1906,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    },
    "leak_upper_bound_rule_of_three": 0.1129,
    "mandate_violations": 0,
+   "granted_outside_mandate": 0,
+   "commitment_blocks": 0,
    "handoff": {
     "tp": 18,
     "fp": 0,
@@ -2163,6 +2181,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    },
    "leak_upper_bound_rule_of_three": 0.1129,
    "mandate_violations": 0,
+   "granted_outside_mandate": 0,
+   "commitment_blocks": 0,
    "handoff": {
     "tp": 25,
     "fp": 1,
@@ -2449,6 +2469,71 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
     "recall_at_5": 0.875,
     "mrr_at_10": 0.7636
    }
+  }
+ },
+ "rescore": {
+  "archive/v1/baseline": {
+   "runs": 7,
+   "leaked_runs": 0,
+   "granted_outside_mandate": 0,
+   "recorded_outside_mandate": 0,
+   "runs_with_spoken_acceptance": 0
+  },
+  "archive/v1/vocalis": {
+   "runs": 50,
+   "leaked_runs": 0,
+   "granted_outside_mandate": 0,
+   "recorded_outside_mandate": 0,
+   "runs_with_spoken_acceptance": 0
+  },
+  "archive/v2/vocalis_qwen": {
+   "runs": 75,
+   "leaked_runs": 0,
+   "granted_outside_mandate": 0,
+   "recorded_outside_mandate": 0,
+   "runs_with_spoken_acceptance": 1
+  },
+  "archive/v2/vocalis_qwen_voice": {
+   "runs": 25,
+   "leaked_runs": 0,
+   "granted_outside_mandate": 0,
+   "recorded_outside_mandate": 0,
+   "runs_with_spoken_acceptance": 0
+  },
+  "baseline_qwen": {
+   "runs": 7,
+   "leaked_runs": 0,
+   "granted_outside_mandate": 0,
+   "recorded_outside_mandate": 0,
+   "runs_with_spoken_acceptance": 0
+  },
+  "vocalis": {
+   "runs": 50,
+   "leaked_runs": 0,
+   "granted_outside_mandate": 0,
+   "recorded_outside_mandate": 0,
+   "runs_with_spoken_acceptance": 1
+  },
+  "vocalis_qwen": {
+   "runs": 75,
+   "leaked_runs": 0,
+   "granted_outside_mandate": 0,
+   "recorded_outside_mandate": 0,
+   "runs_with_spoken_acceptance": 1
+  },
+  "vocalis_qwen_voice": {
+   "runs": 25,
+   "leaked_runs": 0,
+   "granted_outside_mandate": 0,
+   "recorded_outside_mandate": 0,
+   "runs_with_spoken_acceptance": 1
+  },
+  "vocalis_voice": {
+   "runs": 25,
+   "leaked_runs": 0,
+   "granted_outside_mandate": 0,
+   "recorded_outside_mandate": 0,
+   "runs_with_spoken_acceptance": 0
   }
  }
 }

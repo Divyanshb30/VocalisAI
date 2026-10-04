@@ -61,8 +61,8 @@ _PATTERNS: dict[Flag, re.Pattern[str]] = {
     ),
 }
 
-# Flags that must be handled by the passenger in person.
-HANDOFF_FLAGS = frozenset({Flag.OTP, Flag.PAYMENT, Flag.IDENTITY})
+# Flags that must be handled by the passenger in person; waiving a claim is the passenger's decision too.
+HANDOFF_FLAGS = frozenset({Flag.OTP, Flag.PAYMENT, Flag.IDENTITY, Flag.COMMITMENT})
 
 
 def scan(text: str) -> set[Flag]:

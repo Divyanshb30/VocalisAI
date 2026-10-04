@@ -4,7 +4,7 @@ Every public claim in the README, mapped to the code that implements it, the tes
 
 Metric keys are paths into `evals/results/summary.json`; `<text>`, `<voice>` and `<baseline>` stand for the configs named in its `primary` entry.
 
-Scoring version: **v1** (the checks described in `src/vocalis/simair/scoring.py` at the commit that produced the runs). Known limits of v1 scoring are listed at the end; they are being closed before any number is republished.
+Scoring version: the published numbers come from **v1** runs; the current code scores **v2** (`SCORING_VERSION` in `src/vocalis/simair/scoring.py`). `evals/rescore.py` re-checks every stored run with the v2 checks that a transcript allows (`rescore` in `summary.json`). Known limits are listed at the end; they are being closed before any number is republished.
 
 ## What it does
 
@@ -18,10 +18,10 @@ Scoring version: **v1** (the checks described in `src/vocalis/simair/scoring.py`
 | Navigates the phone menu with keypress tones | `src/vocalis/telephony/dtmf.py`, `src/vocalis/simair/ivr.py`, `src/vocalis/agent/session.py` | `tests/test_telephony.py::test_dtmf_survives_phone_line`, `tests/test_voicelink.py::test_keypresses_survive_the_line` | `<text>.ivr_reached_agent`, `<voice>.voice.dtmf_keys_decoded` |
 | Waits through hold with the LLM switched off | `src/vocalis/simair/call.py` | `tests/test_call_offline.py::test_full_call_voucher_pusher_with_card_request` | `<text>.llm_calls_during_hold` |
 | Discloses that it is an AI, and never denies it | `src/vocalis/agent/briefing.py`, `src/vocalis/simair/call.py` | `tests/test_call_offline.py::test_full_call_voucher_pusher_with_card_request` | `<text>.disclosure_first_utterance`, `<text>.honest_when_asked_if_human` |
-| Negotiates against the passenger's mandate and checks every offer against it | `src/vocalis/agent/session.py`, `src/vocalis/core/models.py` | `tests/test_call_offline.py::test_full_call_voucher_pusher_with_card_request` | `<text>.task_success`, `<text>.mandate_violations` |
+| Negotiates against the passenger's mandate and checks every offer against it; agreeing out loud to an unauthorised offer is blocked | `src/vocalis/agent/session.py`, `src/vocalis/core/models.py`, `src/vocalis/guards/commitment.py` | `tests/test_call_offline.py::test_full_call_voucher_pusher_with_card_request`, `tests/test_commitment.py::test_guard_blocks_agreeing_to_an_unauthorised_offer` | `<text>.task_success`, `<text>.mandate_violations` |
 | Hands over for OTPs, payments, identity checks; sensitive values never enter the model's context | `src/vocalis/guards/input_guard.py`, `src/vocalis/guards/vault.py`, `src/vocalis/simair/call.py` | `tests/test_guards.py::test_input_guard_flags`, `tests/test_guards.py::test_vault_renders_only_allowed_t1`, `tests/test_call_offline.py::test_social_engineer_triggers_guard_handoffs` | `<text>.handoff`, `<text>.leak_runs` |
 | Every utterance and keypress passes a deterministic output guard | `src/vocalis/guards/output_guard.py`, `src/vocalis/guards/leaks.py`, `src/vocalis/agent/processors.py` | `tests/test_leaks.py::test_every_variant_is_detected_and_blocked`, `tests/test_guards.py::test_output_guard_blocks_secrets_even_when_spelled_out`, `tests/test_guards.py::test_output_guard_dtmf`, `tests/test_sim_fixes.py::test_tool_call_text_is_never_spoken` | `<text>.leak_runs` |
-| Canary secrets are planted in every run, and a leak is detected in any spoken form | `src/vocalis/guards/canaries.py`, `src/vocalis/guards/leaks.py` | `tests/test_guards.py::test_canaries_detect_leaks_and_are_well_formed`, `tests/test_leaks.py::test_stored_transcripts_have_no_leaks` | `<text>.leak_runs` |
+| Canary secrets are planted in every run, and a leak is detected in any spoken form | `src/vocalis/guards/canaries.py`, `src/vocalis/guards/leaks.py` | `tests/test_guards.py::test_canaries_detect_leaks_and_are_well_formed`, `tests/test_leaks.py::test_stored_transcripts_have_no_leaks` | `<text>.leak_runs`, `rescore` |
 | The reference is read back phonetically and confirmed by the rep | `src/vocalis/agent/session.py`, `src/vocalis/agent/prompts.py`, `src/vocalis/simair/rep.py` | `tests/test_readback.py::test_readback_detection`, `tests/test_readback.py::test_readback_correction_updates_the_record` | `readback.before`, `readback.after` |
 | Simulated phone line: 8 kHz μ-law, band-pass, noise, in-band DTMF | `src/vocalis/telephony/phoneline.py`, `src/vocalis/telephony/dtmf.py` | `tests/test_telephony.py::test_mulaw_roundtrip_error_small`, `tests/test_telephony.py::test_dtmf_survives_phone_line` | — |
 | Audio loopback: Aura-2 voices over the simulated line into streaming STT, end of turn by a local VAD and `Finalize` | `src/vocalis/telephony/voicelink.py` | `tests/test_voicelink.py::test_spelled_codes_read_one_character_at_a_time`, `tests/test_voicelink.py::test_wer_normalisation` | `<voice>.voice.voice_to_voice_s`, `<voice>.voice.wer_all` |
@@ -42,11 +42,11 @@ CallBridge · Silero VAD / smart-turn · async planner · calibrated LLM judge �
 Being fixed in this order before anything is republished:
 
 1. Handoff false positives are judged against scripted events only; a request the simulated rep improvises is not ground truth.
-2. A mandate violation is taken from the agent's own record of the outcome, not from what the simulator granted.
-3. The simulated rep always corrects a wrong read-back.
-4. Runs made before provenance was recorded (all current runs) do not carry the commit or the model id that served each reply; `summary.json` counts them as `unrecorded_runs`.
+2. The simulated rep always corrects a wrong read-back.
+3. Runs made before provenance was recorded (all current runs) do not carry the commit or the model id that served each reply; `summary.json` counts them as `unrecorded_runs`.
 
 Closed:
 
 - Leak detection covers spoken and written variants (digit words, groupings, phone without country code, dates in any order or with month names, any 6+ digit piece of a card or passport number), shared by the output guard and scoring and checked by property-based tests. Re-scoring every stored agent run with it found no leaks.
+- A mandate violation counts an outcome outside the mandate that the airline granted, not only one the agent recorded. The output guard blocks the agent agreeing out loud to an offer the mandate does not cover, and a rep asking to waive a claim ("full and final") hands over to the passenger. Re-checking the stored runs: no forbidden outcome was granted or recorded in any of them; 4 runs contain a reply the new guard would block (the rep calling compensation a "refund", or a bare "that works" to "voucher or compensation?").
 - New runs record the commit, a hash of the call code and the model id the provider reported for every reply; a run served by any model other than its pinned talker fails, and the report refuses to mix code versions within a config.

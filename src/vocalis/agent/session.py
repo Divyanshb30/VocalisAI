@@ -272,6 +272,8 @@ class AgentSession:
                 guidance = "Accept it, and ask for the reference number."
             else:
                 approved = await self.hooks.approve_offer(outcome, amt)
+                if approved:
+                    self.guard.approve(outcome)
                 entry["decision"] = (
                     "accept_after_passenger_approval" if approved else "decline_after_passenger_review"
                 )
@@ -384,6 +386,7 @@ class AgentSession:
         """The other side said ``text``; return what the agent says back."""
         self._last_heard = text
         self._heard.append(text)
+        self.guard.hear(text)
         if self.current_node == "confirm":
             self._heard_since_readback += 1
         self._check_readback(text)
