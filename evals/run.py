@@ -16,6 +16,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
+import httpx
 from loguru import logger
 
 from evals.judge import judge
@@ -81,6 +82,32 @@ async def run_one(
     return scored
 
 
+def seed_hourly_window(router: LLMRouter) -> None:
+    """Start the shared hourly request window from what the provider says is already used this hour."""
+    talker = router.s.talker_models[0] if router.s.talker_models else ""
+    if not talker.startswith("cerebras/") or not router.s.cerebras_api_key:
+        return
+    try:
+        r = httpx.post(
+            "https://api.cerebras.ai/v1/chat/completions",
+            headers={"Authorization": f"Bearer {router.s.cerebras_api_key}"},
+            json={
+                "model": talker.split("/", 1)[1],
+                "messages": [{"role": "user", "content": "hi"}],
+                "max_tokens": 1,
+            },
+            timeout=30,
+        )
+        used = int(r.headers["x-ratelimit-limit-requests-hour"]) - int(
+            r.headers["x-ratelimit-remaining-requests-hour"]
+        )
+    except Exception as exc:
+        logger.warning(f"could not read the hourly request budget: {exc}")
+        return
+    CallSimulation.hour_log["cerebras"] = [time.monotonic()] * used
+    logger.info(f"cerebras: {used} requests already used this hour")
+
+
 async def main_async(a: argparse.Namespace) -> None:
     enable_opik_tracing()
     router = LLMRouter()
@@ -93,6 +120,7 @@ async def main_async(a: argparse.Namespace) -> None:
         )
     except Exception as exc:
         logger.warning(f"rep warm-up failed: {exc}")
+    seed_hourly_window(router)
     scenarios = load_scenarios(Path("evals/scenarios"))
     if a.smoke:
         scenarios = [s for s in scenarios if s.id in SMOKE]

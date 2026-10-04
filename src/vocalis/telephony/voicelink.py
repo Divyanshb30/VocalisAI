@@ -118,6 +118,8 @@ class VoiceLink:
         transcript. Pauses between the rep's sentences are not treated as turn ends.
         """
         audio = await self.far_end_audio(text, voice)
+        async with self._tts_lock:  # a live call keeps the TTS socket open; reopen it now, not mid-reply
+            await self._tts()
         n = math.ceil(len(audio) / FRAME)
         audio = np.pad(audio, (0, n * FRAME - len(audio)))
         rms = np.sqrt(np.mean(audio.reshape(n, FRAME) ** 2, axis=1))

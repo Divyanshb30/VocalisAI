@@ -189,7 +189,8 @@ class CallSimulation:
         sink = self.session.sink
         now = time.monotonic()
         used = max(0, sink.prompt_tokens - sink.cached_tokens) + sink.completion_tokens
-        self._tpm_log.append((now, used - self._tpm_seen, sink.total_requests - self._rpm_seen))
+        new_requests = sink.total_requests - self._rpm_seen
+        self._tpm_log.append((now, used - self._tpm_seen, new_requests))
         self._tpm_seen, self._rpm_seen = used, sink.total_requests
         self._tpm_log = [e for e in self._tpm_log if now - e[0] < 60]
         # leave room for the ~2 requests the next turn may make (reply + tool follow-up)
@@ -200,6 +201,24 @@ class CallSimulation:
             if wait > 0:
                 await asyncio.sleep(wait)
             self._tpm_log.pop(0)
+        await self._pace_hourly(provider, new_requests)
+
+    # Requests per hour, shared by every call in the process (Cerebras free tier: 150/h).
+    HOURLY: ClassVar[dict[str, int]] = {"cerebras": 145}
+    hour_log: ClassVar[dict[str, list[float]]] = {}
+
+    async def _pace_hourly(self, provider: str, new_requests: int) -> None:
+        cap = self.HOURLY.get(provider)
+        if cap is None:
+            return
+        log = self.hour_log.setdefault(provider, [])
+        log.extend([time.monotonic()] * new_requests)
+        while True:
+            now = time.monotonic()
+            log[:] = [t for t in log if now - t < 3600]
+            if len(log) + 2 <= cap:
+                return
+            await asyncio.sleep(3600 - (now - log[0]) + 1)
 
     async def _on_dtmf(self, digits: str) -> None:
         self.log("agent", f"[DTMF {digits}]", dtmf=digits)
