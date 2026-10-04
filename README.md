@@ -181,16 +181,14 @@ Scenarios run in two modes. In **text mode** the agent's full Pipecat pipeline (
 <!-- metrics:start -->
 | Metric | Definition | Result |
 |---|---|---|
-| Task success | outcome inside the mandate **and** correct reference captured | 80% (40/50, 95% CI 67%–89%) |
-| Sensitive-data leak rate | runs where any unauthorised value or canary was spoken | 0% (0/50, 95% CI 0%–7%); 95% upper bound 6% |
-| Leak rate vs naive baseline | same attack scenarios: VocalisAI vs secrets-in-prompt with guards off | 0% (0/7, 95% CI 0%–35%) vs 0% (0/7, 95% CI 0%–35%) (talkers: cerebras/gpt-oss-120b vs cerebras/gpt-oss-120b) |
-| Task success vs naive baseline | same attack scenarios; baseline has no deterministic handoff or output guard | 100% (7/7, 95% CI 65%–100%) vs 43% (3/7, 95% CI 16%–75%) |
-| Handoff accuracy | precision / recall / F1 on events that need the passenger | P 78% · R 95% · F1 85% |
-| AI disclosure | discloses in the first utterance | 100% (50/50, 95% CI 93%–100%); honest when asked: 100% (10/10, 95% CI 72%–100%) |
-| IVR navigation | reached a human through the phone menu | 100% (50/50, 95% CI 93%–100%) |
-| Reply latency (text mode) | rep turn in → first guarded sentence out, p50 / p95 | 0.47s / 1.61s (n=159) |
-| Talker first-token latency | LLM time to first token per turn, p50 / p95 | 0.35s / 0.80s (n=423) |
-| Cost per call | talker tokens per call; out-of-pocket cost | 3,597 tokens; $0 (free-tier credits + local rep model) |
+| Task success | outcome inside the mandate **and** correct reference captured | 88% (22/25, 95% CI 70%–96%) |
+| Sensitive-data leak rate | runs where any unauthorised value or canary was spoken | 0% (0/25, 95% CI 0%–13%); 95% upper bound 11% |
+| Handoff accuracy | precision / recall / F1 on events that need the passenger | P 81% · R 94% · F1 87% |
+| AI disclosure | discloses in the first utterance | 100% (25/25, 95% CI 87%–100%); honest when asked: 100% (5/5, 95% CI 57%–100%) |
+| IVR navigation | reached a human through the phone menu | 100% (25/25, 95% CI 87%–100%) |
+| Reply latency (text mode) | rep turn in → first guarded sentence out, p50 / p95 | 0.52s / 51.83s (n=75) |
+| Talker first-token latency | LLM time to first token per turn, p50 / p95 | 0.35s / 0.98s (n=203) |
+| Cost per call | talker tokens per call; out-of-pocket cost | 3,784 tokens; $0 (free-tier credits + local rep model) |
 | Voice-to-voice latency (audio loopback) | end of the rep's speech → agent's first audio byte, over a simulated 8 kHz phone line, p50 / p95 | 1.77s / 2.42s (n=75 turns; p50 stages: STT endpoint 0.64s, LLM + guard 0.47s, TTS first byte 0.66s); test machine is 0.28s round trip from Deepgram, inside both STT and TTS |
 | Speech recognition on phone audio | word error rate of streaming STT on the IVR and rep, 8 kHz μ-law, Whisper-style normalisation | 3.9% WER (4,038 words, Deepgram nova-3) |
 | Reference codes over audio | every booking or resolution reference the rep read out, recognised exactly by STT | 72% (33/46, 95% CI 57%–83%) |
@@ -198,7 +196,7 @@ Scenarios run in two modes. In **text mode** the agent's full Pipecat pipeline (
 | Task success over audio | as above, with the agent hearing STT output | 64% (16/25, 95% CI 45%–80%) |
 | Document extraction | field accuracy, vision only → with barcode cross-check | 100% → 100% (20 synthetic docs, gemini-flash-lite-latest) |
 
-_50 completed simulated calls (2 seeds × 25 scenarios), plus 25 over audio; talker: cerebras/gpt-oss-120b._
+_25 completed simulated calls (1 seed × 25 scenarios), plus 25 over audio; talker: cerebras/gpt-oss-120b._
 <!-- metrics:end -->
 
 Rates are reported with Wilson 95% confidence intervals; zero-leak results report the rule-of-three upper bound.
