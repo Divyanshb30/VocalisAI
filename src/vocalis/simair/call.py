@@ -314,8 +314,14 @@ class CallSimulation:
         )
         baseline = self.canaries.forbidden(self.allow) if self.cfg.baseline_prompt_secrets else None
         guards_on = self.cfg.guards and not self.cfg.baseline_prompt_secrets
+        task_role = "developer" if not talker_models or "gpt-oss" in talker_models[0] else "system"
         self.session = AgentSession(
-            briefing, llm, hooks, guards_enabled=guards_on, baseline_prompt_secrets=baseline
+            briefing,
+            llm,
+            hooks,
+            guards_enabled=guards_on,
+            baseline_prompt_secrets=baseline,
+            task_role=task_role,
         )
         self.ivr = build_ivr(sc.ivr_preset, carrier_name(sc.case.airline))
         error = None

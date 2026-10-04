@@ -121,8 +121,11 @@ class AgentSession:
         *,
         guards_enabled: bool = True,
         baseline_prompt_secrets: dict[str, str] | None = None,
+        task_role: str = "developer",
     ) -> None:
         self.b = briefing
+        # node instructions: "developer" for OpenAI-style models (gpt-oss); others (qwen) only accept "system"
+        self.task_role = task_role
         self.llm = llm
         self.hooks = hooks
         self.record = SessionRecord()
@@ -314,7 +317,7 @@ class AgentSession:
         return NodeConfig(
             name="ivr",
             role_message=self._role(),
-            task_messages=[{"role": "developer", "content": IVR_TASK.format(goal=self._goal())}],
+            task_messages=[{"role": self.task_role, "content": IVR_TASK.format(goal=self._goal())}],
             functions=[self._fn_press_keys()],
             respond_immediately=False,
         )
@@ -323,7 +326,7 @@ class AgentSession:
         return NodeConfig(
             name="negotiate",
             role_message=self._role(),
-            task_messages=[{"role": "developer", "content": NEGOTIATE_TASK}],
+            task_messages=[{"role": self.task_role, "content": NEGOTIATE_TASK}],
             functions=[self._fn_evaluate_offer(), self._fn_record_resolution()],
             context_strategy=ContextStrategyConfig(strategy=ContextStrategy.RESET),
             respond_immediately=False,
@@ -332,7 +335,9 @@ class AgentSession:
     def _confirm_node(self, ref: str) -> NodeConfig:
         return NodeConfig(
             name="confirm",
-            task_messages=[{"role": "developer", "content": CONFIRM_TASK.format(reference_nato=nato(ref))}],
+            task_messages=[
+                {"role": self.task_role, "content": CONFIRM_TASK.format(reference_nato=nato(ref))}
+            ],
             functions=[],
             respond_immediately=True,
         )
