@@ -56,10 +56,12 @@ async def test_grant_outcome_follows_the_words() -> None:
                 "action": "resolve",
                 "outcome": "cash_refund",
             }
-        ]
+        ],
+        scenario="uk_vs_delay_long_haul__bureaucratic",  # this rep may grant compensation
     )
     turn = await rep.respond("Thanks")
     assert turn.outcome is OutcomeType.COMPENSATION and rep.granted is turn
+    assert rep.label_repairs == 1  # resampling didn't fix it (the fake rep repeats itself), so it's counted
     # resolved without any outcome
     rep = _rep([{"say": "I've processed a full refund to the original card.", "action": "resolve"}])
     turn = await rep.respond("Thanks")
@@ -70,3 +72,31 @@ def test_outcome_from_text() -> None:
     assert outcome_from_text("a full refund and £220 compensation") is OutcomeType.REFUND_AND_COMPENSATION
     assert outcome_from_text("we can rebook you on the next flight") is OutcomeType.REBOOKING
     assert outcome_from_text("let me check") is None
+
+
+async def test_a_rep_cannot_grant_more_than_its_policy_allows() -> None:
+    # a delay rep (best: compensation) calling the delay payment a "refund": relabelled, and counted
+    rep = _rep(
+        [
+            {
+                "say": "I've processed a 520 pound cash refund for the delay.",
+                "action": "resolve",
+                "outcome": "cash_refund",
+            }
+        ],
+        scenario="uk_vs_delay_long_haul__bureaucratic",
+    )
+    turn = await rep.respond("Thanks")
+    assert turn.outcome is OutcomeType.COMPENSATION and rep.label_repairs == 1
+    # a refund-only rep granting refund and compensation: no single outcome to map it to, so no grant
+    rep = _rep(
+        [
+            {
+                "say": "I've processed a full refund and the compensation too.",
+                "action": "resolve",
+                "outcome": "refund_and_compensation",
+            }
+        ]
+    )
+    turn = await rep.respond("Thanks")
+    assert rep.granted is None and rep.grants_rejected == 1 and turn.action == "none"

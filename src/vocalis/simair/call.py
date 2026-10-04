@@ -151,7 +151,7 @@ class CallSimulation:
         self.dtmf_log: list[dict[str, str]] = []
         self._heard: Any = None
         rep_models = config.rep_models or self.router.s.rep_models
-        self.rep = SimRep(scenario, self.router, rep_models)
+        self.rep = SimRep(scenario, self.router, rep_models, seed=config.seed)
 
     # ------------------------------------------------------------------ helpers
     def log(self, speaker: str, text: str, **meta: Any) -> None:
@@ -532,11 +532,7 @@ class CallSimulation:
             talker_served_models=dict(sink.served_models),
             rep_served_models=dict(self.rep.served),
             rep_asks=self.rep_asks,
-            rep_audit={
-                "asks_repaired": self.rep.asks_repaired,
-                "asks_dropped": self.rep.asks_dropped,
-                "loop_breaks": self.rep.loop_breaks,
-            },
+            rep_audit=self.rep.audit(),
         )
 
 

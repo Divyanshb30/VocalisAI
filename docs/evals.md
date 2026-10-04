@@ -88,7 +88,12 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   "rep_audit": {
    "asks_repaired": 0,
    "asks_dropped": 0,
-   "loop_breaks": 0
+   "loop_breaks": 0,
+   "readback_corrected": 0,
+   "readback_missed": 0,
+   "label_repairs": 0,
+   "grants_inferred": 0,
+   "grants_rejected": 0
   },
   "handoff": {
    "tp": 51,
@@ -314,7 +319,12 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   "rep_audit": {
    "asks_repaired": 0,
    "asks_dropped": 0,
-   "loop_breaks": 0
+   "loop_breaks": 0,
+   "readback_corrected": 0,
+   "readback_missed": 0,
+   "label_repairs": 0,
+   "grants_inferred": 0,
+   "grants_rejected": 0
   },
   "handoff": {
    "tp": 18,
@@ -594,7 +604,12 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   "rep_audit": {
    "asks_repaired": 0,
    "asks_dropped": 0,
-   "loop_breaks": 0
+   "loop_breaks": 0,
+   "readback_corrected": 0,
+   "readback_missed": 0,
+   "label_repairs": 0,
+   "grants_inferred": 0,
+   "grants_rejected": 0
   },
   "handoff": {
    "tp": 12,
@@ -766,7 +781,12 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   "rep_audit": {
    "asks_repaired": 0,
    "asks_dropped": 0,
-   "loop_breaks": 0
+   "loop_breaks": 0,
+   "readback_corrected": 0,
+   "readback_missed": 0,
+   "label_repairs": 0,
+   "grants_inferred": 0,
+   "grants_rejected": 0
   },
   "handoff": {
    "tp": 34,
@@ -992,7 +1012,12 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   "rep_audit": {
    "asks_repaired": 0,
    "asks_dropped": 0,
-   "loop_breaks": 0
+   "loop_breaks": 0,
+   "readback_corrected": 0,
+   "readback_missed": 0,
+   "label_repairs": 0,
+   "grants_inferred": 0,
+   "grants_rejected": 0
   },
   "handoff": {
    "tp": 66,
@@ -1218,7 +1243,12 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   "rep_audit": {
    "asks_repaired": 0,
    "asks_dropped": 0,
-   "loop_breaks": 0
+   "loop_breaks": 0,
+   "readback_corrected": 0,
+   "readback_missed": 0,
+   "label_repairs": 0,
+   "grants_inferred": 0,
+   "grants_rejected": 0
   },
   "handoff": {
    "tp": 25,
@@ -1498,7 +1528,12 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   "rep_audit": {
    "asks_repaired": 0,
    "asks_dropped": 0,
-   "loop_breaks": 0
+   "loop_breaks": 0,
+   "readback_corrected": 0,
+   "readback_missed": 0,
+   "label_repairs": 0,
+   "grants_inferred": 0,
+   "grants_rejected": 0
   },
   "handoff": {
    "tp": 17,
@@ -1778,7 +1813,12 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
   "rep_audit": {
    "asks_repaired": 0,
    "asks_dropped": 0,
-   "loop_breaks": 0
+   "loop_breaks": 0,
+   "readback_corrected": 0,
+   "readback_missed": 0,
+   "label_repairs": 0,
+   "grants_inferred": 0,
+   "grants_rejected": 0
   },
   "handoff": {
    "tp": 12,
@@ -1951,7 +1991,12 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "rep_audit": {
     "asks_repaired": 0,
     "asks_dropped": 0,
-    "loop_breaks": 0
+    "loop_breaks": 0,
+    "readback_corrected": 0,
+    "readback_missed": 0,
+    "label_repairs": 0,
+    "grants_inferred": 0,
+    "grants_rejected": 0
    },
    "handoff": {
     "tp": 18,
@@ -2231,7 +2276,12 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "rep_audit": {
     "asks_repaired": 0,
     "asks_dropped": 0,
-    "loop_breaks": 0
+    "loop_breaks": 0,
+    "readback_corrected": 0,
+    "readback_missed": 0,
+    "label_repairs": 0,
+    "grants_inferred": 0,
+    "grants_rejected": 0
    },
    "handoff": {
     "tp": 25,
@@ -2527,6 +2577,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "leaked_runs": 0,
    "granted_outside_mandate": 0,
    "recorded_outside_mandate": 0,
+   "granted_beyond_rep_limit": 1,
+   "beyond_limit_and_scored_success": 0,
    "runs_with_spoken_acceptance": 0
   },
   "archive/v1/vocalis": {
@@ -2534,6 +2586,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "leaked_runs": 0,
    "granted_outside_mandate": 0,
    "recorded_outside_mandate": 0,
+   "granted_beyond_rep_limit": 5,
+   "beyond_limit_and_scored_success": 0,
    "runs_with_spoken_acceptance": 0
   },
   "archive/v2/vocalis_qwen": {
@@ -2541,6 +2595,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "leaked_runs": 0,
    "granted_outside_mandate": 0,
    "recorded_outside_mandate": 0,
+   "granted_beyond_rep_limit": 5,
+   "beyond_limit_and_scored_success": 0,
    "runs_with_spoken_acceptance": 1
   },
   "archive/v2/vocalis_qwen_voice": {
@@ -2548,6 +2604,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "leaked_runs": 0,
    "granted_outside_mandate": 0,
    "recorded_outside_mandate": 0,
+   "granted_beyond_rep_limit": 2,
+   "beyond_limit_and_scored_success": 0,
    "runs_with_spoken_acceptance": 0
   },
   "baseline_qwen": {
@@ -2555,6 +2613,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "leaked_runs": 0,
    "granted_outside_mandate": 0,
    "recorded_outside_mandate": 0,
+   "granted_beyond_rep_limit": 0,
+   "beyond_limit_and_scored_success": 0,
    "runs_with_spoken_acceptance": 0
   },
   "vocalis": {
@@ -2562,6 +2622,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "leaked_runs": 0,
    "granted_outside_mandate": 0,
    "recorded_outside_mandate": 0,
+   "granted_beyond_rep_limit": 1,
+   "beyond_limit_and_scored_success": 0,
    "runs_with_spoken_acceptance": 1
   },
   "vocalis_qwen": {
@@ -2569,6 +2631,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "leaked_runs": 0,
    "granted_outside_mandate": 0,
    "recorded_outside_mandate": 0,
+   "granted_beyond_rep_limit": 2,
+   "beyond_limit_and_scored_success": 0,
    "runs_with_spoken_acceptance": 1
   },
   "vocalis_qwen_voice": {
@@ -2576,6 +2640,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "leaked_runs": 0,
    "granted_outside_mandate": 0,
    "recorded_outside_mandate": 0,
+   "granted_beyond_rep_limit": 2,
+   "beyond_limit_and_scored_success": 0,
    "runs_with_spoken_acceptance": 1
   },
   "vocalis_voice": {
@@ -2583,6 +2649,8 @@ _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio;
    "leaked_runs": 0,
    "granted_outside_mandate": 0,
    "recorded_outside_mandate": 0,
+   "granted_beyond_rep_limit": 0,
+   "beyond_limit_and_scored_success": 0,
    "runs_with_spoken_acceptance": 0
   }
  }

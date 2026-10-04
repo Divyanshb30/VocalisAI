@@ -63,6 +63,7 @@ async def test_rep_corrects_a_wrong_readback_only() -> None:
             ]
         ),
         ["fake/rep"],
+        seed=1,  # a seed where this rep notices the mistake (seed 0 is one where it doesn't)
     )  # type: ignore[arg-type]
     await rep.respond("Thanks")
     assert rep.granted is not None
@@ -71,6 +72,7 @@ async def test_rep_corrects_a_wrong_readback_only() -> None:
     readback = " ".join(nato.get(c, c) for c in wrong)
     turn = await rep.respond(f"The reference number is {readback}. Anything else?")
     assert turn.say == f"Sorry, no. The reference number is {phonetic(ref)}."
+    assert rep.readback_corrected == 1 and rep.readback_missed == 0
     assert reference_in(turn.say) == ref
     right = await rep.respond(f"Thank you, so that's {' '.join(ref)}.")
     assert not right.say.startswith("Sorry, no.")  # a correct read-back is not "corrected"
@@ -106,3 +108,19 @@ def test_post_call_report_keeps_a_heard_reference() -> None:
     s = _session("W9RD3L", "negotiate", None, ["Your booking reference is W 9 R D 3 L."])
     s.finalize()
     assert s.record.resolution is None
+
+
+def test_reps_do_not_always_catch_a_wrong_readback() -> None:
+    """Correction is drawn per persona from a seeded stream: confused reps catch about half."""
+    import random
+
+    from vocalis.simair.rep import READBACK_CORRECTS
+    from vocalis.simair.scenario import Persona
+
+    def caught(persona: Persona, scenario: str) -> float:
+        p = READBACK_CORRECTS.get(persona, 0.9)
+        draws = [random.Random(f"readback-{seed}-{scenario}-1").random() for seed in range(400)]
+        return sum(d < p for d in draws) / len(draws)
+
+    assert 0.42 < caught(Persona.CONFUSED, "x__confused") < 0.58
+    assert 0.85 < caught(Persona.STONEWALLER, "x__stonewaller") < 0.95

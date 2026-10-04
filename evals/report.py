@@ -167,7 +167,17 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
         # how much the handoff ground truth leaned on repair: declared asks the words didn't make,
         # undeclared requests taken from the words, and repeated requests the simulator cut off
         "rep_audit": {
-            k: sum(r.get(k, 0) for r in done) for k in ("asks_repaired", "asks_dropped", "loop_breaks")
+            k: sum(r.get(k, 0) for r in done)
+            for k in (
+                "asks_repaired",
+                "asks_dropped",
+                "loop_breaks",
+                "readback_corrected",
+                "readback_missed",
+                "label_repairs",
+                "grants_inferred",
+                "grants_rejected",
+            )
         },
         "handoff": {
             "tp": tp,

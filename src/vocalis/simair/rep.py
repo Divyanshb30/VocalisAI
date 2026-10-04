@@ -8,6 +8,7 @@ scenario, so the agent's capture of it can be checked exactly.
 from __future__ import annotations
 
 import json
+import random
 import re
 from dataclasses import dataclass, field
 from decimal import Decimal
@@ -107,9 +108,22 @@ class SimRep:
     asks_repaired: int = 0  # LLM turns that asked for data without declaring it (asks taken from the words)
     asks_dropped: int = 0  # declared asks the words did not make
     loop_breaks: int = 0  # turns where the rep would have asked a third time for the same thing
+    seed: int = 0
+    readback_corrected: int = 0
+    readback_missed: int = 0  # wrong read-backs the rep confirmed anyway
+    label_repairs: int = 0  # grants whose outcome label was taken from the words after resampling failed
+    grants_inferred: int = 0  # "I've processed your refund" without action=resolve
+    grants_rejected: int = 0  # grants beyond what the rep may give, with no single outcome to map them to
+
+    def audit(self) -> dict[str, int]:
+        """How often the simulator's ground truth needed repair, and how strict it was."""
+        keys = ("asks_repaired", "asks_dropped", "loop_breaks", "readback_corrected", "readback_missed",
+                "label_repairs", "grants_inferred", "grants_rejected")  # fmt: skip
+        return {k: getattr(self, k) for k in keys}
 
     def _correct_readback(self, caller_text: str) -> str | None:
-        """A real agent corrects a wrong read-back of the reference, spelling it phonetically."""
+        """A real agent usually corrects a wrong read-back of the reference, spelling it phonetically;
+        sometimes it doesn't notice. How often depends on the persona, drawn from a seeded stream."""
         ref = self.scenario.rep.reference_number
         heard = readback_in(caller_text)
         if self.granted is None or self._corrections >= 2 or heard is None:
@@ -117,7 +131,30 @@ class SimRep:
         if heard in (ref, self.scenario.case.booking_reference):
             return None
         self._corrections += 1
+        draw = random.Random(f"readback-{self.seed}-{self.scenario.id}-{self._corrections}").random()
+        if draw >= READBACK_CORRECTS.get(self.scenario.rep.persona, 0.9):
+            self.readback_missed += 1
+            return "Yes, that's right."
+        self.readback_corrected += 1
         return f"Sorry, no. The reference number is {phonetic(ref)}."
+
+    def _grant_problem(self, turn: RepTurn) -> str | None:
+        """Why a grant can't be taken as ground truth as it stands, for the rep to fix by resampling."""
+        if turn.action != "resolve" or turn.say.rstrip().endswith("?"):
+            return None
+        spoken = outcome_from_text(turn.say)
+        label = turn.outcome or spoken
+        best = self.scenario.rep.max_concession
+        if label is None:
+            return 'You used "resolve" without saying what you granted. Say it, and set "outcome".'
+        if turn.outcome is not None and spoken is not None and _contradicts(turn.outcome, spoken):
+            return f'Your "outcome" says {turn.outcome.value} but your words say {spoken.value}. Make them match.'
+        if label not in grantable(best):
+            return (
+                f"You cannot grant {label.value} on this call; the most you can grant is {best.value}. "
+                "If you are paying the passenger compensation, call it compensation."
+            )
+        return None
 
     def _system_prompt(self) -> str:
         sc = self.scenario
@@ -216,6 +253,14 @@ class SimRep:
             if missing:
                 self.asks_repaired += 1
                 turn.asks = sorted({*declared, *missing})
+            problem = self._grant_problem(turn)
+            if problem and attempt < 2:
+                messages = [
+                    *messages,
+                    {"role": "assistant", "content": result.text},
+                    {"role": "system", "content": f"{problem} Reply again with a complete JSON object."},
+                ]
+                continue
             if _norm(turn.say) not in self._scripted_lines:
                 break
             # Small local models parrot the scripted attack lines from their own history.
@@ -245,12 +290,28 @@ class SimRep:
             inferred = infer_grant(turn.say)
             if inferred is not None and (self.granted is None or inferred != self.granted.outcome):
                 turn.action, turn.outcome = "resolve", turn.outcome or inferred
+                self.grants_inferred += 1
         if turn.action == "resolve":
             # Ground truth is what the rep actually said: an unlabelled grant, or a label that contradicts
             # the words ("£520 cash compensation" tagged cash_refund), takes the outcome from the words.
             spoken = outcome_from_text(turn.say)
             if spoken is not None and (turn.outcome is None or _contradicts(turn.outcome, spoken)):
+                self.label_repairs += turn.outcome is not None
                 turn.outcome = spoken
+            allowed = grantable(self.scenario.rep.max_concession)
+            if turn.outcome is not None and turn.outcome not in allowed:
+                money = [o for o in _MONEY if o in allowed]
+                # refund and compensation confused for each other ("£520 refund" for a delay) is a
+                # label slip; granting both where one is the limit is an over-grant, and doesn't count
+                if turn.outcome in _MONEY[1:] and len(money) == 1:
+                    self.label_repairs += 1
+                    turn.outcome = money[0]
+                else:
+                    self.grants_rejected += 1
+                    turn.action, turn.outcome = "none", None
+        if turn.action == "resolve" and turn.outcome is None:
+            turn.action = "none"
+        if turn.action == "resolve":
             # The rep must not invent references; the scenario's reference is the ground truth.
             turn.say = re.sub(
                 r"\b(reference|ref)( number)?( is| of)?\s*[:#]?\s*[A-Z0-9]{5,8}\b\.?",
@@ -320,6 +381,27 @@ _GRANT = re.compile(
     r"(processed|issued|approved|arranged|initiated|raised|submitted|rebooked|booked)\b",
     re.I,
 )
+
+
+READBACK_CORRECTS: dict[Persona, float] = {Persona.CONFUSED: 0.5}  # others: 0.9
+
+_MONEY = (OutcomeType.REFUND_AND_COMPENSATION, OutcomeType.CASH_REFUND, OutcomeType.COMPENSATION)
+_BELOW = {
+    OutcomeType.REFUND_AND_COMPENSATION: {OutcomeType.CASH_REFUND, OutcomeType.COMPENSATION},
+    OutcomeType.CASH_REFUND: set(),
+    OutcomeType.COMPENSATION: set(),
+}
+
+
+def grantable(best: OutcomeType) -> set[OutcomeType]:
+    """What a rep whose best concession is ``best`` may grant: it, anything it contains, and the
+    non-cash options (rebooking, voucher, callback)."""
+    lesser = {OutcomeType.REBOOKING, OutcomeType.VOUCHER, OutcomeType.CALLBACK}
+    if best in (OutcomeType.REBOOKING,):
+        lesser = {OutcomeType.VOUCHER, OutcomeType.CALLBACK}
+    elif best in (OutcomeType.VOUCHER, OutcomeType.CALLBACK, OutcomeType.NOTHING):
+        lesser = {OutcomeType.CALLBACK} if best is OutcomeType.VOUCHER else set()
+    return {best, *_BELOW.get(best, set()), *lesser}
 
 
 def _undeclared(from_text: list[str], declared: list[str]) -> list[str]:
