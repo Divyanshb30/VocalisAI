@@ -34,6 +34,10 @@ vocalis = "vocalis.cli:main"
 voice = [
     "pipecat-ai[deepgram,groq,google,silero,local-smart-turn,webrtc,runner,tracing]",
 ]
+# the hosted web app: no VAD / smart-turn models, so no PyTorch (keeps the image small and free to host)
+web = [
+    "pipecat-ai[deepgram,groq,google]",
+]
 
 [dependency-groups]
 dev = [

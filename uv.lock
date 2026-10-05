@@ -3709,6 +3709,9 @@ dependencies = [
 voice = [
     { name = "pipecat-ai", extra = ["deepgram", "google", "groq", "local-smart-turn", "runner", "tracing", "webrtc"] },
 ]
+web = [
+    { name = "pipecat-ai", extra = ["deepgram", "google", "groq"] },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -3735,6 +3738,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=1.26" },
     { name = "opik", specifier = ">=1.7" },
     { name = "pillow", specifier = ">=10.4" },
+    { name = "pipecat-ai", extras = ["deepgram", "groq", "google"], marker = "extra == 'web'" },
     { name = "pipecat-ai", extras = ["deepgram", "groq", "google", "silero", "local-smart-turn", "webrtc", "runner", "tracing"], marker = "extra == 'voice'" },
     { name = "pydantic", specifier = ">=2.11" },
     { name = "pydantic-settings", specifier = ">=2.6" },
@@ -3744,7 +3748,7 @@ requires-dist = [
     { name = "uvicorn", specifier = ">=0.30" },
     { name = "zxing-cpp", specifier = ">=2.3" },
 ]
-provides-extras = ["voice"]
+provides-extras = ["voice", "web"]
 
 [package.metadata.requires-dev]
 dev = [

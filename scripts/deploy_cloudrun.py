@@ -1,6 +1,7 @@
 """Deploy the live backend to Google Cloud Run (free tier, scales to zero) and point the public demo at it.
 
-    uv run python scripts/deploy_cloudrun.py [--region us-central1] [--service vocalisai]
+    uv run python scripts/deploy_cloudrun.py --image docker.io/<user>/vocalisai:latest   # no build, no storage
+    uv run python scripts/deploy_cloudrun.py                                              # build from source
 
 Needs the gcloud CLI logged in with a project selected. API keys are read from .env and passed
 through a temporary env-vars file that is deleted afterwards; they never enter git or the
@@ -28,8 +29,8 @@ KEYS = [
     "OPIK_WORKSPACE",
 ]
 RUNTIME = {
-    # live demo: Groq first (30 req/min) — Cerebras' free 5 req/min is too low for live turns
-    "VOCALIS_TALKER_MODELS": "groq/openai/gpt-oss-120b,cerebras/gpt-oss-120b,gemini/gemini-flash-lite-latest",
+    # live demo: the main talker first (Cerebras qwen-3.8-27b, 450 req/min), free fallbacks after it
+    "VOCALIS_TALKER_MODELS": "cerebras/qwen-3.8-27b,groq/openai/gpt-oss-120b,gemini/gemini-flash-lite-latest",
     # no local Ollama in the cloud: the simulated airline rep runs on free-tier models
     "VOCALIS_REP_MODELS": "groq/openai/gpt-oss-20b,gemini/gemini-flash-lite-latest",
     "VOCALIS_LIVE_PER_IP": "3",
@@ -48,6 +49,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--region", default="us-central1")
     ap.add_argument("--service", default="vocalisai")
+    ap.add_argument("--image", help="deploy this public image (Docker Hub) instead of building from source")
     a = ap.parse_args()
 
     env = dotenv_values(ROOT / ".env")
@@ -62,8 +64,7 @@ def main() -> None:
                 "run",
                 "deploy",
                 a.service,
-                "--source",
-                str(ROOT),
+                *(["--image", a.image] if a.image else ["--source", str(ROOT)]),
                 "--region",
                 a.region,
                 "--allow-unauthenticated",

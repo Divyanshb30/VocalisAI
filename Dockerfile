@@ -1,4 +1,4 @@
-# VocalisAI web app + API. Runs on Cloud Run (or any container host); listens on $PORT.
+# VocalisAI web app + API. Runs on any container host (Hugging Face Spaces free CPU); listens on $PORT.
 FROM python:3.12-slim
 
 COPY --from=ghcr.io/astral-sh/uv:0.11 /uv /usr/local/bin/uv
@@ -9,10 +9,11 @@ ENV UV_CACHE_DIR=/tmp/uv-cache UV_LINK_MODE=copy PYTHONUNBUFFERED=1 HOME=/tmp \
 WORKDIR /app
 COPY pyproject.toml uv.lock README.md ./
 COPY src ./src
-RUN uv sync --frozen --extra voice --no-dev
+RUN uv sync --frozen --extra web --no-dev && rm -rf /tmp/uv-cache
 
 COPY web ./web
 COPY evals/scenarios ./evals/scenarios
+COPY data/policy ./data/policy
 COPY evals/results/summary.json ./evals/results/summary.json
 # caches (TTS audio, quota ledger) must be writable by a non-root runtime user
 RUN mkdir -p /app/.cache && chmod -R 777 /app
