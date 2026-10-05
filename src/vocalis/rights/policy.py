@@ -24,7 +24,11 @@ RRF_K = 60
 # Dense ranks count double in the fusion: chosen on the hand-written gold set (1, 2, 3 tried) and
 # checked on the LLM-reworded set, which plain words match less often. See evals/retrieval.py.
 DENSE_WEIGHT = 2.0
-Mode = Literal["bm25", "dense", "hybrid"]
+# A small local cross-encoder re-orders the top fused candidates (no API, ~130 MB ONNX on CPU). Chosen
+# over bge-reranker-base and Gemini embeddings on the same sets; see evals/retrieval.py.
+RERANK_MODEL = "Xenova/ms-marco-MiniLM-L-12-v2"
+RERANK_TOP = 20
+Mode = Literal["bm25", "dense", "hybrid", "hybrid_rerank"]
 
 _STOP = set(
     [
@@ -157,12 +161,32 @@ def load_corpus(directory: Path = CORPUS_DIR) -> list[Passage]:
 
 
 class PolicyIndex:
-    def __init__(self, passages: list[Passage] | None = None, embedder: Any = None) -> None:
+    def __init__(
+        self, passages: list[Passage] | None = None, embedder: Any = None, reranker: Any = None
+    ) -> None:
         self.passages = passages if passages is not None else load_corpus()
         self.bm25 = BM25Okapi([_tokens(p.indexed) for p in self.passages])
         self._embedder = embedder
         self._own_model = embedder is None
         self._vectors: np.ndarray | None = None
+        # an injected embedder (tests) gets no reranker unless one is injected too: no model download
+        self._reranker = reranker
+        self._can_rerank = reranker is not None or embedder is None
+
+    def _rerank_model(self) -> Any:
+        if self._reranker is None:
+            from fastembed.rerank.cross_encoder import TextCrossEncoder
+
+            self._reranker = TextCrossEncoder(RERANK_MODEL)
+        return self._reranker
+
+    def rerank(self, query: str, order: list[int]) -> list[int]:
+        """Re-order the first RERANK_TOP candidates by the cross-encoder; the rest keep their order."""
+        if not self._can_rerank or not order:
+            return order
+        top = order[:RERANK_TOP]
+        scores = list(self._rerank_model().rerank(query, [self.passages[i].indexed for i in top]))
+        return [top[k] for k in np.argsort(scores)[::-1]] + order[RERANK_TOP:]
 
     # ------------------------------------------------------------------ dense
     def _model(self) -> Any:
@@ -194,6 +218,10 @@ class PolicyIndex:
     # ---------------------------------------------------------------- ranking
     def rank(self, query: str, mode: Mode = "hybrid") -> list[tuple[int, float]]:
         """All passage indices, best first, with the mode's score."""
+        if mode == "hybrid_rerank":
+            candidates = self.rank(query, "hybrid")
+            by_index = dict(candidates)
+            return [(i, by_index[i]) for i in self.rerank(query, [i for i, _ in candidates])]
         if mode == "bm25":
             scores = self.bm25.get_scores(_tokens(query))
             return sorted(enumerate(map(float, scores)), key=lambda x: -x[1])
@@ -211,19 +239,24 @@ class PolicyIndex:
         self,
         query: str,
         k: int = 5,
-        mode: Mode = "hybrid",
+        mode: Mode = "hybrid_rerank",
         jurisdiction: str | None = None,
         scope: set[str] | None = None,
     ) -> list[Hit]:
         """Top passages; ``scope`` keeps only those jurisdictions (the case's applicable rules, e.g.
-        {"IN", "INTL"}), ``jurisdiction`` only one."""
+        {"IN", "INTL"}), ``jurisdiction`` only one. The scope is applied before reranking, so the
+        cross-encoder re-orders candidates that can actually be returned."""
         keep = {j.upper() for j in scope} if scope else {jurisdiction.upper()} if jurisdiction else None
+        base = "hybrid" if mode == "hybrid_rerank" else mode
+        ranked = [
+            (i, s) for i, s in self.rank(query, base) if not keep or self.passages[i].jurisdiction in keep
+        ]
+        if mode == "hybrid_rerank":
+            by_index = dict(ranked)
+            ranked = [(i, by_index[i]) for i in self.rerank(query, [i for i, _ in ranked])]
         hits: list[Hit] = []
-        for i, score in self.rank(query, mode):
-            p = self.passages[i]
-            if keep and p.jurisdiction not in keep:
-                continue
-            hits.append(Hit(p, score, len(hits) + 1))
+        for i, score in ranked:
+            hits.append(Hit(self.passages[i], score, len(hits) + 1))
             if len(hits) == k:
                 break
         return hits

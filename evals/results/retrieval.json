@@ -12,6 +12,7 @@
  "dense_model": "BAAI/bge-small-en-v1.5",
  "rrf_k": 60,
  "dense_weight": 2.0,
+ "rerank_model": "Xenova/ms-marco-MiniLM-L-12-v2",
  "results": {
   "bm25": {
    "recall_at_5_by_region": {
@@ -682,6 +683,52 @@
      ]
     }
    ]
+  },
+  "hybrid_scoped_rerank": {
+   "recall_at_5_by_region": {
+    "AE": 1.0,
+    "EU/UK": 0.975,
+    "IN": 0.8947,
+    "INTL": 1.0
+   },
+   "questions_by_region": {
+    "AE": 15,
+    "EU/UK": 40,
+    "IN": 19,
+    "INTL": 4
+   },
+   "recall_at_1": 0.6538,
+   "recall_at_5": 0.9615,
+   "mrr_at_10": 0.7748,
+   "misses_at_5": [
+    {
+     "q": "The agent asked me to sign a form giving up my claim. Is that allowed?",
+     "first_relevant_rank": 23,
+     "top": [
+      "EU261 Art. 2",
+      "UK261 Art. 7(3)",
+      "EU261 Art. 7(3)"
+     ]
+    },
+    {
+     "q": "I was bumped off an overbooked IndiGo flight and put on one five hours later. What do they owe me?",
+     "first_relevant_rank": 11,
+     "top": [
+      "DGCA para 3.4.2",
+      "DGCA para 3.2.3",
+      "DGCA para 3.3.1"
+     ]
+    },
+    {
+     "q": "Can an Indian airline pay my cancellation compensation as travel vouchers?",
+     "first_relevant_rank": 6,
+     "top": [
+      "DGCA para 3.3.3",
+      "DGCA para 3.3.4",
+      "DGCA para 1.4"
+     ]
+    }
+   ]
   }
  },
  "paraphrase": {
@@ -754,6 +801,23 @@
     "recall_at_1": 0.3077,
     "recall_at_5": 0.7051,
     "mrr_at_10": 0.4609
+   },
+   "hybrid_scoped_rerank": {
+    "recall_at_5_by_region": {
+     "AE": 0.6667,
+     "EU/UK": 0.7,
+     "IN": 0.7368,
+     "INTL": 0.75
+    },
+    "questions_by_region": {
+     "AE": 15,
+     "EU/UK": 40,
+     "IN": 19,
+     "INTL": 4
+    },
+    "recall_at_1": 0.4487,
+    "recall_at_5": 0.7051,
+    "mrr_at_10": 0.5562
    }
   }
  }

@@ -522,13 +522,14 @@ def metrics_table(s: dict[str, Any]) -> str:
         r = ret["results"]
         fmt = lambda m: f"{pct(r[m]['recall_at_1'])} / {pct(r[m]['recall_at_5'])} / {r[m]['mrr_at_10']:.2f}"  # noqa: E731
         para = ret.get("paraphrase")
-        main = "hybrid_scoped" if "hybrid_scoped" in r else "hybrid"
+        main = next(m for m in ("hybrid_scoped_rerank", "hybrid_scoped", "hybrid") if m in r)
         region = r[main].get("recall_at_5_by_region")
         rows.append(
             (
                 "Regulation retrieval",
                 "passenger questions over the official regulation text (DGCA, GCAA, UAE law, UK261/EU261, "
-                "Montreal), searched within the case's jurisdiction as the agent does; top-1 / top-5 / MRR@10",
+                "Montreal), searched within the case's jurisdiction and reranked by a local cross-encoder, as the "
+                "agent does; top-1 / top-5 / MRR@10",
                 f"{fmt(main)} (all regions unscoped: hybrid {fmt('hybrid')}, BM25 {fmt('bm25')}, dense {fmt('dense')}; "
                 f"{ret['questions']} hand-written questions, {ret['passages']} passages)"
                 + (

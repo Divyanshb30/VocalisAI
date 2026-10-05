@@ -11,13 +11,13 @@ from typing import Any
 
 import yaml
 
-from vocalis.rights.policy import DENSE_WEIGHT, EMBED_MODEL, RRF_K, PolicyIndex, scope_for
+from vocalis.rights.policy import DENSE_WEIGHT, EMBED_MODEL, RERANK_MODEL, RRF_K, PolicyIndex, scope_for
 
 GOLD = Path("evals/retrieval_gold.yaml")
 PARAPHRASE = Path("evals/retrieval_paraphrase.yaml")  # the same questions, reworded by an LLM
 REGION = {"DGCA": "IN", "GCAA": "AE", "UAE-CTL": "AE", "MONTREAL": "INTL", "EU261": "EU/UK", "UK261": "EU/UK"}
 OUT = Path("evals/results/retrieval.json")
-MODES = ("bm25", "dense", "hybrid", "hybrid_scoped")
+MODES = ("bm25", "dense", "hybrid", "hybrid_scoped", "hybrid_scoped_rerank")
 # hybrid_scoped searches only the rules that apply to the case, as the agent does: a question's region
 # stands for the case's jurisdiction (Montreal questions are international, so they search everything)
 REGIMES = {
@@ -29,10 +29,13 @@ REGIMES = {
 
 
 def ranking(index: PolicyIndex, ids: list[str], g: dict[str, Any], mode: str) -> list[str]:
-    if mode != "hybrid_scoped":
+    if not mode.startswith("hybrid_scoped"):
         return [ids[i] for i, _ in index.rank(g["q"], mode)]  # type: ignore[arg-type]
     scope = scope_for(REGIMES[REGION[g["relevant"][0].split(" ", 1)[0]]])
-    return [ids[i] for i, _ in index.rank(g["q"], "hybrid") if index.passages[i].jurisdiction in scope]
+    order = [i for i, _ in index.rank(g["q"], "hybrid") if index.passages[i].jurisdiction in scope]
+    if mode == "hybrid_scoped_rerank":
+        order = index.rerank(g["q"], order)
+    return [ids[i] for i in order]
 
 
 def evaluate(index: PolicyIndex, gold: list[dict[str, Any]]) -> dict[str, Any]:
@@ -74,6 +77,7 @@ def evaluate(index: PolicyIndex, gold: list[dict[str, Any]]) -> dict[str, Any]:
         "dense_model": EMBED_MODEL,
         "rrf_k": RRF_K,
         "dense_weight": DENSE_WEIGHT,
+        "rerank_model": RERANK_MODEL,
         "results": results,
     }
 

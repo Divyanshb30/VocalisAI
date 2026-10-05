@@ -2531,6 +2531,7 @@
   "dense_model": "BAAI/bge-small-en-v1.5",
   "rrf_k": 60,
   "dense_weight": 2.0,
+  "rerank_model": "Xenova/ms-marco-MiniLM-L-12-v2",
   "results": {
    "bm25": {
     "recall_at_5_by_region": {
@@ -2599,6 +2600,23 @@
     "recall_at_1": 0.6282,
     "recall_at_5": 0.9103,
     "mrr_at_10": 0.746
+   },
+   "hybrid_scoped_rerank": {
+    "recall_at_5_by_region": {
+     "AE": 1.0,
+     "EU/UK": 0.975,
+     "IN": 0.8947,
+     "INTL": 1.0
+    },
+    "questions_by_region": {
+     "AE": 15,
+     "EU/UK": 40,
+     "IN": 19,
+     "INTL": 4
+    },
+    "recall_at_1": 0.6538,
+    "recall_at_5": 0.9615,
+    "mrr_at_10": 0.7748
    }
   },
   "paraphrase": {
@@ -2671,6 +2689,23 @@
      "recall_at_1": 0.3077,
      "recall_at_5": 0.7051,
      "mrr_at_10": 0.4609
+    },
+    "hybrid_scoped_rerank": {
+     "recall_at_5_by_region": {
+      "AE": 0.6667,
+      "EU/UK": 0.7,
+      "IN": 0.7368,
+      "INTL": 0.75
+     },
+     "questions_by_region": {
+      "AE": 15,
+      "EU/UK": 40,
+      "IN": 19,
+      "INTL": 4
+     },
+     "recall_at_1": 0.4487,
+     "recall_at_5": 0.7051,
+     "mrr_at_10": 0.5562
     }
    }
   }

@@ -302,7 +302,9 @@ class AgentSession:
         async def handler(args: dict[str, Any], _fm: FlowManager) -> Any:
             question = str(args.get("question", ""))
             # hybrid search over the official text, only within the rules that apply to this case
-            hits = await asyncio.to_thread(shared_index().search, question, 3, "hybrid", None, self.b.scope)
+            hits = await asyncio.to_thread(
+                shared_index().search, question, 3, "hybrid_rerank", None, self.b.scope
+            )
             passages = [{"clause": h.passage.id, "text": h.passage.text[:400]} for h in hits]
             for p in passages:  # numbers in the official wording may be spoken
                 self.guard.allow_text(p["text"])
