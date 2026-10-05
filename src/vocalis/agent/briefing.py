@@ -8,7 +8,33 @@ from vocalis.core.geo import airport, carrier_name
 from vocalis.core.models import Case, DisruptionType, Mandate, OutcomeType
 from vocalis.guards.output_guard import OutputGuard
 from vocalis.guards.vault import Vault
+from vocalis.rights.citations import clause_refs, resolve
 from vocalis.rights.models import RightsAssessment
+from vocalis.rights.policy import Passage, load_corpus, scope_for
+
+_CORPUS: list[Passage] = []
+
+
+def corpus() -> list[Passage]:
+    if not _CORPUS:
+        _CORPUS.extend(load_corpus())
+    return _CORPUS
+
+
+def cited_wording(rights: RightsAssessment, limit: int = 4, chars: int = 300) -> str:
+    """The official wording of the clauses the entitlements cite, so the agent quotes real clause ids."""
+    seen: set[str] = set()
+    lines = []
+    for e in rights.entitlements:
+        for ref in clause_refs(e.citation):
+            for p in resolve(ref, corpus())[:1]:
+                if p.id in seen:
+                    continue
+                seen.add(p.id)
+                text = p.text if len(p.text) <= chars else p.text[:chars].rsplit(" ", 1)[0] + " ..."
+                lines.append(f"- {p.id}: {text}")
+    return "\n".join(lines[:limit])
+
 
 NATO = {
     "A": "Alpha",
@@ -73,6 +99,8 @@ class Briefing:
     facts: str = field(init=False)
     entitlements: str = field(init=False)
     mandate_text: str = field(init=False)
+    regulation_text: str = field(init=False)
+    scope: set[str] = field(init=False)  # corpus jurisdictions for the rules that apply
 
     def __post_init__(self) -> None:
         c = self.case
@@ -104,6 +132,8 @@ class Briefing:
             "\n".join(f"- {e}" for e in ents)
             or "- No regulation clearly applies; rely on the airline's own policy."
         )
+        self.regulation_text = cited_wording(self.rights) or "- (none)"
+        self.scope = scope_for([r.regime.value for r in self.rights.applicable])
         m = self.mandate
         acc = ", ".join(OUTCOME_WORDS[o] for o in m.acceptable) or "nothing else"
         forb = ", ".join(OUTCOME_WORDS[o] for o in m.forbidden) or "nothing"
@@ -116,7 +146,7 @@ class Briefing:
 
     def output_guard(self, enabled: bool = True) -> OutputGuard:
         g = OutputGuard(secrets=self.vault.secret_values(), enabled=enabled, mandate=self.mandate)
-        allowed = [self.facts, self.entitlements, self.mandate_text]
+        allowed = [self.facts, self.entitlements, self.mandate_text, self.regulation_text]
         g.allow_text("\n".join(allowed))
         for v in self.vault.allowed_values():
             g.allow_text(v)

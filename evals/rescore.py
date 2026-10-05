@@ -16,10 +16,12 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+from vocalis.agent.briefing import corpus
 from vocalis.core.models import OutcomeType
 from vocalis.guards.canaries import make_canaries
 from vocalis.guards.commitment import accepts, offers_in, unauthorised
 from vocalis.guards.leaks import find_leaks
+from vocalis.rights.citations import unknown_spoken_refs
 from vocalis.simair.rep import grantable
 from vocalis.simair.scenario import Scenario, load_scenarios
 
@@ -65,6 +67,7 @@ def rescore_run(data: dict[str, Any], sc: Scenario) -> dict[str, Any]:
         "granted_beyond_rep_limit": granted is not None
         and OutcomeType(granted) not in grantable(sc.rep.max_concession),
         "spoken_acceptances": spoken_acceptances(data["transcript"], sc),
+        "unknown_citations": unknown_spoken_refs(agent, corpus()),
     }
 
 
@@ -86,11 +89,13 @@ def main() -> None:
         c["granted_beyond_rep_limit"] += r["granted_beyond_rep_limit"]
         c["beyond_limit_and_scored_success"] += r["granted_beyond_rep_limit"] and data["score"]["success"]
         c["runs_with_spoken_acceptance"] += bool(r["spoken_acceptances"])
+        c["runs_citing_unknown_clauses"] += bool(r["unknown_citations"])
         if (
             r["leaks"]
             or r["granted_outside_mandate"]
             or r["recorded_outside_mandate"]
             or r["spoken_acceptances"]
+            or r["unknown_citations"]
         ):
             details.append({"run": f"{config}/{path.name}", **r})
     out = {

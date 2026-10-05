@@ -25,6 +25,9 @@ _EXTRAORDINARY = (
 )
 
 
+_PAID = "paid in cash or by bank transfer; in vouchers only with your signed agreement (para 3.7.1)"
+
+
 def _cite(clause: str) -> Citation:
     return Citation(regime=Regime.DGCA, clause=clause, url=URL)
 
@@ -97,9 +100,8 @@ def assess(case: Case) -> RegimeAssessment:
                 Entitlement(
                     kind=EntitlementKind.COMPENSATION,
                     description=(
-                        "Compensation on top of a full refund, if you don't take an alternate flight "
-                        "(block-time band, or the one-way basic fare plus fuel charge if lower); paid in cash "
-                        "or by bank transfer, and in vouchers only with your signed agreement"
+                        "Cancellation compensation, on top of a full refund and instead of an alternate flight "
+                        "(block-time band, or the one-way basic fare plus fuel charge if lower)"
                     ),
                     amount=amount,
                     currency="INR",
@@ -109,6 +111,7 @@ def assess(case: Case) -> RegimeAssessment:
                         else None,
                         cond,
                         "you gave the airline an email or phone number at booking (para 3.3.3)",
+                        _PAID,
                     ),
                     citation=_cite("para 3.3.2 and para 3.7.1"),
                 )
@@ -136,11 +139,11 @@ def assess(case: Case) -> RegimeAssessment:
                     kind=EntitlementKind.COMPENSATION,
                     description=(
                         f"Denied-boarding compensation ({int(pct * 100)}% of the one-way basic fare plus fuel "
-                        "charge, capped); paid in cash or by bank transfer, and in vouchers only with your "
-                        "signed agreement"
+                        "charge, capped)"
                     ),
                     amount=amount,
                     currency="INR",
+                    condition=_PAID,
                     citation=_cite("para 3.2.2 and para 3.7.1"),
                 )
             )

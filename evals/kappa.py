@@ -43,11 +43,15 @@ def cohen_kappa(a: list[Any], b: list[Any], weights: str | None = None) -> float
     return round(1 - observed / expected, 3) if expected else None
 
 
+CACHE = Path("evals/results/judge_calibration_cache.json")
+
+
 async def judge_items(items: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
-    cache: dict[str, dict[str, Any]] = (
-        json.loads(OUT.read_text(encoding="utf-8")).get("judge", {}) if OUT.exists() else {}
-    )
+    """The published judge (the first judge model; no failover to a different judge) on each item.
+    Saved after every call, so a run stopped by a free-tier quota resumes where it left off."""
+    cache: dict[str, dict[str, Any]] = json.loads(CACHE.read_text(encoding="utf-8")) if CACHE.exists() else {}
     router = LLMRouter()
+    model = router.s.judge_models[:1]
     for it in items:
         if it["id"] in cache:
             continue
@@ -57,15 +61,27 @@ async def judge_items(items: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
             mandate=it["mandate"],
             transcript=it["transcript"],
         )
-        res = await router.complete(
-            router.s.judge_models,
-            [{"role": "user", "content": prompt}],
-            json_mode=True,
-            temperature=0,
-            max_tokens=500,
-        )
+        for attempt in range(4):
+            try:
+                res = await router.complete(
+                    model,
+                    [{"role": "user", "content": prompt}],
+                    json_mode=True,
+                    temperature=0,
+                    max_tokens=500,
+                )
+                break
+            except RuntimeError as exc:
+                if "quota" in str(exc).lower() and attempt == 3:
+                    raise SystemExit(
+                        f"judge quota exhausted after {len(cache)}/{len(items)} calls; rerun later"
+                    ) from exc
+                await asyncio.sleep(30 * (attempt + 1))
+        else:
+            raise SystemExit(f"judge unavailable after {len(cache)}/{len(items)} calls; rerun later")
         m = re.search(r"\{.*\}", res.text, re.S)
         cache[it["id"]] = {**json.loads(m.group(0) if m else res.text), "judge_model": res.model}
+        CACHE.write_text(json.dumps(cache, indent=1, ensure_ascii=False), encoding="utf-8")
     return cache
 
 
@@ -74,7 +90,14 @@ def main() -> None:
     labels: dict[str, dict[str, Any]] = json.loads(LABELS.read_text(encoding="utf-8"))
     items = [it for it in items if it["id"] in labels]
     judged = asyncio.run(judge_items(items))
-    out: dict[str, Any] = {"labelled_calls": len(items), "kappa": {}, "agreement": {}}
+    meta = Path("evals/results/labels_meta.json")
+    out: dict[str, Any] = {
+        "labelled_calls": len(items),
+        "labeller": json.loads(meta.read_text(encoding="utf-8")) if meta.exists() else {"human": True},
+        "judge_models": sorted({j.get("judge_model", "") for j in judged.values()}),
+        "kappa": {},
+        "agreement": {},
+    }
     for field in (*ORDINAL, *BINARY):
         pairs = [
             (labels[it["id"]].get(field), judged[it["id"]].get(field))

@@ -51,25 +51,26 @@ def unresolved(c: Citation, passages: list[Passage]) -> list[str]:
     return [r for r in refs if not resolve(r, passages)]
 
 
-_SPOKEN_REF = re.compile(
-    r"\b(?:(DGCA|CAR)[^.?!]{0,40}?)?(?:para(?:graph)?|section)\s+(\d+(?:\.\d+)+)|"
-    r"\b(UK\s?261|EU\s?261|Montreal(?: Convention)?|Commercial Transactions Law)?[^.?!]{0,25}?\bArt(?:icle|\.)\s+(\d+)",
-    re.I,
+_SPOKEN_PARA = re.compile(r"\b(?:para(?:graph)?|section)\s+(\d+(?:\.\d+)+)", re.I)
+_SPOKEN_ART = re.compile(r"\bArt(?:icle|\.)\s+(\d+)", re.I)
+# the regime named shortly before "Article N" in the same sentence
+_REGIMES = (
+    ("UK261", re.compile(r"\bUK\s?261\b", re.I)),
+    ("EU261", re.compile(r"\bEU\s?261\b", re.I)),
+    ("MONTREAL", re.compile(r"\bMontreal\b", re.I)),
+    ("UAE-CTL", re.compile(r"\bCommercial Transactions Law\b", re.I)),
 )
 _SPOKEN_PWP = re.compile(r"\bPWP\.?\s?([A-D])\.?\s?(\d{3})", re.I)
 
 
 def spoken_refs(text: str) -> list[str]:
     """Regulation clauses named in speech, as corpus ids where the regime is clear from the words."""
-    out = []
-    for m in _SPOKEN_REF.finditer(text):
-        if m.group(2):
-            out.append(f"DGCA para {m.group(2)}")
-        elif m.group(4):
-            regime = (m.group(3) or "").upper().replace(" ", "")
-            code = {"UK261": "UK261", "EU261": "EU261", "MONTREAL": "MONTREAL", "MONTREALCONVENTION": "MONTREAL",
-                    "COMMERCIALTRANSACTIONSLAW": "UAE-CTL"}.get(regime, "?")  # fmt: skip
-            out.append(f"{code} Art. {m.group(4)}")
+    out = [f"DGCA para {n}" for n in _SPOKEN_PARA.findall(text)]
+    for m in _SPOKEN_ART.finditer(text):
+        before = re.split(r"[.?!]", text[max(0, m.start() - 60) : m.start()])[-1]
+        named = [(mm.end(), code) for code, pat in _REGIMES for mm in pat.finditer(before)]
+        code = max(named)[1] if named else "?"
+        out.append(f"{code} Art. {m.group(1)}")
     out += [f"GCAA PWP.{a.upper()}.{n}" for a, n in _SPOKEN_PWP.findall(text)]
     return out
 

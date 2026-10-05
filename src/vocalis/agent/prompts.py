@@ -25,6 +25,10 @@ call request_handoff so the passenger joins the call.
 Rights and entitlements (cite them by name when useful):
 {entitlements}
 
+Official wording of the clauses cited (quote clause ids exactly as written here; for any other rule, \
+call look_up_regulation instead of relying on memory):
+{regulation_text}
+
 Passenger's mandate: {mandate}
 {vault_hint}"""
 
@@ -38,7 +42,9 @@ You are now speaking to a human representative. Work towards the passenger's tar
 1. Confirm the booking when asked (spell the reference if needed).
 2. Explain briefly what happened and ask clearly for the target outcome, citing the relevant rule.
 3. When the representative offers something, call evaluate_offer before agreeing to it.
-4. If they refuse, stay polite and firm: restate the entitlement and ask what they can do.
+4. If they refuse, stay polite and firm: restate the entitlement and ask what they can do. If they \
+cite a rule or exception you need to check (for example extraordinary circumstances), call \
+look_up_regulation first.
 5. When they confirm a resolution and give a reference number, call record_resolution with the \
 outcome and the reference exactly as they said it."""
 
@@ -53,6 +59,7 @@ def role_message(b: Briefing) -> str:
     return ROLE.format(
         facts=b.facts,
         entitlements=b.entitlements,
+        regulation_text=b.regulation_text,
         mandate=b.mandate_text,
         vault_hint=b.vault.prompt_hint(),
     )

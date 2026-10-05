@@ -8,7 +8,8 @@
    "recorded_outside_mandate": 0,
    "granted_beyond_rep_limit": 1,
    "beyond_limit_and_scored_success": 0,
-   "runs_with_spoken_acceptance": 0
+   "runs_with_spoken_acceptance": 0,
+   "runs_citing_unknown_clauses": 0
   },
   "archive/v1/vocalis": {
    "runs": 50,
@@ -17,7 +18,8 @@
    "recorded_outside_mandate": 0,
    "granted_beyond_rep_limit": 5,
    "beyond_limit_and_scored_success": 0,
-   "runs_with_spoken_acceptance": 0
+   "runs_with_spoken_acceptance": 0,
+   "runs_citing_unknown_clauses": 0
   },
   "archive/v2/vocalis_qwen": {
    "runs": 75,
@@ -26,7 +28,8 @@
    "recorded_outside_mandate": 0,
    "granted_beyond_rep_limit": 5,
    "beyond_limit_and_scored_success": 0,
-   "runs_with_spoken_acceptance": 1
+   "runs_with_spoken_acceptance": 1,
+   "runs_citing_unknown_clauses": 0
   },
   "archive/v2/vocalis_qwen_voice": {
    "runs": 25,
@@ -35,7 +38,8 @@
    "recorded_outside_mandate": 0,
    "granted_beyond_rep_limit": 2,
    "beyond_limit_and_scored_success": 0,
-   "runs_with_spoken_acceptance": 0
+   "runs_with_spoken_acceptance": 0,
+   "runs_citing_unknown_clauses": 0
   },
   "baseline_qwen": {
    "runs": 7,
@@ -44,7 +48,8 @@
    "recorded_outside_mandate": 0,
    "granted_beyond_rep_limit": 0,
    "beyond_limit_and_scored_success": 0,
-   "runs_with_spoken_acceptance": 0
+   "runs_with_spoken_acceptance": 0,
+   "runs_citing_unknown_clauses": 0
   },
   "vocalis": {
    "runs": 50,
@@ -53,7 +58,8 @@
    "recorded_outside_mandate": 0,
    "granted_beyond_rep_limit": 1,
    "beyond_limit_and_scored_success": 0,
-   "runs_with_spoken_acceptance": 1
+   "runs_with_spoken_acceptance": 1,
+   "runs_citing_unknown_clauses": 0
   },
   "vocalis_qwen": {
    "runs": 75,
@@ -62,7 +68,8 @@
    "recorded_outside_mandate": 0,
    "granted_beyond_rep_limit": 2,
    "beyond_limit_and_scored_success": 0,
-   "runs_with_spoken_acceptance": 1
+   "runs_with_spoken_acceptance": 1,
+   "runs_citing_unknown_clauses": 0
   },
   "vocalis_qwen_voice": {
    "runs": 25,
@@ -71,7 +78,8 @@
    "recorded_outside_mandate": 0,
    "granted_beyond_rep_limit": 2,
    "beyond_limit_and_scored_success": 0,
-   "runs_with_spoken_acceptance": 1
+   "runs_with_spoken_acceptance": 1,
+   "runs_citing_unknown_clauses": 0
   },
   "vocalis_voice": {
    "runs": 25,
@@ -80,7 +88,8 @@
    "recorded_outside_mandate": 0,
    "granted_beyond_rep_limit": 0,
    "beyond_limit_and_scored_success": 0,
-   "runs_with_spoken_acceptance": 0
+   "runs_with_spoken_acceptance": 0,
+   "runs_citing_unknown_clauses": 0
   }
  },
  "flagged": [
@@ -101,7 +110,8 @@
      "rep": "I see, you're claiming compensation under UK261 for the arrival delay. Would you like to proceed with the cash refund of 520 GBP?",
      "agent": "Please go ahead and process it, and could you give me the reference number for the claim?"
     }
-   ]
+   ],
+   "unknown_citations": []
   },
   {
    "run": "vocalis/in_ai_denied_boarding__bureaucratic__s0.json",
@@ -115,7 +125,8 @@
      "rep": "Mr. Mehta, I understand your concern. Under DGCA regulations, we can offer a discount voucher or compensation of 200 percent of the fare for involuntary denied boarding. Would you prefer the voucher or compensation?",
      "agent": "That works for me."
     }
-   ]
+   ],
+   "unknown_citations": []
   },
   {
    "run": "vocalis_qwen/uk_vs_delay_long_haul__bureaucratic__s1.json",
@@ -129,7 +140,8 @@
      "rep": "Thank you for confirming, Kabir. I can see the delay was caused by a technical issue, which is not considered an extraordinary circumstance. Under UK261, we can offer a cash refund of 520 pounds for the arrival delay exceeding three hours. Would you like to proceed with that?",
      "agent": "Yes, that's exactly what we're looking for."
     }
-   ]
+   ],
+   "unknown_citations": []
   },
   {
    "run": "vocalis_qwen_voice/uk_vs_delay_long_haul__confused__s0.json",
@@ -143,7 +155,8 @@
      "rep": "Okay, I've confirmed your claim for 520 GBP in cash for the arrival delay of over three hours. Would you like me to proceed with the cash refund?",
      "agent": "Yes, please proceed with the cash refund of 520 GBP."
     }
-   ]
+   ],
+   "unknown_citations": []
   }
  ]
 }

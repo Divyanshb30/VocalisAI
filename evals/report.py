@@ -21,6 +21,7 @@ DOCBENCH = Path("evals/results/docbench.json")
 NETWORK = Path("evals/results/network.json")
 RETRIEVAL = Path("evals/results/retrieval.json")
 RESCORE = Path("evals/results/rescore.json")
+JUDGE_CAL = Path("evals/results/judge_calibration.json")
 RETRY_CUTOFF_S = 10.0
 EVALS_MD = Path("docs/evals.md")
 README = Path("README.md")
@@ -164,6 +165,7 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "mandate_violations": sum(r["mandate_violation"] for r in done),
         "granted_outside_mandate": sum(r.get("granted_outside_mandate", False) for r in done),
         "commitment_blocks": sum(r.get("commitment_blocks", 0) for r in done),
+        "runs_citing_unknown_clauses": sum(bool(r.get("unknown_citations")) for r in done),
         # how much the handoff ground truth leaned on repair: declared asks the words didn't make,
         # undeclared requests taken from the words, and repeated requests the simulator cut off
         "rep_audit": {
@@ -445,27 +447,46 @@ def metrics_table(s: dict[str, Any]) -> str:
                     f"({ds['documents'] - ds['errors']} synthetic docs, {ds['model']})",
                 )
             )
+    cal = s.get("judge_calibration")
+    if cal and cal.get("labelled_calls"):
+        k = cal["kappa"]
+        who = (
+            "a human labeller"
+            if cal["labeller"].get("human")
+            else "an independent LLM labeller blind to the judge's scores (not a human)"
+        )
+        f2 = lambda x: "n/a" if x is None else f"{x:.2f}"  # noqa: E731
+        rows.append(
+            (
+                "LLM judge agreement",
+                f"Cohen's kappa between the judge and {who}, same calls and rubric; 1-5 scores quadratic-weighted",
+                f"overall {f2(k.get('overall'))}, persistence {f2(k.get('persistence'))}, "
+                f"politeness {f2(k.get('politeness'))}, invented facts {f2(k.get('invented_facts'))} "
+                f"({cal['labelled_calls']} calls, judge {', '.join(cal.get('judge_models', []))})",
+            )
+        )
     ret = s.get("retrieval")
     if ret:
         r = ret["results"]
         fmt = lambda m: f"{pct(r[m]['recall_at_1'])} / {pct(r[m]['recall_at_5'])} / {r[m]['mrr_at_10']:.2f}"  # noqa: E731
         para = ret.get("paraphrase")
-        region = r["hybrid"].get("recall_at_5_by_region")
+        main = "hybrid_scoped" if "hybrid_scoped" in r else "hybrid"
+        region = r[main].get("recall_at_5_by_region")
         rows.append(
             (
                 "Regulation retrieval",
                 "passenger questions over the official regulation text (DGCA, GCAA, UAE law, UK261/EU261, "
-                "Montreal); top-1 / top-5 / MRR@10",
-                f"hybrid {fmt('hybrid')} vs BM25 {fmt('bm25')} vs dense {fmt('dense')} "
-                f"({ret['questions']} hand-written questions, {ret['passages']} passages)"
+                "Montreal), searched within the case's jurisdiction as the agent does; top-1 / top-5 / MRR@10",
+                f"{fmt(main)} (all regions unscoped: hybrid {fmt('hybrid')}, BM25 {fmt('bm25')}, dense {fmt('dense')}; "
+                f"{ret['questions']} hand-written questions, {ret['passages']} passages)"
                 + (
-                    "; hybrid top-5 by region " + ", ".join(f"{k} {pct(x)}" for k, x in region.items())
+                    "; top-5 by region " + ", ".join(f"{k} {pct(x)}" for k, x in region.items())
                     if region
                     else ""
                 )
                 + (
-                    f"; same questions reworded by an LLM: hybrid top-5 {pct(para['results']['hybrid']['recall_at_5'])}"
-                    if para
+                    f"; same questions reworded by an LLM: top-5 {pct(para['results'][main]['recall_at_5'])}"
+                    if para and main in para["results"]
                     else ""
                 ),
             )
@@ -571,6 +592,10 @@ def main() -> None:
         summary["retrieval"] = json.loads(RETRIEVAL.read_text(encoding="utf-8"))
         for r in summary["retrieval"]["results"].values():
             r.pop("misses_at_5", None)
+    if JUDGE_CAL.exists():
+        cal = json.loads(JUDGE_CAL.read_text(encoding="utf-8"))
+        cal.pop("judge", None)
+        summary["judge_calibration"] = cal
     if RESCORE.exists():
         summary["rescore"] = json.loads(RESCORE.read_text(encoding="utf-8"))["configs"]
     SUMMARY.parent.mkdir(parents=True, exist_ok=True)

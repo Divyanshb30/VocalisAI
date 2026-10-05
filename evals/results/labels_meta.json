@@ -1,0 +1,5 @@
+{
+ "labeller": "independent LLM labeller run as an isolated agent: it read only web/label/items.json (context and transcript, no judge scores) and scored the same rubric as the judge; a different model family from the judge (Gemini)",
+ "human": false,
+ "calls": 30
+}

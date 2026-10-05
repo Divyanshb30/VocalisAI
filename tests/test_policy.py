@@ -1,6 +1,7 @@
 """Regulation retrieval: corpus chunking, BM25, and RRF fusion (stub embedder, no model download)."""
 
 import hashlib
+from pathlib import Path
 
 import numpy as np
 
@@ -102,3 +103,25 @@ def test_spoken_regulation_references_are_checked_against_the_corpus() -> None:
     assert unknown_spoken_refs("Under DGCA para 3.9.9 that's required.", passages) == ["DGCA para 3.9.9"]
     assert unknown_spoken_refs("Montreal Convention Article 99 says so.", passages) == ["MONTREAL Art. 99"]
     assert unknown_spoken_refs("the GCAA PWP.B.006 rules apply", passages) == []
+
+
+def test_briefing_quotes_the_official_wording_and_scopes_lookups() -> None:
+    from tests.test_rights import make_case
+    from vocalis.agent.briefing import Briefing
+    from vocalis.agent.prompts import role_message
+    from vocalis.core.models import Disruption, DisruptionType
+    from vocalis.guards.canaries import make_canaries
+    from vocalis.guards.vault import Vault
+    from vocalis.rights.engine import assess
+    from vocalis.simair.scenario import load_scenarios
+
+    case = make_case("6E", "DEL", "BOM", Disruption(type=DisruptionType.CANCELLATION, notice_hours=10))
+    mandate = load_scenarios(Path("evals/scenarios"))[0].mandate
+    b = Briefing(case, assess(case), mandate, Vault(make_canaries(0).as_vault_entries()))
+    assert "DGCA para 3.3.2: Passengers who have not been informed" in b.regulation_text
+    assert b.scope == {"IN", "INTL"}
+    assert b.regulation_text in role_message(b)
+    # the amount owed for this 2-hour flight may be spoken; a different amount may not
+    guard = b.output_guard()
+    assert guard.check("Under para 3.3.2 that is INR 7,500 for this flight.").allowed
+    assert not guard.check("Under para 3.3.2 that is INR 12,500 for this flight.").allowed

@@ -36,6 +36,7 @@ from vocalis.agent.briefing import NATO, Briefing, nato
 from vocalis.agent.processors import GuardEvent, LineSink, OutputGuardProcessor
 from vocalis.agent.prompts import CONFIRM_TASK, IVR_TASK, NEGOTIATE_TASK, role_message
 from vocalis.core.models import OutcomeType
+from vocalis.rights.policy import shared_index
 
 OUTCOME_VALUES = [o.value for o in OutcomeType]
 
@@ -113,6 +114,7 @@ class SessionRecord:
     vault_blocks: list[list[str]] = field(default_factory=list)
     nodes: list[str] = field(default_factory=list)
     reference_corrections: list[dict[str, str]] = field(default_factory=list)
+    lookups: list[dict[str, Any]] = field(default_factory=list)  # look_up_regulation calls
 
 
 class AgentSession:
@@ -296,6 +298,25 @@ class AgentSession:
             handler=self._tracked(handler),
         )
 
+    def _fn_look_up_regulation(self) -> FlowsFunctionSchema:
+        async def handler(args: dict[str, Any], _fm: FlowManager) -> Any:
+            question = str(args.get("question", ""))
+            # hybrid search over the official text, only within the rules that apply to this case
+            hits = await asyncio.to_thread(shared_index().search, question, 3, "hybrid", None, self.b.scope)
+            passages = [{"clause": h.passage.id, "text": h.passage.text[:400]} for h in hits]
+            for p in passages:  # numbers in the official wording may be spoken
+                self.guard.allow_text(p["text"])
+            self.record.lookups.append({"question": question, "clauses": [p["clause"] for p in passages]})
+            return {"passages": passages, "note": "Use only what these say, and cite the clause id."}
+
+        return FlowsFunctionSchema(
+            name="look_up_regulation",
+            description="Search the official regulation text that applies to this case for a rule or exception.",
+            properties={"question": {"type": "string", "description": "What to look up, in plain words"}},
+            required=["question"],
+            handler=self._tracked(handler),
+        )
+
     def _fn_record_resolution(self) -> FlowsFunctionSchema:
         async def handler(args: dict[str, Any], _fm: FlowManager) -> Any:
             ref = "".join(ch for ch in str(args.get("reference_number", "")).upper() if ch.isalnum())
@@ -348,7 +369,11 @@ class AgentSession:
             name="negotiate",
             role_message=self._role(),
             task_messages=[self._task(NEGOTIATE_TASK)],
-            functions=[self._fn_evaluate_offer(), self._fn_record_resolution()],
+            functions=[
+                self._fn_evaluate_offer(),
+                self._fn_record_resolution(),
+                self._fn_look_up_regulation(),
+            ],
             context_strategy=ContextStrategyConfig(strategy=ContextStrategy.RESET),
             respond_immediately=False,
         )

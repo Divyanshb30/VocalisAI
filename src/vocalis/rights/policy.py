@@ -21,6 +21,9 @@ CORPUS_DIR = Path("data/policy")
 CACHE = Path(".cache/policy")
 EMBED_MODEL = "BAAI/bge-small-en-v1.5"
 RRF_K = 60
+# Dense ranks count double in the fusion: chosen on the hand-written gold set (1, 2, 3 tried) and
+# checked on the LLM-reworded set, which plain words match less often. See evals/retrieval.py.
+DENSE_WEIGHT = 2.0
 Mode = Literal["bm25", "dense", "hybrid"]
 
 _STOP = set(
@@ -198,21 +201,48 @@ class PolicyIndex:
             scores = self._passage_vectors() @ self._query_vector(query)
             return sorted(enumerate(map(float, scores)), key=lambda x: -x[1])
         fused: dict[int, float] = {}
-        subs: tuple[Mode, Mode] = ("bm25", "dense")
-        for sub in subs:
+        subs: tuple[tuple[Mode, float], ...] = (("bm25", 1.0), ("dense", DENSE_WEIGHT))
+        for sub, weight in subs:
             for r, (i, _) in enumerate(self.rank(query, sub)):
-                fused[i] = fused.get(i, 0.0) + 1.0 / (RRF_K + r + 1)
+                fused[i] = fused.get(i, 0.0) + weight / (RRF_K + r + 1)
         return sorted(fused.items(), key=lambda x: -x[1])
 
     def search(
-        self, query: str, k: int = 5, mode: Mode = "hybrid", jurisdiction: str | None = None
+        self,
+        query: str,
+        k: int = 5,
+        mode: Mode = "hybrid",
+        jurisdiction: str | None = None,
+        scope: set[str] | None = None,
     ) -> list[Hit]:
+        """Top passages; ``scope`` keeps only those jurisdictions (the case's applicable rules, e.g.
+        {"IN", "INTL"}), ``jurisdiction`` only one."""
+        keep = {j.upper() for j in scope} if scope else {jurisdiction.upper()} if jurisdiction else None
         hits: list[Hit] = []
         for i, score in self.rank(query, mode):
             p = self.passages[i]
-            if jurisdiction and p.jurisdiction != jurisdiction.upper():
+            if keep and p.jurisdiction not in keep:
                 continue
             hits.append(Hit(p, score, len(hits) + 1))
             if len(hits) == k:
                 break
         return hits
+
+
+REGIME_SCOPE = {"DGCA": "IN", "GCAA": "AE", "UK261": "UK", "EU261": "EU", "MONTREAL": "INTL"}
+
+
+def scope_for(regimes: list[str]) -> set[str]:
+    """Corpus jurisdictions for the regimes that apply to a case (international rules always included)."""
+    return {REGIME_SCOPE[r] for r in regimes if r in REGIME_SCOPE} | {"INTL"}
+
+
+_SHARED: PolicyIndex | None = None
+
+
+def shared_index() -> PolicyIndex:
+    """One index per process: the corpus and its vectors load once, on first use."""
+    global _SHARED
+    if _SHARED is None:
+        _SHARED = PolicyIndex()
+    return _SHARED
