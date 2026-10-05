@@ -22,6 +22,7 @@ NETWORK = Path("evals/results/network.json")
 RETRIEVAL = Path("evals/results/retrieval.json")
 RESCORE = Path("evals/results/rescore.json")
 JUDGE_CAL = Path("evals/results/judge_calibration.json")
+DOCBENCH_CAPTURED = Path("evals/results/docbench_captured.json")
 RETRY_CUTOFF_S = 10.0
 EVALS_MD = Path("docs/evals.md")
 README = Path("README.md")
@@ -447,6 +448,28 @@ def metrics_table(s: dict[str, Any]) -> str:
                     f"({ds['documents'] - ds['errors']} synthetic docs, {ds['model']})",
                 )
             )
+    cap = s.get("docbench_captured")
+    if cap and cap.get("by_severity"):
+        sev = cap["by_severity"]
+        bc = cap.get("barcode_decoded_by_severity", {})
+        rows.append(
+            (
+                "Documents photographed badly",
+                "field accuracy on fabricated airline emails, e-tickets and boarding passes photographed at three "
+                "severities (perspective, screen moire, glare, low light, crop, blur); vision only → with barcode",
+                "; ".join(
+                    f"{k} {pct(v['vision'])} → {pct(v['with_barcode'])}"
+                    for k, v in sev.items()
+                    if k in ("light", "medium", "heavy")
+                )
+                + (
+                    "; boarding-pass barcode decoded: " + ", ".join(f"{k} {pct(v)}" for k, v in bc.items())
+                    if bc
+                    else ""
+                )
+                + f" ({cap['documents'] - cap['errors']} images of {cap['documents'] // 3} documents, {cap['model']})",
+            )
+        )
     cal = s.get("judge_calibration")
     if cal and cal.get("labelled_calls"):
         k = cal["kappa"]
@@ -592,6 +615,17 @@ def main() -> None:
         summary["retrieval"] = json.loads(RETRIEVAL.read_text(encoding="utf-8"))
         for r in summary["retrieval"]["results"].values():
             r.pop("misses_at_5", None)
+    if DOCBENCH_CAPTURED.exists():
+        cap = json.loads(DOCBENCH_CAPTURED.read_text(encoding="utf-8"))
+        bps = [r for r in cap["per_doc"] if r.get("type") == "boarding_pass" and "error" not in r]
+        summary["docbench_captured"] = {
+            **cap["summary"],
+            "barcode_decoded_by_severity": {
+                sev: round(sum(r["barcode_decoded"] for r in g) / len(g), 4)
+                for sev in ("light", "medium", "heavy")
+                if (g := [r for r in bps if r.get("severity") == sev])
+            },
+        }
     if JUDGE_CAL.exists():
         cal = json.loads(JUDGE_CAL.read_text(encoding="utf-8"))
         cal.pop("judge", None)

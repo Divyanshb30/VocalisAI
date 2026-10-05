@@ -44,6 +44,7 @@ CHECKLIST.md
 
 # generated benchmark documents (recreate with: python -m evals.docbench.synth)
 evals/docbench/data/
+evals/docbench/captured/
 
 # eval run logs
 evals/results/*.log

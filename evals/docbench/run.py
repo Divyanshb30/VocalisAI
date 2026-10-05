@@ -1,6 +1,7 @@
 """Document-extraction benchmark: field-level accuracy, vision-only vs vision + barcode.
 
 uv run python -m evals.docbench.run --data evals/docbench/data --model gemini-flash-latest
+uv run python -m evals.docbench.run --data evals/docbench/captured --out evals/results/docbench_captured.json
 """
 
 from __future__ import annotations
@@ -55,7 +56,8 @@ async def run(data: Path, model: str, limit: int | None) -> dict:
         rec = reconcile(doc, read_image(path), reference=date(2026, 10, 1))
         row = {
             "doc": name,
-            "type": truth["doc_type"],
+            "type": truth.get("kind", truth["doc_type"]),
+            "severity": truth.get("severity"),
             "latency_s": round(latency, 2),
             "conflicts": len(rec.conflicts),
         }
@@ -65,14 +67,29 @@ async def run(data: Path, model: str, limit: int | None) -> dict:
             row[f"{variant}_correct"] = len(correct)
             row[f"{variant}_total"] = len(checked)
             row[f"{variant}_wrong"] = sorted(set(checked) - set(correct))
+            row[f"{variant}_read"] = {
+                f: fields.get(f) for f in row[f"{variant}_wrong"]
+            }  # for auditing misses
+        row["barcode_decoded"] = rec.barcode is not None
         per_doc.append(row)
         await asyncio.sleep(4)  # stay inside free-tier requests-per-minute
     ok = [r for r in per_doc if "error" not in r]
 
-    def acc(variant: str) -> float:
-        c = sum(r[f"{variant}_correct"] for r in ok)
-        t = sum(r[f"{variant}_total"] for r in ok)
+    def acc(variant: str, rows: list[dict] | None = None) -> float:
+        rows = ok if rows is None else rows
+        c = sum(r[f"{variant}_correct"] for r in rows)
+        t = sum(r[f"{variant}_total"] for r in rows)
         return round(c / t, 4) if t else 0.0
+
+    def breakdown(key: str) -> dict[str, dict[str, float | int]]:
+        groups: dict[str, list[dict]] = {}
+        for r in ok:
+            if r.get(key):
+                groups.setdefault(r[key], []).append(r)
+        return {
+            k: {"documents": len(g), "vision": acc("vision", g), "with_barcode": acc("reconciled", g)}
+            for k, g in sorted(groups.items())
+        }
 
     summary = {
         "model": model,
@@ -82,6 +99,8 @@ async def run(data: Path, model: str, limit: int | None) -> dict:
         "field_accuracy_with_barcode": acc("reconciled"),
         "barcode_conflicts_caught": sum(r["conflicts"] for r in ok),
         "mean_latency_s": round(sum(r["latency_s"] for r in ok) / len(ok), 2) if ok else None,
+        "by_severity": breakdown("severity"),
+        "by_type": breakdown("type"),
     }
     return {"summary": summary, "per_doc": per_doc}
 
