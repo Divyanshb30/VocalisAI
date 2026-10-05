@@ -110,7 +110,7 @@ sequenceDiagram
     Note over A: evaluate_offer: outside the mandate, the passenger decides
     A->>R: declines, restates the entitlement
     R-->>A: "I need the OTP sent to the passenger"
-    Note over A,R: input guard: handoff; the passenger gives the OTP to the rep,<br/>the agent's context only gets a summary
+    Note over A,R: input guard hands off: the passenger gives the OTP to the rep directly,<br/>the agent hears the rep's line and a summary, never the OTP
     R-->>A: "Refund issued, reference X7K2QB"
     A->>R: read-back "X-ray Seven Kilo Two Quebec Bravo", waits for confirmation
     A-->>G: outcome + reference + transcript
