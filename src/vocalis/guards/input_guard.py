@@ -69,7 +69,25 @@ def scan(text: str) -> set[Flag]:
     return {flag for flag, pat in _PATTERNS.items() if pat.search(text)}
 
 
-def requires_handoff(flags: set[Flag], shareable_keys: list[str]) -> bool:
+# A handoff is for something the rep is asking for, not a mention: "the compensation will be transferred
+# to your bank account" names payment data but asks for nothing (found on a live call, where the handoff
+# also hid the reference number in that same sentence from the agent).
+_REQUEST = re.compile(
+    r"\?|\b(can|could|would|will|may) (you|i|we)\b|\bplease\b|\b(i|we)('ll| will)? (need|require)\b|"
+    r"\b(must|have to|need to)\b|\b(confirm|provide|tell me|give me|read (me|out|it|back)|share|verify|spell|"
+    r"repeat|dictate|go ahead with|let me have|what'?s|what is)\b",
+    re.I,
+)
+
+
+def is_request(text: str) -> bool:
+    return bool(_REQUEST.search(text))
+
+
+def requires_handoff(flags: set[Flag], shareable_keys: list[str], text: str | None = None) -> bool:
+    """Whether the passenger must take over. With ``text``, only when the rep is actually asking."""
+    if text is not None and not is_request(text):
+        return False
     if flags & HANDOFF_FLAGS:
         return True
     if Flag.PHONE in flags and "phone" not in shareable_keys:

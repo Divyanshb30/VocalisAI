@@ -424,6 +424,11 @@ class AgentSession:
         latency = self.sink.first_text_at - t0 if self.sink.first_text_at else None
         return AgentTurn(list(self.sink.spoken), latency)
 
+    def overhear(self, text: str) -> None:
+        """The rep spoke while the passenger handled a step: keep it for reference parsing."""
+        self._last_heard = text
+        self._heard.append(text)
+
     async def note(self, text: str, role: str = "user") -> None:
         """Add something to the context without running the LLM."""
         await self.worker.queue_frame(

@@ -34,7 +34,7 @@ RUNTIME = {
     # no local Ollama in the cloud: the simulated airline rep runs on free-tier models
     "VOCALIS_REP_MODELS": "groq/openai/gpt-oss-20b,gemini/gemini-flash-lite-latest",
     "VOCALIS_LIVE_PER_IP": "3",
-    "VOCALIS_LIVE_PER_DAY": "40",
+    "VOCALIS_LIVE_PER_DAY": "10",  # 10 calls x 5 min stays well inside the Cloud Run free tier
 }
 
 

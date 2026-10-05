@@ -91,3 +91,19 @@ def test_canaries_detect_leaks_and_are_well_formed():
     assert "card_last4" in c.leaked(f"card ending {spelled}")
     assert c.leaked("Booking X7K2QB, refund of 10000 rupees") == []
     assert "phone" not in c.leaked(f"call {c.phone}", allow={"phone"})
+
+
+def test_handoff_needs_a_request_not_a_mention():
+    for grant in (
+        "I've processed the refund; the compensation will be transferred to your bank account.",
+        "We will send the refund to your credit card, you should see it in 7 days.",
+    ):
+        assert Flag.PAYMENT in scan(grant)
+        assert not requires_handoff(scan(grant), [], grant), grant
+    for ask in (
+        "Can you give me the bank details for the transfer?",
+        "I'll need the full card number the ticket was paid with.",
+        "Read me the OTP we just sent.",
+        "Go ahead with the passport number.",
+    ):
+        assert requires_handoff(scan(ask), [], ask), ask

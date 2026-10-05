@@ -453,12 +453,15 @@ class CallSimulation:
                     deterministic
                     and hand_backs < 3
                     and rep_turn.action != "end_call"
-                    and input_guard.requires_handoff(flags, sorted(self.allow))
+                    and input_guard.requires_handoff(flags, sorted(self.allow), heard)
                 ):
                     hand_backs += 1
                     note = await self._do_handoff("guard", ",".join(sorted(flags)))
+                    # the agent still hears what the rep said: the same sentence can carry the reference
+                    self.session.overhear(heard)
                     await self.session.note(
-                        f"[Representative asked for something only the passenger can provide.] {note}"
+                        f'[The representative said: "{heard}" It asked for something only the passenger can '
+                        f"provide.] {note}"
                     )
                     rep_turn = await self.rep.respond(
                         "(The passenger has handed the call back to the assistant.)"
