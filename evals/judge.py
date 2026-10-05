@@ -1,7 +1,8 @@
 """LLM judge for what code cannot check: tone, persistence, and invented facts.
 
-Uses a different model family from the talker to avoid self-preference. Its agreement
-with human labels is measured separately (Cohen's kappa) before its scores are trusted.
+Uses a different model family from the talker to avoid self-preference. Its agreement with an
+independent labeller is measured on a held-out set of calls (Cohen's kappa, evals/kappa.py); the
+invented-facts flag did not agree beyond chance, so only the 1-5 scores are reported.
 """
 
 from __future__ import annotations
@@ -87,8 +88,11 @@ def render_transcript(r: CallResult, limit: int = 6000) -> str:
     return text[-limit:]
 
 
+JUDGE_RUBRIC = 2  # chosen on the held-out labelled set (evals/kappa.py --set 2)
+
+
 async def judge(r: CallResult, b: Briefing, router: LLMRouter, models: list[str]) -> dict[str, Any]:
-    prompt = RUBRIC.format(
+    prompt = RUBRICS[JUDGE_RUBRIC].format(
         facts=b.facts, entitlements=b.entitlements, mandate=b.mandate_text, transcript=render_transcript(r)
     )
     try:
@@ -108,4 +112,5 @@ async def judge(r: CallResult, b: Briefing, router: LLMRouter, models: list[str]
     except json.JSONDecodeError:
         return {"judge_error": "unparseable", "raw": res.text[:300]}
     data["judge_model"] = res.model
+    data["judge_rubric"] = JUDGE_RUBRIC
     return data

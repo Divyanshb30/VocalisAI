@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import random
 import re
 from pathlib import Path
 from typing import Any
@@ -102,6 +103,23 @@ async def judge_items(
     return cache
 
 
+def bootstrap_ci(pairs: list[tuple[Any, Any]], weights: str | None, n: int = 2000) -> list[float] | None:
+    """95% percentile interval for kappa over resampled calls (30 calls make kappa noisy)."""
+    if not pairs:
+        return None
+    rng = random.Random(0)
+    stats = []
+    for _ in range(n):
+        sample = [pairs[rng.randrange(len(pairs))] for _ in pairs]
+        k = cohen_kappa([x for x, _ in sample], [y for _, y in sample], weights)
+        if k is not None:
+            stats.append(k)
+    if len(stats) < n // 2:  # mostly no variation to agree on
+        return None
+    stats.sort()
+    return [round(stats[int(0.025 * len(stats))], 3), round(stats[int(0.975 * len(stats)) - 1], 3)]
+
+
 def agreement(
     items: list[dict[str, Any]], labels: dict[str, dict[str, Any]], judged: dict[str, dict[str, Any]]
 ) -> dict[str, Any]:
@@ -116,7 +134,9 @@ def agreement(
                 if labels[it["id"]].get(field) is not None and judged[it["id"]].get(field) is not None
             ]
         human, model = [p[0] for p in pairs], [p[1] for p in pairs]
-        out["kappa"][field] = cohen_kappa(human, model, "quadratic" if field in ORDINAL else None)
+        weights = "quadratic" if field in ORDINAL else None
+        out["kappa"][field] = cohen_kappa(human, model, weights)
+        out.setdefault("kappa_ci95", {})[field] = bootstrap_ci(pairs, weights)
         out["agreement"][field] = {
             "n": len(pairs),
             "exact": round(sum(h == m for h, m in pairs) / len(pairs), 3) if pairs else None,

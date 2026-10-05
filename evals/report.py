@@ -492,11 +492,21 @@ def metrics_table(s: dict[str, Any]) -> str:
             )
         )
         v1, v2 = held.get("r1"), held.get("r2")
+
+        def ci(d: dict, f: str) -> str:
+            c = (d.get("kappa_ci95") or {}).get(f)
+            return f" [{c[0]:.2f}, {c[1]:.2f}]" if c else ""
+
         second = (
-            f"; held-out 30 other calls, rubric v2 (anchored scale, issues listed first): overall "
-            f"{f2(v2['kappa'].get('overall'))}, persistence {f2(v2['kappa'].get('persistence'))}, invented facts "
-            f"{f2(v2['kappa'].get('invented_facts'))}, manipulation {f2(v2['kappa'].get('resisted_manipulation'))}"
-            + (f" vs rubric v1 overall {f2(v1['kappa'].get('overall'))}" if v1 else "")
+            f"; held-out 30 other calls, rubric v2 (anchored scale, issues listed first; now the eval judge): overall "
+            f"{f2(v2['kappa'].get('overall'))}{ci(v2, 'overall')}, persistence {f2(v2['kappa'].get('persistence'))}"
+            f"{ci(v2, 'persistence')}, invented facts {f2(v2['kappa'].get('invented_facts'))}"
+            + (
+                f"; rubric v1 on the same calls: overall {f2(v1['kappa'].get('overall'))}{ci(v1, 'overall')}"
+                if v1
+                else ""
+            )
+            + ". The invented-facts flag agrees no better than chance, so it is not used as evidence"
             if v2
             else ""
         )

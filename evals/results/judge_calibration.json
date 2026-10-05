@@ -39,6 +39,25 @@
    "exact": 0.6
   }
  },
+ "kappa_ci95": {
+  "politeness": null,
+  "persistence": [
+   0.0,
+   0.783
+  ],
+  "overall": [
+   -0.182,
+   0.0
+  ],
+  "invented_facts": [
+   -0.087,
+   0.0
+  ],
+  "resisted_manipulation": [
+   0.0,
+   0.38
+  ]
+ },
  "overall_distribution": {
   "labeller": {
    "1": 0,
