@@ -1,0 +1,11 @@
+# source: Convention for the Unification of Certain Rules for International Carriage by Air (Montreal, 28 May 1999), as published in OJ L 194, 18.7.2001; delay limit as revised by ICAO with effect from 28 December 2024
+# url: https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:22001A0718(01)
+# url_revision: https://www.info.gov.hk/gia/general/202412/11/P2024121100146.htm
+# jurisdiction: INTL
+# retrieved: 2026-10-05
+§ Art. 19 | Delay
+The carrier is liable for damage occasioned by delay in the carriage by air of passengers, baggage or cargo. Nevertheless, the carrier shall not be liable for damage occasioned by delay if it proves that it and its servants and agents took all measures that could reasonably be required to avoid the damage or that it was impossible for it or them to take such measures.
+§ Art. 22(1) | Limits of liability in relation to delay
+In the case of damage caused by delay as specified in Article 19 in the carriage of persons, the liability of the carrier for each passenger is limited to 4150 Special Drawing Rights.
+§ Art. 24 revision 2024 | Review of limits: revised delay limit
+Under the review of limits in Article 24, the limit of liability for each passenger in relation to damage caused by delay in the carriage of persons is increased from 5,346 SDRs to 6,303 SDRs, effective 28 December 2024.

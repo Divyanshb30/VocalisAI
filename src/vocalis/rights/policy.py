@@ -105,7 +105,12 @@ def _tokens(text: str) -> list[str]:
 
 
 def load_corpus(directory: Path = CORPUS_DIR) -> list[Passage]:
-    """Article paragraphs from each corpus file; '# key: value' header lines give source and url."""
+    """Passages from each corpus file; '# key: value' header lines give source and url.
+
+    Two layouts: "Article N / title / 1. ..." (EU/UK legislation, one passage per numbered paragraph),
+    and "§ <id> | <title>" followed by the text (one passage per clause, as cut by
+    scripts/build_policy_corpus.py). A passage id is the file's code and the clause: "DGCA para 3.3.2".
+    """
     passages: list[Passage] = []
     for path in sorted(directory.glob("*.txt")):
         lines = path.read_text(encoding="utf-8").splitlines()
@@ -113,9 +118,22 @@ def load_corpus(directory: Path = CORPUS_DIR) -> list[Passage]:
         for line in lines:
             if m := re.match(r"#\s*(\w+):\s*(.*)", line):
                 meta[m.group(1)] = m.group(2)
-        code = path.stem.upper()
+        code = path.stem.upper().replace("_", "-")
         jurisdiction = meta.get("jurisdiction", code[:2])
         body = "\n".join(line for line in lines if not line.startswith("#"))
+        if body.lstrip().startswith("§"):
+            for m in re.finditer(r"(?m)^§ (.+?) \| (.+)\n(.+)$", body):
+                passages.append(
+                    Passage(
+                        f"{code} {m.group(1)}",
+                        jurisdiction,
+                        m.group(2).strip(),
+                        m.group(3).strip(),
+                        meta.get("source", ""),
+                        meta.get("url", ""),
+                    )
+                )
+            continue
         for art in re.split(r"(?m)^(?=Article \d+\s*$)", body):
             m = re.match(r"Article (\d+)\s*\n(.*?)\n(.*)", art, re.S)
             if not m:

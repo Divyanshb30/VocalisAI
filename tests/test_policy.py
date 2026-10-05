@@ -48,3 +48,57 @@ def test_hybrid_fuses_and_filters_by_jurisdiction() -> None:
     assert hits and all(h.passage.jurisdiction == "UK" for h in hits)
     assert hits[0].passage.id == "UK261 Art. 9(1)"
     assert [h.rank for h in hits] == [1, 2, 3]
+
+
+def _grid():
+    from tests.test_rights import make_case
+    from vocalis.core.models import AlternativeOffer, Disruption, DisruptionType
+
+    routes = [("6E", "DEL", "BOM"), ("AI", "DEL", "LHR"), ("BA", "LHR", "JFK"), ("LH", "FRA", "MAD"),
+              ("EK", "DXB", "BOM"), ("FZ", "DXB", "DOH"), ("EK", "BOM", "DXB"), ("VS", "LHR", "DEL")]  # fmt: skip
+    alt = AlternativeOffer(departs_minutes_after_original=300, arrives_minutes_after_original=300)
+    disruptions = (
+        [
+            Disruption(type=DisruptionType.CANCELLATION, notice_hours=h)
+            for h in (None, 6, 30, 72, 10 * 24, 20 * 24)
+        ]
+        + [
+            Disruption(type=DisruptionType.DELAY, departure_delay_minutes=m, arrival_delay_minutes=m)
+            for m in (100, 200, 400, 600, 26 * 60)
+        ]
+        + [
+            Disruption(type=DisruptionType.DENIED_BOARDING, alternative=alt),
+            Disruption(type=DisruptionType.DENIED_BOARDING, passenger_declined_alternative=True),
+        ]
+    )
+    return [make_case(c, o, d, dis, block_h=2.5) for c, o, d in routes for dis in disruptions]
+
+
+def test_every_citation_resolves_to_regulation_text() -> None:
+    """Each clause an entitlement cites is a passage of the official text in data/policy/."""
+    from pathlib import Path
+
+    from vocalis.rights.citations import unresolved
+    from vocalis.rights.engine import assess
+    from vocalis.simair.scenario import load_scenarios
+
+    passages = load_corpus()
+    cases = _grid() + [sc.case for sc in load_scenarios(Path("evals/scenarios"))]
+    missing = {
+        (e.citation.regime.value, e.citation.clause, tuple(unresolved(e.citation, passages)))
+        for case in cases
+        for e in assess(case).entitlements
+        if unresolved(e.citation, passages)
+    }
+    assert not missing, sorted(missing)
+
+
+def test_spoken_regulation_references_are_checked_against_the_corpus() -> None:
+    from vocalis.rights.citations import unknown_spoken_refs
+
+    passages = load_corpus()
+    assert unknown_spoken_refs("Under DGCA paragraph 3.3.2 you owe compensation.", passages) == []
+    assert unknown_spoken_refs("UK261 Article 7 sets the amount.", passages) == []
+    assert unknown_spoken_refs("Under DGCA para 3.9.9 that's required.", passages) == ["DGCA para 3.9.9"]
+    assert unknown_spoken_refs("Montreal Convention Article 99 says so.", passages) == ["MONTREAL Art. 99"]
+    assert unknown_spoken_refs("the GCAA PWP.B.006 rules apply", passages) == []

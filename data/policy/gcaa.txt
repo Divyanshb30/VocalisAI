@@ -1,0 +1,42 @@
+# source: UAE GCAA Civil Aviation Regulations CAR-PWP, Passenger Welfare Program, Issue 02 (issued 25 Dec 2024, applicable 1 Jan 2025)
+# url: https://www.gcaa.gov.ae/en/epublication/EPublications/Civil%20Aviation%20Regulations%20(CARs)/CAR%20III%20-%20GENERAL%20REGULATIONS/CAR-PWP%20-%20PASSENGER%20WELFARE%20PROGRAM%20-%20ISSUE%2002.pdf
+# jurisdiction: AE
+# retrieved: 2026-10-05 (text layer of the official PDF; page furniture removed)
+§ PWP.A.003 | Applicability
+This regulation applies to: (a) Commercial Air Transport Operators operating from and to airports located in the United Arab Emirates (UAE), (b) Commercial Air Transport Operators diverting to airports located in the UAE, and (c) UAE Airport Operators. Compliance with this regulation does not exempt Commercial Air Transport Operators from compliance with other international regulations that may be applicable to them.
+§ GM1 to PWP.A.003 | Applicability
+This regulation applies to flight disruptions including denied boarding, cancellation, delay and diversions at airports located in the UAE. Disruptions at airports other than the UAE will be subject to local regulations.
+§ GM2 to PWP.A.003 | Applicability
+This regulation does not apply to passengers travelling: (a) free of charge or (b) at a reduced fare not available directly or indirectly to the public. The operator should however accommodate such passengers’ needs in accordance with this regulation as far as practicable.
+§ PWP.A.005 Cancellation | Definition: Cancellation
+means the non-operation of a flight which was previously planned and on which at least one place was reserved. For the purpose of this requirement; a passenger shall be eligible for welfare if the flight is cancelled within 48 hours from the scheduled time of departure (STD).
+§ PWP.A.005 Delay | Definition: Delay
+Is when a specific flight departs or arrives later than its scheduled time.
+§ PWP.A.005 Denied boarding | Definition: Denied boarding
+means a refusal to carry passengers on a flight, although they have presented themselves for boarding, except where the passenger does not comply fully with the carrier's contract of carriage or tariff provisions regarding ticketing, reconfirmation, check-in, and acceptability for transportation.
+§ PWP.B.002 | Denied boarding
+In the event of a denied boarding, the affected passengers shall be provided with: (a) option for a return flight to the first point of departure or re-routing to their final destination; (b) care (refreshments, meals, hotel accommodation, transport between the airport and place of accommodation, and appropriate means of communication) as appropriate.
+§ GM1 PWP.B.002 | Denied boarding
+The requirements are applicable in circumstances where passengers are denied boarding by the operator and excludes circumstances where in the passenger does not comply fully with the carrier's contract of carriage or tariff provisions regarding ticketing, reconfirmation, check-in, and acceptability for transportation.
+§ GM2 PWP.B.002 | Denied boarding
+When an operator reasonably expects to deny boarding on a flight, it first calls for volunteers to surrender their reservations in exchange for certain benefits. If an insufficient number of volunteers come forward to allow the remaining passengers to board the flight, the air carrier may then deny boarding to passengers against their will, in which case the requirements of PWP.B.002 shall apply.
+§ PWP.B.003(a) | Delay – Passengers in Terminal (Terminal Delay)
+For delays of 1 to 3 hours from the scheduled time of departure; passengers shall be provided with up to date information on flight status by the operator or its representative.
+§ PWP.B.003(b) | Delay – Passengers in Terminal (Terminal Delay)
+In the event of anticipated delays of 3 to 8 hours (regardless of the distance of the flight) scheduled time of departure; passengers shall be provided with: (1) up to date information on flight status by the operator or its representative; (2) free meals and refreshments commensurate with the waiting time; (3) appropriate means of communication; (4) hotel accommodation (commensurate with the time of the day) for passengers who have missed their connection and their next probable connection is after 8hrs.
+§ PWP.B.003(c) | Delay – Passengers in Terminal (Terminal Delay)
+If the anticipated delay is more than 8 hours from the scheduled time of departure; passengers shall be provided with: (1) hotel accommodation (commensurate with travel distance to the city of residence/domicile and time of day); (2) free meals and refreshments commensurate with the waiting time; (3) Appropriate means of communication; (4) transportation between the airport and the place of accommodation/hotel.
+§ PWP.B.004(a) | Delay – Passengers on-board Aircraft (Tarmac Delay)
+For delays of 1 to 3 hours from the scheduled time of departure; passengers shall be provided with up to date information on flight status by the operator or its representative.
+§ PWP.B.004(b) | Delay – Passengers on-board Aircraft (Tarmac Delay)
+In the event of anticipated delays of 3 to 8 hours (regardless of the distance of the flight) scheduled time of departure; passengers shall be: (1) offered the possibility/opportunity to disembark from the aircraft (subject to local regulations); (2) provided up to date information on flight status by the operator or its representative; (3) provided free meals and refreshments commensurate with the waiting time; (4) provided appropriate means of communication; (5) provided hotel accommodation (commensurate with the time of the day) if they have missed their connection.
+§ PWP.B.004(c) | Delay – Passengers on-board Aircraft (Tarmac Delay)
+If the anticipated delay is more than 8 hours from the scheduled time of departure; passengers shall be: (1) disembarked from the aircraft (subject to local regulations); (2) provided hotel accommodation (commensurate with travel distance to the city of residence/domicile and the time of the day); (3) provided free meals and refreshments commensurate with the waiting time; (4) provided appropriate means of communication; (5) provided transportation between the airport and the place of accommodation/hotel.
+§ PWP.B.005 | Diversion
+Following a diversion to an airport other than the planned destination, passengers shall be provided with: (a) care (refreshments, meals, hotel accommodation, transport between the airport and place of accommodation, and appropriate means of communication) in accordance with PWP.B.003 and PWP.B.004 as applicable; (b) option for a return flight to the first point of departure or re-routing to their final destination without additional cost.
+§ PWP.B.006(a) | Cancellation
+In the event of the cancellation of a flight by the operator, regardless of whether checked-in or not; passengers shall be: (1) informed at the earliest time practicable; (2) offered care (refreshments, meals, hotel accommodation, transport between the airport and place of accommodation, and appropriate means of communication) as appropriate; (3) carried along with their baggage as soon as practicable on another flight on which space is available and, where necessary, extend the period of validity of their ticket to cover that carriage. (4) provided an option for a return flight to the first point of departure or re-routing within a reasonable period of time on a flight of another airline subject to availability , or by other mutually agreed means and class of carriage.
+§ PWP.B.006(b) | Cancellation
+The above requirement shall apply to: (1) all transit flights; and (2) flights not originating from the city of residence /domicile of the passenger.
+§ PWP.D.001 | Requirements
+Foreign Air Transport Operators conducting commercial air transport operations to and from the United Arab Emirates are required to provide the airport operator according to its conditions of use, with a Passenger Welfare Program that is equivalent to the program described in this regulation, and that the operator is committed to activating the program in the event of flight delays, cancellations, diversions and denied boarding.

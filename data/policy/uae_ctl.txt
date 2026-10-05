@@ -1,0 +1,12 @@
+# source: UAE Federal Decree-Law No. 50 of 2022 promulgating the Commercial Transactions Law (official English translation), carriage of persons and air carriage
+# url: https://uaelegislation.gov.ae/en/legislations/1610
+# jurisdiction: AE
+# retrieved: 2026-10-05 (text layer of the official PDF; page furniture removed)
+§ Art. 322 | Carriage of persons: force majeure
+1. Where a force majeure event prevents the commencement of carriage or where, before execution of carriage, circumstances occur rendering such carriage a threat to lives, the carrier shall not pay any indemnity on the grounds of failure of execution, nor shall the latter be entitled to receive the fare. 2. Where the force majeure event or threat to lives arises after commencement of execution of carriage, the carrier shall receive the fare only for that part of carriage executed by it.
+§ Art. 333 | Carriage of persons: delay and injury
+1. The carrier shall be liable for the delayed arrival and for such bodily or non-bodily injuries sustained by the passenger during the performance of the carriage contract. 2. The liability set out in Clause (1) shall only lapse if the carrier proves that the delay or injury is due to force majeure, the passenger's fault or a third party's act.
+§ Art. 354 | Air carriage: application
+Without prejudice to the international conventions to which the State is a party, the provisions of this Part shall apply to air carriage, subject to the specific provisions stipulated in the following Articles.
+§ Art. 357 | Air carriage: delay
+An air carrier shall be held liable for damage caused by the delayed arrival of passengers or the registered luggage or goods.
