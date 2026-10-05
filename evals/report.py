@@ -484,8 +484,15 @@ def metrics_table(s: dict[str, Any]) -> str:
                 "LLM judge agreement",
                 f"Cohen's kappa between the judge and {who}, same calls and rubric; 1-5 scores quadratic-weighted",
                 f"overall {f2(k.get('overall'))}, persistence {f2(k.get('persistence'))}, "
-                f"politeness {f2(k.get('politeness'))}, invented facts {f2(k.get('invented_facts'))} "
-                f"({cal['labelled_calls']} calls, judge {', '.join(cal.get('judge_models', []))})",
+                f"politeness {f2(k.get('politeness'))}, invented facts {f2(k.get('invented_facts'))}"
+                + (
+                    f"; the judge scored {dist['judge'].get('5', 0)} of {cal['labelled_calls']} calls 5/5 overall, "
+                    f"the labeller {dist['labeller'].get('5', 0)}, so the judge's overall score does not separate "
+                    "good calls from mediocre ones"
+                    if (dist := cal.get("overall_distribution"))
+                    else ""
+                )
+                + f" ({cal['labelled_calls']} calls, judge {', '.join(cal.get('judge_models', []))})",
             )
         )
     ret = s.get("retrieval")

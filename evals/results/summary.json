@@ -2675,6 +2675,62 @@
    }
   }
  },
+ "judge_calibration": {
+  "labelled_calls": 30,
+  "labeller": {
+   "labeller": "independent LLM labeller run as an isolated agent: it read only web/label/items.json (context and transcript, no judge scores) and scored the same rubric as the judge; a different model family from the judge (Gemini)",
+   "human": false,
+   "calls": 30
+  },
+  "judge_models": [
+   "gemini/gemini-flash-lite-latest"
+  ],
+  "kappa": {
+   "politeness": null,
+   "persistence": 0.294,
+   "overall": -0.05,
+   "invented_facts": -0.034,
+   "resisted_manipulation": null
+  },
+  "agreement": {
+   "politeness": {
+    "n": 30,
+    "exact": 1.0
+   },
+   "persistence": {
+    "n": 30,
+    "exact": 0.867
+   },
+   "overall": {
+    "n": 30,
+    "exact": 0.5
+   },
+   "invented_facts": {
+    "n": 30,
+    "exact": 0.933
+   },
+   "resisted_manipulation": {
+    "n": 16,
+    "exact": 1.0
+   }
+  },
+  "overall_distribution": {
+   "labeller": {
+    "1": 0,
+    "2": 0,
+    "3": 3,
+    "4": 11,
+    "5": 16
+   },
+   "judge": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 1,
+    "5": 29
+   }
+  }
+ },
  "rescore": {
   "archive/v1/baseline": {
    "runs": 7,

@@ -110,6 +110,11 @@ def main() -> None:
             "n": len(pairs),
             "exact": round(sum(h == m for h, m in pairs) / len(pairs), 3) if pairs else None,
         }
+    # score spreads: a judge that gives nearly every call the top score cannot agree beyond chance
+    out["overall_distribution"] = {
+        who: {str(k): sum(1 for it in items if src[it["id"]].get("overall") == k) for k in range(1, 6)}
+        for who, src in (("labeller", labels), ("judge", judged))
+    }
     out["judge"] = judged
     OUT.write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
     print(json.dumps({k: out[k] for k in ("labelled_calls", "kappa", "agreement")}, indent=1))

@@ -33,7 +33,7 @@ Scoring version: the published numbers come from **v1** runs; the current code s
 
 | The LLM judge's agreement is measured on 30 calls against an independent labeller | `evals/label_export.py`, `web/label.html`, `evals/kappa.py`, `evals/results/labels.json`, `evals/results/labels_meta.json` | — | — |
 
-The labeller is an LLM run as an isolated agent that read only the 30 calls (context and transcript, no judge scores) and scored the judge's rubric; `labels_meta.json` records this. The README reports it as agreement with an independent LLM labeller, not as human calibration. The kappa itself appears only once the judge has re-scored all 30 calls (`judge_calibration` in `summary.json`).
+The labeller is an LLM run as an isolated agent that read only the 30 calls (context and transcript, no judge scores) and scored the judge's rubric; `labels_meta.json` records this. The README reports it as agreement with an independent LLM labeller, not as human calibration. Result (`judge_calibration` in `summary.json`): the judge gave almost every call 5/5 overall, so its overall score agrees with the labeller no better than chance. The judge's quality scores are therefore not used as evidence anywhere; only the deterministic checks are. A stricter, anchored rubric is the fix, re-measured the same way.
 
 ## Not built (must not appear in the README)
 
