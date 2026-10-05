@@ -449,12 +449,25 @@ def metrics_table(s: dict[str, Any]) -> str:
     if ret:
         r = ret["results"]
         fmt = lambda m: f"{pct(r[m]['recall_at_1'])} / {pct(r[m]['recall_at_5'])} / {r[m]['mrr_at_10']:.2f}"  # noqa: E731
+        para = ret.get("paraphrase")
+        region = r["hybrid"].get("recall_at_5_by_region")
         rows.append(
             (
                 "Regulation retrieval",
-                "hand-written passenger questions over EU261/UK261 article paragraphs; top-1 / top-5 / MRR@10",
+                "passenger questions over the official regulation text (DGCA, GCAA, UAE law, UK261/EU261, "
+                "Montreal); top-1 / top-5 / MRR@10",
                 f"hybrid {fmt('hybrid')} vs BM25 {fmt('bm25')} vs dense {fmt('dense')} "
-                f"({ret['questions']} questions, {ret['passages']} passages)",
+                f"({ret['questions']} hand-written questions, {ret['passages']} passages)"
+                + (
+                    "; hybrid top-5 by region " + ", ".join(f"{k} {pct(x)}" for k, x in region.items())
+                    if region
+                    else ""
+                )
+                + (
+                    f"; same questions reworded by an LLM: hybrid top-5 {pct(para['results']['hybrid']['recall_at_5'])}"
+                    if para
+                    else ""
+                ),
             )
         )
     if not rows:

@@ -9,7 +9,7 @@
 ## What it does
 
 1. **Reads the document**: a photo of a boarding pass, e-ticket or cancellation email becomes a typed `Case` (vision model, cross-checked against the IATA boarding-pass barcode when there is one).
-2. **Knows your rights**: computes entitlements **in code** for India (DGCA CAR), the UK and EU (UK261/EU261) and the UAE (GCAA), each tied to the clause it comes from, which the agent cites on the call. Hybrid search over the regulation text (EU261/UK261 so far) finds the paragraph behind a clause.
+2. **Knows your rights**: computes entitlements **in code** for India (DGCA CAR), the UK and EU (UK261/EU261) and the UAE (GCAA), each tied to the clause it comes from, which the agent cites on the call. Hybrid search over the official regulation text (DGCA, GCAA, UAE law, UK261/EU261, Montreal Convention) finds the paragraph behind a clause, and every clause the engine cites resolves to a passage of that text.
 3. **Makes the call**: navigates the phone menu with keypress tones, waits through hold with the LLM switched off, discloses that it is an AI, and negotiates against the passenger's mandate (what to ask for, what is acceptable, what to refuse), checking every offer against it.
 4. **Knows when to stop**: hands over to the passenger for OTPs, payments, identity checks and any offer outside the mandate. Sensitive values never enter the model's context.
 5. **Reports back**: outcome, reference number (read back phonetically and confirmed by the rep) and the transcript.
@@ -190,7 +190,7 @@ Scenarios run in two modes. In **text mode** the agent's full Pipecat pipeline (
 | Task success over audio | as above, with the agent hearing STT output | 68% (17/25, 95% CI 48%–83%) |
 | Reference read-back (audio) | agent reads the reference back phonetically and the rep corrects a mishearing: before → after, same talker | task success 56% → 68%; reference captured 64% → 72% (25 calls each) |
 | Document extraction | field accuracy, vision only → with barcode cross-check | 100% → 100% (20 synthetic docs, gemini-flash-lite-latest) |
-| Regulation retrieval | hand-written passenger questions over EU261/UK261 article paragraphs; top-1 / top-5 / MRR@10 | hybrid 70% / 88% / 0.76 vs BM25 50% / 70% / 0.59 vs dense 60% / 88% / 0.70 (40 questions, 68 passages) |
+| Regulation retrieval | passenger questions over the official regulation text (DGCA, GCAA, UAE law, UK261/EU261, Montreal); top-1 / top-5 / MRR@10 | hybrid 42% / 77% / 0.56 vs BM25 26% / 62% / 0.40 vs dense 41% / 83% / 0.58 (78 hand-written questions, 123 passages); hybrid top-5 by region AE 73%, EU/UK 80%, IN 68%, INTL 100%; same questions reworded by an LLM: hybrid top-5 41% |
 
 _75 completed simulated calls (25 scenarios, seeds 0, 1, 2), plus 25 over audio; talker: cerebras/qwen-3.8-27b._
 

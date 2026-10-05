@@ -14,6 +14,8 @@ import yaml
 from vocalis.rights.policy import EMBED_MODEL, RRF_K, PolicyIndex
 
 GOLD = Path("evals/retrieval_gold.yaml")
+PARAPHRASE = Path("evals/retrieval_paraphrase.yaml")  # the same questions, reworded by an LLM
+REGION = {"DGCA": "IN", "GCAA": "AE", "UAE-CTL": "AE", "MONTREAL": "INTL", "EU261": "EU/UK", "UK261": "EU/UK"}
 OUT = Path("evals/results/retrieval.json")
 MODES = ("bm25", "dense", "hybrid")
 
@@ -36,7 +38,15 @@ def evaluate(index: PolicyIndex, gold: list[dict[str, Any]]) -> dict[str, Any]:
             if not first or first > 5:
                 misses.append({"q": g["q"], "first_relevant_rank": first, "top": ranked[:3]})
         n = len(gold)
+        by_region: dict[str, list[int]] = {}
+        for g in gold:
+            region = REGION[g["relevant"][0].split(" ", 1)[0]]
+            ranked = [ids[i] for i, _ in index.rank(g["q"], mode)]  # type: ignore[arg-type]
+            hit = any(pid in g["relevant"] for pid in ranked[:5])
+            by_region.setdefault(region, []).append(hit)
         results[mode] = {
+            "recall_at_5_by_region": {k: round(sum(v) / len(v), 4) for k, v in sorted(by_region.items())},
+            "questions_by_region": {k: len(v) for k, v in sorted(by_region.items())},
             "recall_at_1": round(r1 / n, 4),
             "recall_at_5": round(r5 / n, 4),
             "mrr_at_10": round(rr / n, 4),
@@ -54,7 +64,17 @@ def evaluate(index: PolicyIndex, gold: list[dict[str, Any]]) -> dict[str, Any]:
 
 def main() -> None:
     gold = yaml.safe_load(GOLD.read_text(encoding="utf-8"))
-    out = evaluate(PolicyIndex(), gold)
+    index = PolicyIndex()
+    out = evaluate(index, gold)
+    if PARAPHRASE.exists():
+        para = yaml.safe_load(PARAPHRASE.read_text(encoding="utf-8"))
+        out["paraphrase"] = {
+            "questions": len(para),
+            "results": {
+                m: {k: v for k, v in r.items() if k != "misses_at_5"}
+                for m, r in evaluate(index, para)["results"].items()
+            },
+        }
     OUT.write_text(json.dumps(out, indent=1), encoding="utf-8")
     for mode, r in out["results"].items():
         print(f"{mode:7} R@1 {r['recall_at_1']:.0%}  R@5 {r['recall_at_5']:.0%}  MRR@10 {r['mrr_at_10']:.2f}")

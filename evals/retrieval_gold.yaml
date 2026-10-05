@@ -81,3 +81,82 @@
   relevant: [EU261 Art. 5(2), UK261 Art. 5(2)]
 - q: They told me about the cancellation more than two weeks before. No compensation then?
   relevant: [EU261 Art. 5(1), UK261 Art. 5(1)]
+# India: DGCA CAR Section 3 Series M Part IV (Rev. 4)
+- q: IndiGo cancelled my Delhi to Mumbai flight ten hours before departure. How much compensation can I get?
+  relevant: [DGCA para 3.3.2]
+- q: Air India told me about the cancellation five days in advance. What are my options?
+  relevant: [DGCA para 3.3.1]
+- q: Is there any compensation in India if the airline cancels because of fog or bad weather?
+  relevant: [DGCA para 3.3.4, DGCA para 1.5]
+- q: The airline says I get no compensation because the travel agent never gave them my phone number.
+  relevant: [DGCA para 3.3.3]
+- q: How is the cancellation compensation worked out for a 90 minute domestic flight in India?
+  relevant: [DGCA para 3.3.2]
+- q: I was bumped off an overbooked IndiGo flight and put on one five hours later. What do they owe me?
+  relevant: [DGCA para 3.2.2]
+- q: Overbooked in Delhi and I refused the alternate flight. Do I get a refund and compensation?
+  relevant: [DGCA para 3.2.2]
+- q: Do Indian airlines have to ask for volunteers before refusing to board passengers?
+  relevant: [DGCA para 3.2.1]
+- q: My domestic flight in India was delayed three hours on a two hour route. Do they have to feed me?
+  relevant: [DGCA para 3.4.1, DGCA para 3.8.1]
+- q: My domestic flight in India is going to be more than six hours late. Can I ask for my money back?
+  relevant: [DGCA para 3.4.2]
+- q: When does an Indian airline have to put me up in a hotel for a delayed night flight?
+  relevant: [DGCA para 3.4.3, DGCA para 3.8.1]
+- q: Can an Indian airline pay my cancellation compensation as travel vouchers?
+  relevant: [DGCA para 3.7.1]
+- q: I was moved from business to economy on a domestic Air India flight. How much do I get back?
+  relevant: [DGCA para 3.5.1]
+- q: Do the DGCA compensation rules apply to a foreign airline flying out of India?
+  relevant: [DGCA para 3.6.1]
+- q: What counts as extraordinary circumstances under the Indian passenger rules?
+  relevant: [DGCA para 1.4, DGCA para 1.5]
+- q: Where can I complain in India if the airline won't pay what it owes?
+  relevant: [DGCA para 3.9.1, DGCA para 3.9.2, DGCA para 3.9.3]
+- q: The first leg was cancelled and I missed my connection on the same ticket in India. Am I compensated?
+  relevant: [DGCA para 3.3.2]
+- q: Under the Indian rules, who has to prove when I was told about the delay?
+  relevant: [DGCA para 3.4.5]
+- q: After a cancellation in India, do I get meals while I wait at the airport for the replacement flight?
+  relevant: [DGCA para 3.3.2, DGCA para 3.8.1]
+# UAE: GCAA CAR-PWP Issue 02 and the Commercial Transactions Law
+- q: Emirates cancelled my flight from Dubai twelve hours before departure. What must they do under the GCAA rules?
+  relevant: [GCAA PWP.B.006(a)]
+- q: Does the UAE passenger welfare rule apply if my flight was cancelled a week before departure?
+  relevant: [GCAA PWP.A.005 Cancellation]
+- q: My flight out of Dubai is delayed four hours. Am I entitled to meals?
+  relevant: [GCAA PWP.B.003(b)]
+- q: We have been delayed more than eight hours in Abu Dhabi. Does the airline owe us a hotel?
+  relevant: [GCAA PWP.B.003(c)]
+- q: Delayed two hours at Dubai airport. What does the airline have to give me?
+  relevant: [GCAA PWP.B.003(a)]
+- q: We have been stuck on the plane on the tarmac in Sharjah for hours. Can we get off?
+  relevant: [GCAA PWP.B.004(b), GCAA PWP.B.004(c)]
+- q: flydubai refused to let me board. What are my options under UAE rules?
+  relevant: [GCAA PWP.B.002]
+- q: Does the UAE welfare regulation cover a delay that happened at Mumbai airport on an Emirates flight?
+  relevant: [GCAA GM1 to PWP.A.003]
+- q: I flew on a free staff ticket. Does the UAE passenger welfare program apply to me?
+  relevant: [GCAA GM2 to PWP.A.003]
+- q: I live in Dubai and my cancelled flight started in Dubai. Does the UAE cancellation care still apply?
+  relevant: [GCAA PWP.B.006(b)]
+- q: Is a UAE airline liable for losses caused by arriving late on a domestic flight?
+  relevant: [UAE-CTL Art. 357]
+- q: Under UAE commercial law, how can a carrier escape liability for a passenger's delay?
+  relevant: [UAE-CTL Art. 333]
+- q: If a flight from the UAE never operates because of force majeure, can the airline keep my fare?
+  relevant: [UAE-CTL Art. 322]
+- q: Do foreign airlines flying into the UAE also need a passenger welfare program?
+  relevant: [GCAA PWP.D.001]
+- q: Our flight was diverted to Al Ain instead of Abu Dhabi. What care should we get?
+  relevant: [GCAA PWP.B.005]
+# Montreal Convention (international carriage)
+- q: On an international flight, is the airline liable for the losses the delay caused me?
+  relevant: [MONTREAL Art. 19]
+- q: What is the most an airline has to pay for delay damages under the Montreal Convention?
+  relevant: [MONTREAL Art. 22(1), MONTREAL Art. 24 revision 2024]
+- q: Can the airline avoid paying for my delay losses if it did everything it reasonably could?
+  relevant: [MONTREAL Art. 19]
+- q: Has the Montreal Convention limit for delay been raised recently?
+  relevant: [MONTREAL Art. 24 revision 2024]

@@ -1,145 +1,335 @@
 {
- "questions": 40,
- "passages": 68,
+ "questions": 78,
+ "passages": 123,
  "sources": [
+  "Convention for the Unification of Certain Rules for International Carriage by Air (Montreal, 28 May 1999), as published in OJ L 194, 18.7.2001; delay limit as revised by ICAO with effect from 28 December 2024",
+  "DGCA Civil Aviation Requirements, Section 3, Series M, Part IV, Rev. 4 dated 25 Jan 2023 (effective 15 Feb 2023): facilities to be provided to passengers by airlines due to denied boarding, cancellation of flights and delays in flights",
   "Regulation (EC) No 261/2004 as it has effect in UK law (retained, amended by S.I. 2019/278), Articles 4-10",
-  "Regulation (EC) No 261/2004 of the European Parliament and of the Council, Articles 1-17"
+  "Regulation (EC) No 261/2004 of the European Parliament and of the Council, Articles 1-17",
+  "UAE Federal Decree-Law No. 50 of 2022 promulgating the Commercial Transactions Law (official English translation), carriage of persons and air carriage",
+  "UAE GCAA Civil Aviation Regulations CAR-PWP, Passenger Welfare Program, Issue 02 (issued 25 Dec 2024, applicable 1 Jan 2025)"
  ],
  "dense_model": "BAAI/bge-small-en-v1.5",
  "rrf_k": 60,
  "results": {
   "bm25": {
-   "recall_at_1": 0.5,
-   "recall_at_5": 0.7,
-   "mrr_at_10": 0.5895,
+   "recall_at_5_by_region": {
+    "AE": 0.5333,
+    "EU/UK": 0.625,
+    "IN": 0.5789,
+    "INTL": 1.0
+   },
+   "questions_by_region": {
+    "AE": 15,
+    "EU/UK": 40,
+    "IN": 19,
+    "INTL": 4
+   },
+   "recall_at_1": 0.2564,
+   "recall_at_5": 0.6154,
+   "mrr_at_10": 0.4002,
    "misses_at_5": [
     {
      "q": "Who has to prove when I was told about the cancellation, me or the airline?",
-     "first_relevant_rank": 9,
+     "first_relevant_rank": 25,
      "top": [
-      "EU261 Art. 5(3)",
-      "UK261 Art. 5(3)",
-      "EU261 Art. 16(2)"
-     ]
-    },
-    {
-     "q": "How much compensation in euros for a flight of about 1,200 km?",
-     "first_relevant_rank": 9,
-     "top": [
-      "EU261 Art. 16(2)",
-      "EU261 Art. 12(1)",
-      "EU261 Art. 7(3)"
-     ]
-    },
-    {
-     "q": "Can the airline cut my compensation in half because they rebooked me and I arrived only a bit late?",
-     "first_relevant_rank": 20,
-     "top": [
-      "EU261 Art. 3(4)",
+      "DGCA para 1.4",
       "EU261 Art. 5(3)",
       "UK261 Art. 5(3)"
      ]
     },
     {
-     "q": "How quickly must the airline refund the ticket after a cancellation?",
-     "first_relevant_rank": 21,
+     "q": "Can the airline cut my compensation in half because they rebooked me and I arrived only a bit late?",
+     "first_relevant_rank": 43,
      "top": [
-      "EU261 Art. 5(1)",
-      "UK261 Art. 5(1)",
-      "UK261 Art. 10(2)"
+      "DGCA para 3.2.3",
+      "DGCA para 3.3.3",
+      "DGCA para 1.4"
+     ]
+    },
+    {
+     "q": "How quickly must the airline refund the ticket after a cancellation?",
+     "first_relevant_rank": 48,
+     "top": [
+      "DGCA para 3.3.1",
+      "DGCA para 3.3.5",
+      "DGCA para 3.3.3"
+     ]
+    },
+    {
+     "q": "Instead of a refund, can I pick a later flight that suits me?",
+     "first_relevant_rank": 13,
+     "top": [
+      "GCAA PWP.A.005 Delay",
+      "DGCA para 3.3.1",
+      "DGCA para 3.3.5"
      ]
     },
     {
      "q": "Do they have to give me food and drinks while I wait at the airport?",
-     "first_relevant_rank": 10,
+     "first_relevant_rank": 23,
      "top": [
+      "DGCA para 3.2.1",
       "EU261 Art. 11(1)",
-      "EU261 Art. 8(3)",
-      "UK261 Art. 8(3)"
+      "DGCA para 3.3.3"
+     ]
+    },
+    {
+     "q": "Is the airline required to pay for a hotel if I'm stuck overnight?",
+     "first_relevant_rank": 8,
+     "top": [
+      "DGCA para 1.5",
+      "DGCA para 1.4",
+      "DGCA para 3.3.5"
      ]
     },
     {
      "q": "Extra care for a passenger in a wheelchair or a child travelling alone during disruption",
-     "first_relevant_rank": 6,
+     "first_relevant_rank": 13,
      "top": [
-      "EU261 Art. 3(3)",
-      "EU261 Art. 9(2)",
-      "UK261 Art. 9(2)"
+      "GCAA GM1 to PWP.A.003",
+      "GCAA GM2 to PWP.A.003",
+      "EU261 Art. 3(3)"
      ]
     },
     {
      "q": "I was moved from business to economy on a 4,000 km flight. How much do I get back?",
-     "first_relevant_rank": 20,
+     "first_relevant_rank": 32,
      "top": [
-      "UK261 Art. 6(1)",
-      "EU261 Art. 6(1)",
-      "EU261 Art. 5(1)"
+      "DGCA para 3.5.1",
+      "DGCA para 3.2.2",
+      "DGCA para 1.4"
      ]
     },
     {
      "q": "I got bumped up to a better cabin. Can they charge me the difference?",
-     "first_relevant_rank": 36,
+     "first_relevant_rank": 70,
      "top": [
+      "DGCA para 3.3.2",
       "EU261 Art. 5(3)",
-      "UK261 Art. 5(3)",
-      "UK261 Art. 6(4)"
+      "UK261 Art. 5(3)"
+     ]
+    },
+    {
+     "q": "My 800 km flight is running three hours late. What help must they give me at the airport?",
+     "first_relevant_rank": 6,
+     "top": [
+      "DGCA para 3.2.1",
+      "DGCA para 3.5.1",
+      "UK261 Art. 7(2)"
      ]
     },
     {
      "q": "Who is the operating carrier if I booked through another airline?",
-     "first_relevant_rank": 8,
+     "first_relevant_rank": 17,
      "top": [
-      "EU261 Art. 8(3)",
-      "UK261 Art. 8(3)",
-      "UK261 Art. 7(2)"
+      "DGCA para 3.2.2",
+      "DGCA para 3.3.2",
+      "DGCA para 1.4"
      ]
     },
     {
      "q": "The agent asked me to sign a form giving up my claim. Is that allowed?",
-     "first_relevant_rank": 42,
+     "first_relevant_rank": 76,
      "top": [
       "EU261 Art. 2",
-      "EU261 Art. 8(2)",
-      "UK261 Art. 8(2)"
+      "MONTREAL Art. 19",
+      "DGCA para 3.7.1"
+     ]
+    },
+    {
+     "q": "Where can I complain if the airline ignores the passenger rights rules?",
+     "first_relevant_rank": 7,
+     "top": [
+      "DGCA para 3.9.1",
+      "DGCA para 3.9.3",
+      "DGCA para 1.6"
      ]
     },
     {
      "q": "Does taking the fixed compensation stop me suing for my other losses?",
-     "first_relevant_rank": 10,
+     "first_relevant_rank": 14,
      "top": [
       "EU261 Art. 3(4)",
-      "EU261 Art. 7(2)",
-      "UK261 Art. 7(2)"
+      "DGCA para 2.9",
+      "EU261 Art. 7(2)"
      ]
     },
     {
      "q": "Can an airline that paid compensation recover the cost from someone else who caused the problem?",
-     "first_relevant_rank": 15,
+     "first_relevant_rank": 40,
      "top": [
       "EU261 Art. 5(3)",
       "UK261 Art. 5(3)",
       "UK261 Art. 6(4)"
+     ]
+    },
+    {
+     "q": "IndiGo cancelled my Delhi to Mumbai flight ten hours before departure. How much compensation can I get?",
+     "first_relevant_rank": 23,
+     "top": [
+      "EU261 Art. 5(1)",
+      "UK261 Art. 5(1)",
+      "DGCA para 3.3.1"
+     ]
+    },
+    {
+     "q": "Air India told me about the cancellation five days in advance. What are my options?",
+     "first_relevant_rank": 24,
+     "top": [
+      "EU261 Art. 3(2)",
+      "EU261 Art. 16(2)",
+      "EU261 Art. 5(1)"
+     ]
+    },
+    {
+     "q": "How is the cancellation compensation worked out for a 90 minute domestic flight in India?",
+     "first_relevant_rank": 32,
+     "top": [
+      "EU261 Art. 3(6)",
+      "EU261 Art. 3(2)",
+      "EU261 Art. 17"
+     ]
+    },
+    {
+     "q": "My domestic flight in India was delayed three hours on a two hour route. Do they have to feed me?",
+     "first_relevant_rank": 13,
+     "top": [
+      "DGCA para 3.4.2",
+      "UK261 Art. 6(1)",
+      "EU261 Art. 6(1)"
+     ]
+    },
+    {
+     "q": "When does an Indian airline have to put me up in a hotel for a delayed night flight?",
+     "first_relevant_rank": 36,
+     "top": [
+      "EU261 Art. 9(1)",
+      "UK261 Art. 9(1)",
+      "DGCA para 3.2.3"
+     ]
+    },
+    {
+     "q": "What counts as extraordinary circumstances under the Indian passenger rules?",
+     "first_relevant_rank": 7,
+     "top": [
+      "DGCA para 1.6",
+      "DGCA para 3.3.4",
+      "EU261 Art. 12(2)"
+     ]
+    },
+    {
+     "q": "Under the Indian rules, who has to prove when I was told about the delay?",
+     "first_relevant_rank": 20,
+     "top": [
+      "DGCA para 1.6",
+      "EU261 Art. 16(2)",
+      "EU261 Art. 12(2)"
+     ]
+    },
+    {
+     "q": "After a cancellation in India, do I get meals while I wait at the airport for the replacement flight?",
+     "first_relevant_rank": 35,
+     "top": [
+      "EU261 Art. 5(1)",
+      "UK261 Art. 5(1)",
+      "UK261 Art. 6(1)"
+     ]
+    },
+    {
+     "q": "Emirates cancelled my flight from Dubai twelve hours before departure. What must they do under the GCAA rules?",
+     "first_relevant_rank": 33,
+     "top": [
+      "EU261 Art. 5(1)",
+      "UK261 Art. 5(1)",
+      "GCAA PWP.A.005 Cancellation"
+     ]
+    },
+    {
+     "q": "My flight out of Dubai is delayed four hours. Am I entitled to meals?",
+     "first_relevant_rank": 13,
+     "top": [
+      "UK261 Art. 6(1)",
+      "EU261 Art. 6(1)",
+      "UK261 Art. 7(2)"
+     ]
+    },
+    {
+     "q": "We have been delayed more than eight hours in Abu Dhabi. Does the airline owe us a hotel?",
+     "first_relevant_rank": 6,
+     "top": [
+      "DGCA para 3.4.2",
+      "DGCA para 3.4.1",
+      "DGCA para 3.2.3"
+     ]
+    },
+    {
+     "q": "Delayed two hours at Dubai airport. What does the airline have to give me?",
+     "first_relevant_rank": 47,
+     "top": [
+      "DGCA para 3.2.3",
+      "DGCA para 3.2.1",
+      "UK261 Art. 7(2)"
+     ]
+    },
+    {
+     "q": "flydubai refused to let me board. What are my options under UAE rules?",
+     "first_relevant_rank": 10,
+     "top": [
+      "DGCA para 1.6",
+      "EU261 Art. 12(2)",
+      "GCAA PWP.A.003"
+     ]
+    },
+    {
+     "q": "I live in Dubai and my cancelled flight started in Dubai. Does the UAE cancellation care still apply?",
+     "first_relevant_rank": 7,
+     "top": [
+      "EU261 Art. 3(6)",
+      "UAE-CTL Art. 322",
+      "GCAA PWP.A.003"
+     ]
+    },
+    {
+     "q": "Our flight was diverted to Al Ain instead of Abu Dhabi. What care should we get?",
+     "first_relevant_rank": 7,
+     "top": [
+      "GCAA GM2 to PWP.A.003",
+      "DGCA para 1.5",
+      "GCAA PWP.B.002"
      ]
     }
    ]
   },
   "dense": {
-   "recall_at_1": 0.6,
-   "recall_at_5": 0.875,
-   "mrr_at_10": 0.7048,
+   "recall_at_5_by_region": {
+    "AE": 0.6,
+    "EU/UK": 0.875,
+    "IN": 0.8947,
+    "INTL": 1.0
+   },
+   "questions_by_region": {
+    "AE": 15,
+    "EU/UK": 40,
+    "IN": 19,
+    "INTL": 4
+   },
+   "recall_at_1": 0.4103,
+   "recall_at_5": 0.8333,
+   "mrr_at_10": 0.5773,
    "misses_at_5": [
     {
      "q": "The delay is over five hours and I no longer want to travel. Can I get my money back?",
-     "first_relevant_rank": 10,
+     "first_relevant_rank": 14,
      "top": [
+      "DGCA para 3.4.2",
       "UK261 Art. 8(1)",
-      "EU261 Art. 8(1)",
-      "EU261 Art. 7(2)"
+      "EU261 Art. 8(1)"
      ]
     },
     {
      "q": "What counts as the final destination when I have connecting flights?",
-     "first_relevant_rank": 29,
+     "first_relevant_rank": 56,
      "top": [
       "EU261 Art. 7(1)",
       "UK261 Art. 7(1)",
@@ -157,75 +347,332 @@
     },
     {
      "q": "The agent asked me to sign a form giving up my claim. Is that allowed?",
-     "first_relevant_rank": 23,
+     "first_relevant_rank": 33,
      "top": [
+      "DGCA para 3.3.3",
       "EU261 Art. 12(2)",
-      "EU261 Art. 14(2)",
-      "UK261 Art. 5(4)"
+      "GCAA PWP.B.006(b)"
      ]
     },
     {
      "q": "Can an airline that paid compensation recover the cost from someone else who caused the problem?",
-     "first_relevant_rank": 20,
+     "first_relevant_rank": 27,
      "top": [
       "UK261 Art. 5(3)",
       "EU261 Art. 5(3)",
-      "UK261 Art. 8(3)"
+      "DGCA para 1.4"
+     ]
+    },
+    {
+     "q": "IndiGo cancelled my Delhi to Mumbai flight ten hours before departure. How much compensation can I get?",
+     "first_relevant_rank": 6,
+     "top": [
+      "UK261 Art. 7(1)",
+      "DGCA para 3.2.2",
+      "EU261 Art. 7(1)"
+     ]
+    },
+    {
+     "q": "Can an Indian airline pay my cancellation compensation as travel vouchers?",
+     "first_relevant_rank": 24,
+     "top": [
+      "DGCA para 3.3.3",
+      "DGCA para 3.3.4",
+      "DGCA para 3.2.2"
+     ]
+    },
+    {
+     "q": "Does the UAE passenger welfare rule apply if my flight was cancelled a week before departure?",
+     "first_relevant_rank": 15,
+     "top": [
+      "DGCA para 3.3.1",
+      "UK261 Art. 5(1)",
+      "EU261 Art. 5(1)"
+     ]
+    },
+    {
+     "q": "My flight out of Dubai is delayed four hours. Am I entitled to meals?",
+     "first_relevant_rank": 12,
+     "top": [
+      "DGCA para 3.4.2",
+      "GCAA PWP.B.004(c)",
+      "EU261 Art. 14(1)"
+     ]
+    },
+    {
+     "q": "Delayed two hours at Dubai airport. What does the airline have to give me?",
+     "first_relevant_rank": 19,
+     "top": [
+      "DGCA para 3.4.2",
+      "DGCA para 3.4.1",
+      "UK261 Art. 6(1)"
+     ]
+    },
+    {
+     "q": "flydubai refused to let me board. What are my options under UAE rules?",
+     "first_relevant_rank": 6,
+     "top": [
+      "DGCA para 2.6",
+      "DGCA para 3.2.2",
+      "EU261 Art. 4(1)"
+     ]
+    },
+    {
+     "q": "I flew on a free staff ticket. Does the UAE passenger welfare program apply to me?",
+     "first_relevant_rank": 41,
+     "top": [
+      "GCAA PWP.D.001",
+      "DGCA para 3.3.3",
+      "DGCA para 3.2.2"
+     ]
+    },
+    {
+     "q": "I live in Dubai and my cancelled flight started in Dubai. Does the UAE cancellation care still apply?",
+     "first_relevant_rank": 12,
+     "top": [
+      "DGCA para 3.3.1",
+      "DGCA para 3.3.3",
+      "GCAA GM1 to PWP.A.003"
      ]
     }
    ]
   },
   "hybrid": {
-   "recall_at_1": 0.7,
-   "recall_at_5": 0.875,
-   "mrr_at_10": 0.7636,
+   "recall_at_5_by_region": {
+    "AE": 0.7333,
+    "EU/UK": 0.8,
+    "IN": 0.6842,
+    "INTL": 1.0
+   },
+   "questions_by_region": {
+    "AE": 15,
+    "EU/UK": 40,
+    "IN": 19,
+    "INTL": 4
+   },
+   "recall_at_1": 0.4231,
+   "recall_at_5": 0.7692,
+   "mrr_at_10": 0.5617,
    "misses_at_5": [
     {
-     "q": "How quickly must the airline refund the ticket after a cancellation?",
-     "first_relevant_rank": 7,
+     "q": "Who has to prove when I was told about the cancellation, me or the airline?",
+     "first_relevant_rank": 6,
      "top": [
-      "EU261 Art. 5(1)",
-      "UK261 Art. 5(1)",
-      "UK261 Art. 10(2)"
+      "DGCA para 3.3.1",
+      "EU261 Art. 5(3)",
+      "UK261 Art. 5(3)"
+     ]
+    },
+    {
+     "q": "Can the airline cut my compensation in half because they rebooked me and I arrived only a bit late?",
+     "first_relevant_rank": 12,
+     "top": [
+      "DGCA para 3.3.3",
+      "DGCA para 3.2.2",
+      "DGCA para 3.2.3"
+     ]
+    },
+    {
+     "q": "How quickly must the airline refund the ticket after a cancellation?",
+     "first_relevant_rank": 17,
+     "top": [
+      "DGCA para 3.3.1",
+      "DGCA para 3.4.2",
+      "DGCA para 3.3.5"
+     ]
+    },
+    {
+     "q": "I was moved from business to economy on a 4,000 km flight. How much do I get back?",
+     "first_relevant_rank": 6,
+     "top": [
+      "DGCA para 3.5.1",
+      "DGCA para 3.2.2",
+      "DGCA para 3.3.2"
      ]
     },
     {
      "q": "I got bumped up to a better cabin. Can they charge me the difference?",
-     "first_relevant_rank": 6,
+     "first_relevant_rank": 13,
      "top": [
-      "UK261 Art. 9(1)",
-      "EU261 Art. 9(1)",
-      "UK261 Art. 9(2)"
+      "DGCA para 3.2.2",
+      "DGCA para 3.3.2",
+      "DGCA para 3.8.1"
      ]
     },
     {
      "q": "What counts as the final destination when I have connecting flights?",
-     "first_relevant_rank": 13,
+     "first_relevant_rank": 21,
      "top": [
       "EU261 Art. 5(1)",
       "UK261 Art. 5(1)",
-      "UK261 Art. 6(3)"
+      "GCAA PWP.B.005"
      ]
     },
     {
      "q": "The agent asked me to sign a form giving up my claim. Is that allowed?",
-     "first_relevant_rank": 36,
+     "first_relevant_rank": 55,
      "top": [
+      "DGCA para 3.3.3",
       "EU261 Art. 14(2)",
-      "UK261 Art. 8(2)",
-      "EU261 Art. 8(2)"
+      "UK261 Art. 8(2)"
      ]
     },
     {
      "q": "Can an airline that paid compensation recover the cost from someone else who caused the problem?",
-     "first_relevant_rank": 14,
+     "first_relevant_rank": 31,
      "top": [
       "EU261 Art. 5(3)",
       "UK261 Art. 5(3)",
-      "UK261 Art. 6(4)"
+      "DGCA para 1.4"
+     ]
+    },
+    {
+     "q": "IndiGo cancelled my Delhi to Mumbai flight ten hours before departure. How much compensation can I get?",
+     "first_relevant_rank": 9,
+     "top": [
+      "UK261 Art. 5(1)",
+      "EU261 Art. 5(1)",
+      "DGCA para 3.3.1"
+     ]
+    },
+    {
+     "q": "Air India told me about the cancellation five days in advance. What are my options?",
+     "first_relevant_rank": 6,
+     "top": [
+      "UK261 Art. 5(1)",
+      "EU261 Art. 5(1)",
+      "EU261 Art. 3(2)"
+     ]
+    },
+    {
+     "q": "How is the cancellation compensation worked out for a 90 minute domestic flight in India?",
+     "first_relevant_rank": 8,
+     "top": [
+      "DGCA para 3.4.2",
+      "UK261 Art. 7(1)",
+      "EU261 Art. 7(1)"
+     ]
+    },
+    {
+     "q": "When does an Indian airline have to put me up in a hotel for a delayed night flight?",
+     "first_relevant_rank": 19,
+     "top": [
+      "DGCA para 3.4.2",
+      "DGCA para 3.4.1",
+      "DGCA para 3.2.3"
+     ]
+    },
+    {
+     "q": "Can an Indian airline pay my cancellation compensation as travel vouchers?",
+     "first_relevant_rank": 8,
+     "top": [
+      "EU261 Art. 5(3)",
+      "UK261 Art. 5(3)",
+      "DGCA para 3.3.3"
+     ]
+    },
+    {
+     "q": "After a cancellation in India, do I get meals while I wait at the airport for the replacement flight?",
+     "first_relevant_rank": 9,
+     "top": [
+      "EU261 Art. 5(1)",
+      "UK261 Art. 5(1)",
+      "DGCA para 3.3.3"
+     ]
+    },
+    {
+     "q": "Emirates cancelled my flight from Dubai twelve hours before departure. What must they do under the GCAA rules?",
+     "first_relevant_rank": 12,
+     "top": [
+      "UK261 Art. 5(1)",
+      "DGCA para 3.3.1",
+      "EU261 Art. 5(1)"
+     ]
+    },
+    {
+     "q": "My flight out of Dubai is delayed four hours. Am I entitled to meals?",
+     "first_relevant_rank": 11,
+     "top": [
+      "DGCA para 3.4.2",
+      "UK261 Art. 6(1)",
+      "EU261 Art. 14(1)"
+     ]
+    },
+    {
+     "q": "Delayed two hours at Dubai airport. What does the airline have to give me?",
+     "first_relevant_rank": 28,
+     "top": [
+      "DGCA para 3.4.2",
+      "DGCA para 3.2.3",
+      "UK261 Art. 6(1)"
+     ]
+    },
+    {
+     "q": "I flew on a free staff ticket. Does the UAE passenger welfare program apply to me?",
+     "first_relevant_rank": 8,
+     "top": [
+      "GCAA PWP.D.001",
+      "EU261 Art. 3(3)",
+      "DGCA para 3.8.1"
      ]
     }
    ]
+  }
+ },
+ "paraphrase": {
+  "questions": 78,
+  "results": {
+   "bm25": {
+    "recall_at_5_by_region": {
+     "AE": 0.2667,
+     "EU/UK": 0.175,
+     "IN": 0.1053,
+     "INTL": 0.0
+    },
+    "questions_by_region": {
+     "AE": 15,
+     "EU/UK": 40,
+     "IN": 19,
+     "INTL": 4
+    },
+    "recall_at_1": 0.1154,
+    "recall_at_5": 0.1667,
+    "mrr_at_10": 0.1561
+   },
+   "dense": {
+    "recall_at_5_by_region": {
+     "AE": 0.2667,
+     "EU/UK": 0.625,
+     "IN": 0.7368,
+     "INTL": 0.25
+    },
+    "questions_by_region": {
+     "AE": 15,
+     "EU/UK": 40,
+     "IN": 19,
+     "INTL": 4
+    },
+    "recall_at_1": 0.3077,
+    "recall_at_5": 0.5641,
+    "mrr_at_10": 0.4234
+   },
+   "hybrid": {
+    "recall_at_5_by_region": {
+     "AE": 0.1333,
+     "EU/UK": 0.45,
+     "IN": 0.5263,
+     "INTL": 0.5
+    },
+    "questions_by_region": {
+     "AE": 15,
+     "EU/UK": 40,
+     "IN": 19,
+     "INTL": 4
+    },
+    "recall_at_1": 0.1923,
+    "recall_at_5": 0.4103,
+    "mrr_at_10": 0.2837
+   }
   }
  }
 }

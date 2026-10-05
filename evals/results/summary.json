@@ -2508,29 +2508,125 @@
   }
  },
  "retrieval": {
-  "questions": 40,
-  "passages": 68,
+  "questions": 78,
+  "passages": 123,
   "sources": [
+   "Convention for the Unification of Certain Rules for International Carriage by Air (Montreal, 28 May 1999), as published in OJ L 194, 18.7.2001; delay limit as revised by ICAO with effect from 28 December 2024",
+   "DGCA Civil Aviation Requirements, Section 3, Series M, Part IV, Rev. 4 dated 25 Jan 2023 (effective 15 Feb 2023): facilities to be provided to passengers by airlines due to denied boarding, cancellation of flights and delays in flights",
    "Regulation (EC) No 261/2004 as it has effect in UK law (retained, amended by S.I. 2019/278), Articles 4-10",
-   "Regulation (EC) No 261/2004 of the European Parliament and of the Council, Articles 1-17"
+   "Regulation (EC) No 261/2004 of the European Parliament and of the Council, Articles 1-17",
+   "UAE Federal Decree-Law No. 50 of 2022 promulgating the Commercial Transactions Law (official English translation), carriage of persons and air carriage",
+   "UAE GCAA Civil Aviation Regulations CAR-PWP, Passenger Welfare Program, Issue 02 (issued 25 Dec 2024, applicable 1 Jan 2025)"
   ],
   "dense_model": "BAAI/bge-small-en-v1.5",
   "rrf_k": 60,
   "results": {
    "bm25": {
-    "recall_at_1": 0.5,
-    "recall_at_5": 0.7,
-    "mrr_at_10": 0.5895
+    "recall_at_5_by_region": {
+     "AE": 0.5333,
+     "EU/UK": 0.625,
+     "IN": 0.5789,
+     "INTL": 1.0
+    },
+    "questions_by_region": {
+     "AE": 15,
+     "EU/UK": 40,
+     "IN": 19,
+     "INTL": 4
+    },
+    "recall_at_1": 0.2564,
+    "recall_at_5": 0.6154,
+    "mrr_at_10": 0.4002
    },
    "dense": {
-    "recall_at_1": 0.6,
-    "recall_at_5": 0.875,
-    "mrr_at_10": 0.7048
+    "recall_at_5_by_region": {
+     "AE": 0.6,
+     "EU/UK": 0.875,
+     "IN": 0.8947,
+     "INTL": 1.0
+    },
+    "questions_by_region": {
+     "AE": 15,
+     "EU/UK": 40,
+     "IN": 19,
+     "INTL": 4
+    },
+    "recall_at_1": 0.4103,
+    "recall_at_5": 0.8333,
+    "mrr_at_10": 0.5773
    },
    "hybrid": {
-    "recall_at_1": 0.7,
-    "recall_at_5": 0.875,
-    "mrr_at_10": 0.7636
+    "recall_at_5_by_region": {
+     "AE": 0.7333,
+     "EU/UK": 0.8,
+     "IN": 0.6842,
+     "INTL": 1.0
+    },
+    "questions_by_region": {
+     "AE": 15,
+     "EU/UK": 40,
+     "IN": 19,
+     "INTL": 4
+    },
+    "recall_at_1": 0.4231,
+    "recall_at_5": 0.7692,
+    "mrr_at_10": 0.5617
+   }
+  },
+  "paraphrase": {
+   "questions": 78,
+   "results": {
+    "bm25": {
+     "recall_at_5_by_region": {
+      "AE": 0.2667,
+      "EU/UK": 0.175,
+      "IN": 0.1053,
+      "INTL": 0.0
+     },
+     "questions_by_region": {
+      "AE": 15,
+      "EU/UK": 40,
+      "IN": 19,
+      "INTL": 4
+     },
+     "recall_at_1": 0.1154,
+     "recall_at_5": 0.1667,
+     "mrr_at_10": 0.1561
+    },
+    "dense": {
+     "recall_at_5_by_region": {
+      "AE": 0.2667,
+      "EU/UK": 0.625,
+      "IN": 0.7368,
+      "INTL": 0.25
+     },
+     "questions_by_region": {
+      "AE": 15,
+      "EU/UK": 40,
+      "IN": 19,
+      "INTL": 4
+     },
+     "recall_at_1": 0.3077,
+     "recall_at_5": 0.5641,
+     "mrr_at_10": 0.4234
+    },
+    "hybrid": {
+     "recall_at_5_by_region": {
+      "AE": 0.1333,
+      "EU/UK": 0.45,
+      "IN": 0.5263,
+      "INTL": 0.5
+     },
+     "questions_by_region": {
+      "AE": 15,
+      "EU/UK": 40,
+      "IN": 19,
+      "INTL": 4
+     },
+     "recall_at_1": 0.1923,
+     "recall_at_5": 0.4103,
+     "mrr_at_10": 0.2837
+    }
    }
   }
  },

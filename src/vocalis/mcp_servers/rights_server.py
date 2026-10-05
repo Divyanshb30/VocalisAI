@@ -117,7 +117,7 @@ _POLICY: PolicyIndex | None = None
 def search_regulations(question: str, jurisdiction: str | None = None, k: int = 5) -> list[dict[str, Any]]:
     """Find the regulation paragraphs that answer a question (EU261, UK261), each with its citation.
 
-    jurisdiction: "UK" or "EU" to restrict the search. Hybrid BM25 + dense retrieval.
+    jurisdiction: "IN", "AE", "UK", "EU" or "INTL" to restrict the search. Hybrid BM25 + dense retrieval.
     """
     global _POLICY
     if _POLICY is None:
