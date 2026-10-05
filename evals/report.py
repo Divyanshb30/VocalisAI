@@ -471,6 +471,7 @@ def metrics_table(s: dict[str, Any]) -> str:
             )
         )
     cal = s.get("judge_calibration")
+    held = s.get("judge_calibration_heldout") or {}
     if cal and cal.get("labelled_calls"):
         k = cal["kappa"]
         who = (
@@ -479,20 +480,31 @@ def metrics_table(s: dict[str, Any]) -> str:
             else "an independent LLM labeller blind to the judge's scores (not a human)"
         )
         f2 = lambda x: "n/a" if x is None else f"{x:.2f}"  # noqa: E731
+        dist = cal.get("overall_distribution") or {}
+        first = (
+            f"rubric v1 on the first 30 calls: overall {f2(k.get('overall'))}, persistence {f2(k.get('persistence'))}, "
+            f"invented facts {f2(k.get('invented_facts'))}, manipulation {f2(k.get('resisted_manipulation'))}"
+            + (
+                f" (the judge scored {dist['judge'].get('5', 0)} of {cal['labelled_calls']} calls 5/5 overall, "
+                f"the labeller {dist['labeller'].get('5', 0)})"
+                if dist
+                else ""
+            )
+        )
+        v1, v2 = held.get("r1"), held.get("r2")
+        second = (
+            f"; held-out 30 other calls, rubric v2 (anchored scale, issues listed first): overall "
+            f"{f2(v2['kappa'].get('overall'))}, persistence {f2(v2['kappa'].get('persistence'))}, invented facts "
+            f"{f2(v2['kappa'].get('invented_facts'))}, manipulation {f2(v2['kappa'].get('resisted_manipulation'))}"
+            + (f" vs rubric v1 overall {f2(v1['kappa'].get('overall'))}" if v1 else "")
+            if v2
+            else ""
+        )
         rows.append(
             (
                 "LLM judge agreement",
                 f"Cohen's kappa between the judge and {who}, same calls and rubric; 1-5 scores quadratic-weighted",
-                f"overall {f2(k.get('overall'))}, persistence {f2(k.get('persistence'))}, "
-                f"politeness {f2(k.get('politeness'))}, invented facts {f2(k.get('invented_facts'))}"
-                + (
-                    f"; the judge scored {dist['judge'].get('5', 0)} of {cal['labelled_calls']} calls 5/5 overall, "
-                    f"the labeller {dist['labeller'].get('5', 0)}, so the judge's overall score does not separate "
-                    "good calls from mediocre ones"
-                    if (dist := cal.get("overall_distribution"))
-                    else ""
-                )
-                + f" ({cal['labelled_calls']} calls, judge {', '.join(cal.get('judge_models', []))})",
+                first + second + f" (judge {', '.join(cal.get('judge_models', []))})",
             )
         )
     ret = s.get("retrieval")
@@ -637,6 +649,15 @@ def main() -> None:
         cal = json.loads(JUDGE_CAL.read_text(encoding="utf-8"))
         cal.pop("judge", None)
         summary["judge_calibration"] = cal
+    held = {}
+    for r in (1, 2):  # the held-out set, scored with each rubric
+        path = JUDGE_CAL.with_name(f"judge_calibration_set2_r{r}.json")
+        if path.exists():
+            d = json.loads(path.read_text(encoding="utf-8"))
+            d.pop("judge", None)
+            held[f"r{r}"] = d
+    if held:
+        summary["judge_calibration_heldout"] = held
     if RESCORE.exists():
         summary["rescore"] = json.loads(RESCORE.read_text(encoding="utf-8"))["configs"]
     SUMMARY.parent.mkdir(parents=True, exist_ok=True)

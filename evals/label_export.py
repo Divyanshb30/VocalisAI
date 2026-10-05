@@ -1,6 +1,7 @@
 """Pick 30 stored calls for human labelling and write them, with exactly what the judge sees, to the page.
 
-uv run python -m evals.label_export   # -> web/label/items.json, then open web/label.html
+uv run python -m evals.label_export           # -> web/label/items.json, then open web/label.html
+uv run python -m evals.label_export --set 2   # -> web/label/items_set2.json: 30 other calls (held out)
 
 The page never shows the judge's scores. Labels come back as labels.json (download from the page), which
 evals/kappa.py compares with the judge run on the same text.
@@ -9,6 +10,7 @@ evals/kappa.py compares with the judge run on the same text.
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 from vocalis.agent.briefing import Briefing
@@ -18,8 +20,9 @@ from vocalis.rights.engine import assess
 from vocalis.simair.scenario import load_scenarios
 
 RUNS = Path("evals/results/runs/vocalis_qwen")
-OUT = Path("web/label/items.json")
 N = 30
+SET = int(sys.argv[sys.argv.index("--set") + 1]) if "--set" in sys.argv else 1
+OUT = Path("web/label/items.json" if SET == 1 else f"web/label/items_set{SET}.json")
 
 
 def transcript_text(lines: list[dict]) -> str:
@@ -37,7 +40,12 @@ def main() -> None:
         if not json.loads(p.read_text(encoding="utf-8"))["score"]["error"]
     ]
     step = len(runs) / N  # spread over scenarios and seeds
-    picked = [runs[int(i * step)] for i in range(N)]
+    first_set = [runs[int(i * step)] for i in range(N)]
+    if SET == 1:
+        picked = first_set
+    else:  # a held-out set: none of the calls in set 1
+        rest = [r for r in runs if r not in first_set]
+        picked = [rest[int(i * len(rest) / N)] for i in range(N)]
     items = []
     for p in picked:
         data = json.loads(p.read_text(encoding="utf-8"))

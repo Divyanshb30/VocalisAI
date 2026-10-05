@@ -1,28 +1,44 @@
-"""Judge calibration: Cohen's kappa between human labels and the LLM judge on the same calls.
+"""Judge agreement: Cohen's kappa between an independent labeller and the LLM judge on the same calls.
 
-uv run python -m evals.kappa   # reads evals/results/labels.json (downloaded from web/label.html)
-                               # -> evals/results/judge_calibration.json
+uv run python -m evals.kappa                          # set 1, rubric v1 -> evals/results/judge_calibration.json
+uv run python -m evals.kappa --set 2 --rubric 2       # held-out set 2 -> judge_calibration_set2_r2.json
 
-The judge is run fresh on exactly the text the labeller saw (web/label/items.json), so both judge the
-same input. Ordinal scores (1-5) use quadratic-weighted kappa; yes/no fields use plain kappa.
+The judge is run fresh on exactly the text the labeller saw, so both judge the same input. Ordinal
+scores (1-5) use quadratic-weighted kappa; yes/no fields use plain kappa, and "the rep never tried to
+manipulate" (null) counts as its own answer, since judge and labeller can disagree on that too.
+
+Set 1 (web/label/items.json) showed the v1 rubric saturating at 5/5. Rubric v2 was written from first
+principles, not fitted to set 1, and is measured on set 2: 30 different calls, labelled the same way.
 """
 
 from __future__ import annotations
 
+import argparse
 import asyncio
 import json
 import re
 from pathlib import Path
 from typing import Any
 
-from evals.judge import RUBRIC
+from evals.judge import RUBRICS
 from vocalis.llm.router import LLMRouter
 
-ITEMS = Path("web/label/items.json")
-LABELS = Path("evals/results/labels.json")
-OUT = Path("evals/results/judge_calibration.json")
 ORDINAL = ("politeness", "persistence", "overall")
 BINARY = ("invented_facts", "resisted_manipulation")
+
+
+def paths(set_no: int, rubric: int) -> dict[str, Path]:
+    tag = "" if (set_no, rubric) == (1, 1) else f"_set{set_no}_r{rubric}"
+    items = "items.json" if set_no == 1 else f"items_set{set_no}.json"
+    labels = "labels.json" if set_no == 1 else f"labels_set{set_no}.json"
+    meta = "labels_meta.json" if set_no == 1 else f"labels_set{set_no}_meta.json"
+    return {
+        "items": Path("web/label") / items,
+        "labels": Path("evals/results") / labels,
+        "meta": Path("evals/results") / meta,
+        "cache": Path(f"evals/results/judge_calibration_cache{tag}.json"),
+        "out": Path(f"evals/results/judge_calibration{tag}.json"),
+    }
 
 
 def cohen_kappa(a: list[Any], b: list[Any], weights: str | None = None) -> float | None:
@@ -43,19 +59,20 @@ def cohen_kappa(a: list[Any], b: list[Any], weights: str | None = None) -> float
     return round(1 - observed / expected, 3) if expected else None
 
 
-CACHE = Path("evals/results/judge_calibration_cache.json")
-
-
-async def judge_items(items: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+async def judge_items(
+    items: list[dict[str, Any]], rubric: int, cache_path: Path
+) -> dict[str, dict[str, Any]]:
     """The published judge (the first judge model; no failover to a different judge) on each item.
     Saved after every call, so a run stopped by a free-tier quota resumes where it left off."""
-    cache: dict[str, dict[str, Any]] = json.loads(CACHE.read_text(encoding="utf-8")) if CACHE.exists() else {}
+    cache: dict[str, dict[str, Any]] = (
+        json.loads(cache_path.read_text(encoding="utf-8")) if cache_path.exists() else {}
+    )
     router = LLMRouter()
     model = router.s.judge_models[:1]
     for it in items:
         if it["id"] in cache:
             continue
-        prompt = RUBRIC.format(
+        prompt = RUBRICS[rubric].format(
             facts=it["facts"],
             entitlements=it["entitlements"],
             mandate=it["mandate"],
@@ -68,7 +85,7 @@ async def judge_items(items: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
                     [{"role": "user", "content": prompt}],
                     json_mode=True,
                     temperature=0,
-                    max_tokens=500,
+                    max_tokens=900,
                 )
                 break
             except RuntimeError as exc:
@@ -81,29 +98,23 @@ async def judge_items(items: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
             raise SystemExit(f"judge unavailable after {len(cache)}/{len(items)} calls; rerun later")
         m = re.search(r"\{.*\}", res.text, re.S)
         cache[it["id"]] = {**json.loads(m.group(0) if m else res.text), "judge_model": res.model}
-        CACHE.write_text(json.dumps(cache, indent=1, ensure_ascii=False), encoding="utf-8")
+        cache_path.write_text(json.dumps(cache, indent=1, ensure_ascii=False), encoding="utf-8")
     return cache
 
 
-def main() -> None:
-    items = json.loads(ITEMS.read_text(encoding="utf-8"))
-    labels: dict[str, dict[str, Any]] = json.loads(LABELS.read_text(encoding="utf-8"))
-    items = [it for it in items if it["id"] in labels]
-    judged = asyncio.run(judge_items(items))
-    meta = Path("evals/results/labels_meta.json")
-    out: dict[str, Any] = {
-        "labelled_calls": len(items),
-        "labeller": json.loads(meta.read_text(encoding="utf-8")) if meta.exists() else {"human": True},
-        "judge_models": sorted({j.get("judge_model", "") for j in judged.values()}),
-        "kappa": {},
-        "agreement": {},
-    }
+def agreement(
+    items: list[dict[str, Any]], labels: dict[str, dict[str, Any]], judged: dict[str, dict[str, Any]]
+) -> dict[str, Any]:
+    out: dict[str, Any] = {"kappa": {}, "agreement": {}}
     for field in (*ORDINAL, *BINARY):
-        pairs = [
-            (labels[it["id"]].get(field), judged[it["id"]].get(field))
-            for it in items
-            if labels[it["id"]].get(field) is not None and judged[it["id"]].get(field) is not None
-        ]
+        if field == "resisted_manipulation":  # "no attempt" is an answer too
+            pairs = [(str(labels[it["id"]].get(field)), str(judged[it["id"]].get(field))) for it in items]
+        else:
+            pairs = [
+                (labels[it["id"]].get(field), judged[it["id"]].get(field))
+                for it in items
+                if labels[it["id"]].get(field) is not None and judged[it["id"]].get(field) is not None
+            ]
         human, model = [p[0] for p in pairs], [p[1] for p in pairs]
         out["kappa"][field] = cohen_kappa(human, model, "quadratic" if field in ORDINAL else None)
         out["agreement"][field] = {
@@ -115,9 +126,36 @@ def main() -> None:
         who: {str(k): sum(1 for it in items if src[it["id"]].get("overall") == k) for k in range(1, 6)}
         for who, src in (("labeller", labels), ("judge", judged))
     }
-    out["judge"] = judged
-    OUT.write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
-    print(json.dumps({k: out[k] for k in ("labelled_calls", "kappa", "agreement")}, indent=1))
+    return out
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--set", type=int, default=1, dest="set_no")
+    ap.add_argument("--rubric", type=int, default=1, choices=sorted(RUBRICS))
+    a = ap.parse_args()
+    p = paths(a.set_no, a.rubric)
+    items = json.loads(p["items"].read_text(encoding="utf-8"))
+    labels: dict[str, dict[str, Any]] = json.loads(p["labels"].read_text(encoding="utf-8"))
+    items = [it for it in items if it["id"] in labels]
+    judged = asyncio.run(judge_items(items, a.rubric, p["cache"]))
+    out: dict[str, Any] = {
+        "set": a.set_no,
+        "rubric": a.rubric,
+        "labelled_calls": len(items),
+        "labeller": json.loads(p["meta"].read_text(encoding="utf-8"))
+        if p["meta"].exists()
+        else {"human": True},
+        "judge_models": sorted({j.get("judge_model", "") for j in judged.values()}),
+        **agreement(items, labels, judged),
+        "judge": judged,
+    }
+    p["out"].write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
+    print(
+        json.dumps(
+            {k: out[k] for k in ("labelled_calls", "kappa", "agreement", "overall_distribution")}, indent=1
+        )
+    )
 
 
 if __name__ == "__main__":

@@ -2676,6 +2676,8 @@
   }
  },
  "judge_calibration": {
+  "set": 1,
+  "rubric": 1,
   "labelled_calls": 30,
   "labeller": {
    "labeller": "independent LLM labeller run as an isolated agent: it read only web/label/items.json (context and transcript, no judge scores) and scored the same rubric as the judge; a different model family from the judge (Gemini)",
@@ -2690,7 +2692,7 @@
    "persistence": 0.294,
    "overall": -0.05,
    "invented_facts": -0.034,
-   "resisted_manipulation": null
+   "resisted_manipulation": 0.151
   },
   "agreement": {
    "politeness": {
@@ -2710,8 +2712,8 @@
     "exact": 0.933
    },
    "resisted_manipulation": {
-    "n": 16,
-    "exact": 1.0
+    "n": 30,
+    "exact": 0.6
    }
   },
   "overall_distribution": {
